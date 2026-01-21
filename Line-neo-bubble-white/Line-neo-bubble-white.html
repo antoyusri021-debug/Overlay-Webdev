@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Webdev Costum Line</title>
+    <link rel="icon" href="../../favicon.ico" />
+    <link rel="preload" href="../../thirdparty/NotoColorEmoji.ttf" as="font" type="font/ttf" crossorigin="anonymous">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+
+    <style>
+    /* --- custom line style by me --- */
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+
+    body {
+        font-family: 'Inter', sans-serif;
+        background: transparent;
+        overflow: hidden;
+    }
+
+    #container {
+        display: flex;
+        position: absolute;
+        inset: 0;
+        align-items: center;
+        justify-content: center;
+    }
+
+    /* animasi muncul */
+    .message-wrapper {
+        opacity: 0;
+        transform: translateX(-15px);
+        transition: all .4s ease-out;
+    }
+
+    .message-wrapper.show {
+        opacity: 1;
+        transform: translateX(0);
+    }
+
+    /* setup grid chat */
+    .message {
+        display: grid;
+        grid-template-columns: 55px auto;
+        grid-template-areas: 
+            "ava user"
+            "ava kontent";
+        gap: 0 12px;
+        width: 320px;
+        align-items: start;
+        position: relative;
+    }
+
+    .avatar {
+        grid-area: ava;
+        width: 53px;
+        height: 53px;
+        border-radius: 50%;
+        object-fit: cover;
+        margin-left: -8px; /* biar agak mepet kiri */
+        border: 1px solid rgba(255,255,255,0.2);
+        box-shadow: 0 3px 10px rgba(0,0,0,0.25);
+    }
+
+    .username {
+        grid-area: user;
+        font-size: 13px;
+        color: #ffffff;
+        font-weight: 700;
+        padding-bottom: 3px;
+        padding-left: 2px;
+    }
+
+    .message-content {
+        grid-area: kontent;
+        background: #ffffff; 
+        padding: 9px 13px;
+        border-radius: 0 12px 12px 12px; /* pojok kiri atas lurus buat ekor */
+        position: relative;
+        filter: drop-shadow(0 2px 3px rgba(0,0,0,0.15));
+        display: inline-block;
+        max-width: fit-content;
+    }
+
+    /* ekor manual */
+    .message-content::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: -9px;
+        border-width: 0 10px 10px 0;
+        border-style: solid;
+        border-color: transparent #ffffff transparent transparent;
+    }
+
+    .text {
+        color: #000000;
+        font-size: 14.5px;
+        line-height: 1.3;
+        font-weight: 500;
+    }
+
+    .content-image {
+        max-width: 100%;
+        border-radius: 6px;
+        margin-top: 6px;
+    }
+
+    /* hide sampah */
+    .badges, .source-icon, .physics-bg, .particle, .header {
+        display: none !important;
+    }
+    </style>
+</head>
+<body>
+    <div class="physics-bg"></div>
+    <div id="container">
+        <div id="output"></div>
+    </div>
+
+    <script src="../../tts.js"></script>
+    <script>
+        const urlParams = new URLSearchParams(window.location.search);
+        const roomID = urlParams.get('session') || urlParams.get('room') || urlParams.get('roomid') || 'TESTROOM';
+        const password = urlParams.get('password') || urlParams.get('pass') || urlParams.get('pw') || "false";
+        
+        function createIframe() {
+            var iframe = document.createElement("iframe");
+            iframe.src = "https://vdo.socialstream.ninja/?ln&password=" + password + "&notmobile&salt=vdo.ninja&label=overlay&exclude=" + roomID + "&scene&novideo&noaudio&cleanoutput&room=" + roomID;
+            iframe.style.width = "0px"; iframe.style.height = "0px"; iframe.style.position = "fixed";
+            iframe.id = "frame1";
+            document.body.appendChild(iframe);
+
+            window.addEventListener("message", function (e) {
+                if (e.source != iframe.contentWindow) return;
+                if (e.data.dataReceived && e.data.dataReceived.overlayNinja) {
+                    processData({ contents: e.data.dataReceived.overlayNinja });
+                }
+            });
+        }
+
+        function processData(data) {
+            if (!data || data.contents === false) { hideMessage(); return; }
+            if (data.contents) showMessage(data.contents);
+        }
+
+        let currentMessage = null;
+
+        function showMessage(content) {
+            if (!content.chatmessage && !content.chatname) return;
+
+            hideMessage(() => {
+                const wrapper = document.createElement('div');
+                wrapper.className = 'message-wrapper';
+                
+                const message = document.createElement('div');
+                message.className = 'message';
+
+                // 1. Avatar (Foto Utama)
+                if (content.chatimg) {
+                    const avatar = document.createElement('img');
+                    avatar.className = 'avatar';
+                    avatar.src = content.chatimg;
+                    avatar.onerror = () => { avatar.src = '../../sources/images/unknown.png'; };
+                    message.appendChild(avatar);
+                }
+
+                // 2. Username (Ditempel di atas Avatar)
+                if (content.chatname) {
+                    const name = document.createElement('div');
+                    name.className = 'username';
+                    // Decode HTML entities
+                    const tempDiv = document.createElement('div');
+                    tempDiv.innerHTML = content.chatname;
+                    name.textContent = tempDiv.textContent || tempDiv.innerText || '';
+                    message.appendChild(name);
+                }
+
+                // 3. Content Chat (Di bawah foto)
+                const contentDiv = document.createElement('div');
+                contentDiv.className = 'message-content';
+
+                if (content.chatmessage) {
+                    const text = document.createElement('div');
+                    text.className = 'text';
+                    text.innerHTML = content.chatmessage;
+                    contentDiv.appendChild(text);
+                }
+
+                if (content.contentimg) {
+                    const img = document.createElement('img');
+                    img.className = 'content-image';
+                    img.src = content.contentimg;
+                    contentDiv.appendChild(img);
+                }
+
+                message.appendChild(contentDiv);
+                wrapper.appendChild(message);
+                
+                const output = document.getElementById('output');
+                output.innerHTML = '';
+                output.appendChild(wrapper);
+
+                requestAnimationFrame(() => { wrapper.classList.add('show'); });
+                currentMessage = wrapper;
+
+                // TTS
+                if (window.initTTS && urlParams.has('tts')) {
+                    const ttsText = content.chatmessage ? content.chatmessage.replace(/<[^>]*>/g, '') : '';
+                    if (ttsText) window.speak(content.chatname + ' says ' + ttsText);
+                }
+            });
+        }
+
+        function hideMessage(callback) {
+            if (currentMessage) {
+                currentMessage.classList.remove('show');
+                setTimeout(() => {
+                    if (currentMessage && currentMessage.parentNode) {
+                        currentMessage.parentNode.removeChild(currentMessage);
+                    }
+                    currentMessage = null;
+                    if (callback) callback();
+                }, 450);
+            } else if (callback) {
+                callback();
+            }
+        }
+
+        if (urlParams.has('tts') && window.initTTS) {
+            window.initTTS({
+                lang: urlParams.get('tts') || 'en-US',
+                pitch: parseFloat(urlParams.get('pitch') || '1'),
+                rate: parseFloat(urlParams.get('rate') || '1')
+            });
+        }
+
+        createIframe();
+    </script>
+</body>
+</html>

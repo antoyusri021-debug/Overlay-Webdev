@@ -1,0 +1,814 @@
+<!--
+Development Notes:
+- It's important that the IFRAME logic stay intact, as it is how we receieve messages
+- This code is in vanilla Javascript designed for web browsers without compiling
+- Details of the incoming message structure can be found here: https://github.com/steveseguin/social_stream/blob/main/README.md#message-structure
+ !-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta charset="utf-8" />
+    <title>Social Stream - Overlay</title>
+    <meta name="title" content="Social Stream - Overlay" />
+    <link rel="icon" href="./favicon.ico" />
+    <link rel="preload" href="./thirdparty/NotoColorEmoji.ttf" as="font" type="font/ttf" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <meta name="robots" content="noindex">
+    <style>
+        /* =========================
+   CHAT STYLE REVAMP
+========================= */
+
+/* Container utama */
+.highlight-chat {
+    background: transparent;
+    border: none;
+    box-shadow: none;
+    padding: 0;
+    animation: slideUp 0.3s ease-out;
+}
+
+/* Header (avatar + username) */
+.hl-title {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 6px;
+}
+
+/* Avatar keluar */
+.hl-profile-pic {
+    width: 52px;
+    height: 52px;
+    border-radius: 12px;
+    border: 2px solid rgba(255,255,255,0.15);
+    background: #000;
+    z-index: 2;
+}
+
+/* Username bubble */
+.hl-name {
+    background: linear-gradient(135deg,#5a6cff,#9b4bff);
+    padding: 6px 14px;
+    border-radius: 999px;
+    font-size: 1.05rem;
+    font-weight: 700;
+    line-height: 1;
+    white-space: nowrap;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.25);
+}
+
+/* Bubble chat */
+.hl-message {
+    position: relative;
+    margin-left: 26px;
+    background: rgba(23,25,35,0.92);
+    padding: 14px 18px;
+    border-radius: 18px;
+    font-size: 1rem;
+    line-height: 1.6;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.35);
+    border: 1px solid rgba(255,255,255,0.08);
+}
+
+/* Ekor bubble chat */
+.hl-message::before {
+    content: "";
+    position: absolute;
+    top: 14px;
+    left: -10px;
+    width: 0;
+    height: 0;
+    border-top: 10px solid transparent;
+    border-bottom: 10px solid transparent;
+    border-right: 12px solid rgba(23,25,35,0.92);
+}
+
+/* ===============================
+   SAWER / DONATION PREMIUM STYLE
+================================ */
+
+.highlight-chat.dono .hl-message {
+    background: linear-gradient(135deg,#f5c542,#c99b1f);
+    color: #1a1200 !important;
+    font-weight: 700;
+    box-shadow:
+        0 0 12px rgba(255,215,64,0.8),
+        0 10px 30px rgba(0,0,0,0.45);
+    border: 1px solid rgba(255,215,64,0.8);
+}
+
+/* Ekor bubble ikut emas */
+.highlight-chat.dono .hl-message::before {
+    border-right-color: #c99b1f;
+}
+
+/* Username sawer ikut beda */
+.highlight-chat.dono .hl-name {
+    background: #d4af37 !important;
+    color: #1a1200 !important;
+    font-weight: 800;
+    box-shadow: 0 0 10px rgba(255,215,64,0.8);
+}
+
+
+/* Icon source */
+.icon.sourcetype {
+    top: -6px;
+    right: -6px;
+    opacity: 0.7;
+}
+
+/* ===============================
+   FIX WIDTH + BUG + WARNA TEKS
+================================ */
+
+/* Kunci lebar overlay */
+.output {
+    max-width: 420px !important;
+    width: auto !important;
+}
+
+/* Hilangkan kotak bug kosong */
+.output > div:empty,
+.output iframe,
+.hl-imgContent:empty {
+    display: none !important;
+}
+
+/* Chat container rapih */
+.highlight-chat {
+    width: fit-content;
+    max-width: 100%;
+}
+
+/* Username putih */
+.hl-name {
+    color: #ffffff !important;
+}
+
+/* Bubble chat tidak melebar */
+.hl-message {
+    max-width: 360px;
+    width: fit-content;
+    color: #ffffff !important;
+    word-wrap: break-word;
+    white-space: normal;
+}
+
+/* Biar teks panjang turun ke bawah */
+.hl-message * {
+    color: #ffffff !important;
+}
+
+/* Avatar & username tidak ikut maksa lebar */
+.hl-title {
+    max-width: 100%;
+}
+
+/* Optional: bikin bubble lebih compact */
+.hl-message {
+    padding: 12px 16px;
+    font-size: 0.95rem;
+}
+
+/* Anti stretch flex */
+.hl-title,
+.hl-message {
+    align-self: flex-start;
+}
+#frame1 {
+    display: none !important;
+}
+/* ===============================
+   CHAT DI TENGAH LAYAR
+================================ */
+
+.output {
+    position: fixed !important;
+    left: 50% !important;
+    top: 50% !important;
+    transform: translate(-50%, -50%) !important;
+
+    max-width: 420px;
+    width: fit-content;
+}
+
+/* ===============================
+   STRUKTUR TETAP, AVATAR SAMPING
+================================ */
+
+/* Chat wrapper */
+.highlight-chat {
+    display: block; /* JANGAN flex */
+}
+
+/* Header: avatar + username (tetap di atas) */
+.hl-title {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 6px;
+}
+
+/* Avatar di samping bubble */
+.hl-img {
+    float: left;
+}
+
+/* Username tetap */
+.hl-name {
+    font-size: 1rem;
+    padding: 6px 14px;
+}
+
+/* Bubble chat geser kanan sejajar avatar */
+.hl-message {
+    margin-left: 64px; /* avatar (52) + gap */
+    max-width: 320px;
+}
+
+/* Ekor bubble tetap kiri */
+.hl-message::before {
+    left: -10px;
+    top: 16px;
+}
+/* ===============================
+   USERNAME BG: DARK KUNING
+================================ */
+
+.hl-name {
+    background: #ffffff !important; /* dark kuning */
+    color: #000000 !important;
+    box-shadow: 0 3px 10px rgba(0,0,0,0.35);
+}
+/* ===============================
+   AVATAR DI SAMPING CHAT (KIRI)
+   USERNAME TETAP DI ATAS
+================================ */
+
+/* Header tetap normal */
+.hl-title {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 6px;
+}
+
+/* Avatar dilepas dari flow header */
+.hl-img {
+    position: absolute;
+    left: 0;
+    top: 44px; /* sejajar tengah bubble */
+}
+
+/* Ukuran avatar */
+.hl-profile-pic {
+    width: 52px;
+    height: 52px;
+    border-radius: 12px;
+}
+
+/* Bubble chat geser ke kanan, kasih ruang avatar */
+.hl-message {
+    margin-left: 64px; /* space buat avatar */
+    max-width: 320px;
+}
+
+/* Wrapper chat harus relative */
+.highlight-chat {
+    position: relative;
+}
+/* Avatar jadi BULAT */
+.hl-profile-pic {
+    border-radius: 50% !important;
+}
+/* Geser username ke kanan sejajar bubble chat */
+.hl-name {
+    margin-left: 64px !important;
+}
+/* ===============================
+   BRAND TAG DI POJOK KANAN ATAS
+================================ */
+
+.highlight-chat::after {
+    content: "WEBDEV";
+    position: absolute;
+    bottom: -8px;     /* posisi di bawah bubble */
+    right: 0;         /* sejajar kanan chat */
+
+    background: #8b0000;
+    color: #ffffff;
+
+    font-size: 0.55rem;
+    font-weight: 800;
+    font-family: 'Roboto', sans-serif !important;
+    letter-spacing: 0.8px;
+    padding: 3px 10px;
+
+    border-radius: 6px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.35);
+    z-index: 10;
+    pointer-events: none;
+}
+.hl-message,
+.hl-name {
+    font-family: 'Roboto', sans-serif !important;
+}
+
+@keyframes wiggleFade {
+    0% { transform: translateX(0); opacity: 0; }
+    25% { transform: translateX(-4px); opacity: 1; }
+    50% { transform: translateX(4px); }
+    75% { transform: translateX(-2px); }
+    100% { transform: translateX(0); }
+}
+
+.highlight-chat {
+    animation: wiggleFade 0.5s ease-out;
+}
+
+/* FORCE FIX AVATAR ICON */
+.hl-img img,
+.hl-profile-pic,
+.hl-profile-pic img {
+    width: 52px !important;
+    height: 52px !important;
+    min-width: 52px !important;
+    min-height: 52px !important;
+    max-width: 52px !important;
+    max-height: 52px !important;
+
+    object-fit: cover !important;
+    border-radius: 50% !important;
+    display: block !important;
+}
+.highlight-chat img {
+    max-width: 100% !important;
+    height: auto;
+}
+.hl-profile-pic {
+    background-size: cover !important;
+    background-position: center !important;
+}
+/* === HARD FIX AVATAR BACKGROUND IMAGE === */
+.hl-profile-pic {
+    width: 52px !important;
+    height: 52px !important;
+    min-width: 52px !important;
+    min-height: 52px !important;
+    max-width: 52px !important;
+    max-height: 52px !important;
+
+    background-size: cover !important;
+    background-position: center center !important;
+    background-repeat: no-repeat !important;
+
+    overflow: hidden !important;
+    border-radius: 50% !important;
+    flex-shrink: 0 !important;
+}
+.hl-profile-pic * {
+    transform: none !important;
+}
+.hl-img,
+.hl-profile-pic {
+    display: block !important;
+    box-sizing: border-box !important;
+}
+.hl-profile-pic[style] {
+    width: 52px !important;
+    height: 52px !important;
+}
+/* ===============================
+   FIX BADGE / ICON CHAT GEDE
+================================ */
+
+.hl-badges {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.hl-badge,
+.hl-badges img,
+.hl-badges svg {
+    width: 18px !important;
+    height: 18px !important;
+    min-width: 18px !important;
+    min-height: 18px !important;
+    max-width: 18px !important;
+    max-height: 18px !important;
+
+    object-fit: contain !important;
+    display: inline-block !important;
+}
+
+
+</style>
+</head>
+<body>
+    <div id="output" class="output"></div>
+    <script>
+    const urlParams = new URLSearchParams(window.location.search);
+    
+    const App = {
+        config: {
+            serverURL: (urlParams.has("localserver") ? "ws://127.0.0.1:3000" : 'wss://io.socialstream.ninja'),
+            maxReconnectAttempts: 10,
+            reconnectDelay: 100,
+            roomIdMaxLength: 80
+        },
+
+        state: {
+            socketserver: null,
+            reconnectionTimeout: null,
+            conCon: 1,
+            roomID: 'test',
+            password: 'false',
+            fallbackImage: null,
+            fallbackImageAnnouncement: null
+        },
+
+        init() {
+            this.setupUrlParams();
+            this.setupFallbackImages();
+            this.initializeConnection();
+        },
+
+        initializeConnection() {
+            if (urlParams.has('server')) {
+                this.config.serverURL = urlParams.get('server') || this.config.serverURL;
+                this.setupSocket();
+            } else if (urlParams.has('server2')) {
+                this.config.serverURL = urlParams.get('server2') || this.config.serverURL;
+                this.setupSocket(1);
+            } else if (urlParams.has('server3')) {
+                this.config.serverURL = urlParams.get('server3') || this.config.serverURL;
+                this.setupSocket(2);
+            } else {
+                this.setupRecvDataWindow();
+            }
+        },
+
+        setupUrlParams() {
+            const urlParams = new URLSearchParams(window.location.search);
+            this.handleRoomIdParam(urlParams);
+            this.handlePasswordParam(urlParams);
+            this.handleServerParam(urlParams);
+
+            if (urlParams.has('savetodisk')) {
+                document.body.onclick = () => this.overwriteFile('setup');
+            }
+        },
+
+        handlePasswordParam(urlParams) {
+            this.state.password = urlParams.get('password') || 'false';
+        },
+
+        handleServerParam(urlParams) {
+            if (urlParams.has('server')) {
+                this.config.serverURL = urlParams.get('server') || this.config.serverURL;
+            } else if (urlParams.has('server2')) {
+                this.config.serverURL = urlParams.get('server2') || this.config.serverURL;
+            } else if (urlParams.has('server3')) {
+                this.config.serverURL = urlParams.get('server3') || this.config.serverURL;
+            }
+        },
+
+        setupRecvDataWindow() {
+            const iframe = document.createElement('iframe');
+            iframe.src = `https://vdo.socialstream.ninja/?ln&password=${this.state.password}&notmobile&salt=vdo.ninja&label=overlay&exclude=${this.state.roomID}&scene&novideo&noaudio&cleanoutput&room=${this.state.roomID}`;
+            iframe.id = 'frame1';
+            iframe.allow = 'midi;geolocation;microphone;';
+            document.body.appendChild(iframe);
+
+            window.addEventListener('message', (e) => {
+                if (e.source !== iframe.contentWindow) return;
+                
+                if (e.data?.dataReceived && ("overlayNinja" in e.data.dataReceived)){
+                    if ( e.data.dataReceived.overlayNinja){
+                        this.processData({ contents: e.data.dataReceived.overlayNinja });
+                    } else {
+                         this.processData(false);
+                    }
+                }
+            });
+        },
+
+        handleRoomIdParam(urlParams) {
+            let roomID = urlParams.get('session') || 
+                        urlParams.get('s') || 
+                        urlParams.get('id');
+
+            if (!roomID && window.location.protocol === 'file:') {
+                roomID = prompt('Enter your session ID here, or add it to the URL.');
+            } else if (!roomID) {
+                window.location.href = 'https://socialstream.ninja/landing';
+                return;
+            }
+
+            const validatedID = this.validateRoomId(roomID);
+            if (!validatedID) {
+                this.handleInvalidRoom();
+                return;
+            }
+
+            this.state.roomID = validatedID;
+        },
+
+        setupFallbackImages() {
+            this.state.fallbackImage = new Image();
+            this.state.fallbackImage.src = './sources/images/unknown.png';
+            this.state.fallbackImage.onerror = () => this.state.fallbackImage = null;
+
+            this.state.fallbackImageAnnouncement = new Image();
+            this.state.fallbackImageAnnouncement.src = './icons/announcement.png';
+            this.state.fallbackImageAnnouncement.onerror = () => this.state.fallbackImageAnnouncement = null;
+        },
+
+        validateRoomId(roomId) {
+            if (!roomId?.trim()) return false;
+
+            let sanitizedId = String(roomId).trim();
+            if (sanitizedId.length < 2) return false;
+
+            const reservedValues = [
+                'undefined', 'null', 'false', 'true', 'NaN',
+                'default', 'room', 'lobby', 'test', 'nothing',
+                '0', '1', 'none'
+            ];
+
+            if (reservedValues.includes(sanitizedId.toLowerCase())) return false;
+
+            sanitizedId = sanitizedId.replace(/[^a-zA-Z0-9]/g, '_');
+            if (/^_+$/.test(sanitizedId)) return false;
+            
+            return sanitizedId.length <= this.config.roomIdMaxLength ? sanitizedId : false;
+        },
+
+        handleInvalidRoom() {
+            document.write('Invalid session ID');
+            throw new Error('Invalid session ID');
+        },
+
+        setupSocket(allin = false) {
+            if (this.state.reconnectionTimeout) {
+                clearTimeout(this.state.reconnectionTimeout);
+                this.state.reconnectionTimeout = null;
+            }
+
+            if (this.state.socketserver) {
+                this.state.socketserver.onclose = null;
+                this.state.socketserver.close();
+            }
+
+            this.state.socketserver = new WebSocket(this.config.serverURL);
+            this.initializeSocketHandlers(allin);
+        },
+
+        initializeSocketHandlers(allin) {
+            const socket = this.state.socketserver;
+
+            socket.onclose = () => {
+                if (this.state.conCon <= this.config.maxReconnectAttempts) {
+                    this.state.reconnectionTimeout = setTimeout(() => {
+                        this.state.conCon++;
+                        this.setupSocket(allin);
+                    }, this.config.reconnectDelay * this.state.conCon);
+                }
+            };
+
+            socket.onerror = (error) => {
+                console.error('WebSocket error:', error);
+                socket.close();
+            };
+
+            socket.onopen = () => {
+                this.state.conCon = 1;
+                const message = {
+                    join: this.state.roomID,
+                    out: 3
+                };
+
+                if (allin === 2) {
+                    message.in = 2;
+                } else if (allin === 1) {
+                    message.in = 1;
+                }
+
+                socket.send(JSON.stringify(message));
+            };
+
+            socket.onmessage = this.handleSocketMessage.bind(this);
+        },
+
+        handleSocketMessage(event) {
+            if (!event.data) return;
+
+            let data;
+            try {
+                data = typeof event.data === 'object' ? event.data : JSON.parse(event.data);
+            } catch (error) {
+                console.error('Error parsing message:', error);
+                return;
+            }
+
+            const pid = data?.get || false;
+            if (data?.overlayNinja) {
+                data = data.overlayNinja;
+            }
+
+            const resp = this.processData(data);
+            if (resp !== null) {
+                const ret = {
+                    callback: {
+                        ...data,
+                        result: resp,
+                        get: pid
+                    }
+                };
+                this.state.socketserver.send(JSON.stringify(ret));
+            }
+        },
+
+        processData(data) {
+            if (!data || data === false || (data.contents && data.contents === false) || (data.content === false)) {
+                document.getElementById('output').innerHTML = '';
+                return true;
+            }
+
+            if (data.contents) {
+                const content = data.contents;
+                if (!content.chatmessage && !content.chatname && 
+                    !content.contentimg && !content.donation && 
+                    !content.hasDonation && !content.memebership && 
+                    !content.hasMembership) {
+                    return;
+                }
+                
+                this.showMessage(content);
+                return true;
+            }
+
+            return null;
+        },
+
+        errorImage(ele) {
+            if (ele.dataset.backupImage) {
+                ele.src = ele.dataset.backupImage;
+            } else if (this.state.fallbackImage) {
+                ele.src = './sources/images/unknown.png';
+            } else {
+                ele.style.display = 'none';
+            }
+        },
+
+        showMessage(data) {
+            const messageContent = this.buildMessageContent(data);
+            document.getElementById('output').innerHTML = messageContent;
+
+            if (data.hasDonation) {
+                document.getElementById('newmessage')?.classList.add('dono');
+            }
+
+            if (!data.chatname && !data.chatbadges) {
+                document.getElementById('nameDIV').style.display = 'none';
+            }
+
+            this.handleTwitchImage(data);
+        },
+
+        buildMessageContent(data) {
+            const imgContent = this.buildImageContent(data);
+            const avatarImg = this.buildAvatarImage(data);
+            const chatbadges = this.buildChatBadges(data.chatbadges);
+            const sourceType = this.buildSourceType(data.type);
+            const styleOverride = this.getStyleOverride(data);
+            const donationContent = this.buildDonation(data);
+
+            return `
+                <div class="hl-c-cont highlight-chat" id="newmessage" data-source-type="${data.type || 'none'}">
+                    <div class="hl-title">
+                    ${avatarImg}
+                    <div class="hl-name" ${styleOverride} id="nameDIV">
+                        ${data.chatname || ''}
+                    </div>
+                    ${chatbadges}${donationContent}
+                    </div>
+                    <div id="message" class="hl-message">${data.chatmessage || ''}</div>
+                   ${sourceType}${imgContent}
+                </div>
+            `;
+        },
+
+        buildImageContent(data) {
+            if (!data.contentimg) return '';
+
+            const isVideo = data.contentimg.includes('.mp4') || data.contentimg.includes('.webm');
+            const mediaElement = isVideo ? 
+                `<video loop="true" autoplay="true" muted="true" src="${data.contentimg}" onerror="this.parentElement.style.display='none'" />` :
+                `<img src="${data.contentimg}" onerror="this.parentElement.style.display='none'" />`;
+
+            return `<div class="hl-imgContent">${mediaElement}</div>`;
+        },
+
+        buildAvatarImage(data) {
+            const imgSrc = data.chatimg || (!data.chatname && data.event ? 
+                './icons/announcement.png' : './sources/images/unknown.png');
+
+            const backupAttr = data.backupChatimg ? 
+                `data-backup-image="${data.backupChatimg}"` : '';
+
+            return `
+                <div class="hl-img">
+                    <img id="img_${data.id}" 
+                         src="${imgSrc}" 
+                         class="hl-profile-pic" 
+                         ${backupAttr}
+                         onerror="App.errorImage(this)" />
+                </div>`;
+        },
+
+        buildChatBadges(badges) {
+            if (!badges?.length) return '';
+
+            const badgeElements = badges.map(badge => {
+                if (typeof badge === 'object') {
+                    if (badge.type === 'img' && badge.src) {
+                        return `<img class="hl-badge" src="${badge.src}" />`;
+                    } else if (badge.type === 'svg' && badge.html) {
+                        return `<span class="hl-badge">${badge.html}</span>`;
+                    }
+                } else {
+                    return `<img class="hl-badge" src="${badge}" />`;
+                }
+                return '';
+            }).join('');
+
+            return badgeElements ? `<div class="hl-badges">${badgeElements}</div>` : '';
+        },
+        
+        buildDonation(data) {
+            if (!(data.hasDonation || data.donation)) return '';
+
+            const donationAmount = (data.hasDonation || data.donation);
+            return `<div class="hl-donation">${donationAmount}</div>`;
+        },
+
+        buildSourceType(type = 'none') {
+            return `
+                <img src="./sources/images/${type}.png" 
+                     class="icon sourcetype" 
+                     data-icon-name="${type}" 
+                     onerror="this.style.display='none'" />`;
+        },
+
+        getStyleOverride(data) {
+            const styles = [];
+            
+            if (data.backgroundColor) {
+                styles.push(data.backgroundColor.startsWith('background-color:') ? 
+                    data.backgroundColor : `background-color: ${data.backgroundColor}`);
+            }
+            
+            if (data.nameColor) {
+                styles.push(`color: ${data.nameColor}`);
+            } else if (data.textNameColor) {
+                styles.push(data.textNameColor);
+            }
+            
+            return styles.length ? `style="${styles.join('; ')}"` : '';
+        },
+
+        handleTwitchImage(data) {
+            const username = data.username || data.chatname;
+            if (data.type !== 'twitch' || !username) return;
+
+            if (!data.chatimg || data.chatimg.startsWith('https://api.socialstream.ninja')) {
+                const twitchImage = new Image();
+                const imageUrl = `https://api.socialstream.ninja/twitch/large?username=${encodeURIComponent(username)}`;
+                
+                twitchImage.onload = () => {
+                    const imgElement = document.getElementById(`img_${data.id}`);
+                    if (imgElement) {
+                        imgElement.src = imageUrl;
+                    }
+                };
+                
+                twitchImage.src = imageUrl;
+            }
+        },
+
+        overwriteFile(type) {
+            console.log('Save to disk functionality:', type);
+        }
+    };
+
+    // Initialize the application when DOM is ready
+    document.addEventListener('DOMContentLoaded', () => App.init());
+    </script>
+</body>
+</html>

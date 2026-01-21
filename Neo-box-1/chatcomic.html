@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Webdev Costum</title>
+    <link rel="icon" href="../../favicon.ico" />
+    <link rel="preload" href="../../thirdparty/NotoColorEmoji.ttf" as="font" type="font/ttf" crossorigin="anonymous">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+
+    <style>
+@font-face {
+    font-family: NotoColorEmojiLimited;
+    unicode-range: U+1F1E6-1F1FF;
+    src: url(../../thirdparty/NotoColorEmoji.ttf);
+}
+
+/* ==========================
+   RESET GLOBAL
+========================== */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Inter', 'Segoe UI', Roboto, Arial, 'NotoColorEmojiLimited', sans-serif;
+    background: transparent;
+    overflow: hidden;
+    width: 100vw;
+    height: 100vh;
+    -webkit-font-smoothing: antialiased;
+}
+
+/* ==========================
+   CONTAINER
+========================== */
+#container {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    pointer-events: none;
+}
+
+/* ==========================
+   MESSAGE WRAPPER
+========================== */
+.message-wrapper {
+    opacity: 0;
+    transform: scale(0.85);
+    transition: all .45s cubic-bezier(.22,1,.36,1);
+}
+
+.message-wrapper.show {
+    opacity: 1;
+    transform: scale(1);
+    filter: drop-shadow(0 12px 30px rgba(0,0,0,.28));
+}
+
+/* ==========================
+   MESSAGE CARD
+========================== */
+.message {
+    width: 260px;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    position: relative; /* Penting untuk posisi username */
+
+    background: rgba(255,255,255,.72);
+    backdrop-filter: blur(14px);
+    border-radius: 20px;
+    border: 1.5px solid rgba(255,255,255,.65);
+}
+
+/* AVATAR */
+.avatar {
+    width: 100%;
+    height: 220px;
+    object-fit: cover;
+    display: block;
+}
+
+/* Memanggil Icon TikTok via CSS */
+.message::after {
+    content: ""; /* Wajib ada */
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    width: 35px; /* Sesuaikan ukuran icon */
+    height: 35px;
+    
+    /* Panggil file gambar di sini */
+    background-image: url('tiktok.png'); 
+    background-size: contain;
+    background-repeat: no-repeat;
+    
+    /* Pastikan berada di depan foto */
+    z-index: 30;
+    filter: drop-shadow(0 2px 5px rgba(0,0,0,0.4));
+    pointer-events: none;
+}
+
+/* USERNAME POSISI POJOK KIRI BAWAH FOTO */
+.username {
+    position: absolute;
+    left: 10px;
+    top: 195px; /* Menyesuaikan tinggi avatar (220px) agar di bawah */
+    
+    font-size: 14px;
+    font-weight: 700;
+    color: #fff;
+
+    padding: 4px 10px;
+    border-radius: 8px;
+
+    background: rgba(0, 0, 0, 0.65);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+
+    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+    text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+
+    z-index: 20;
+    pointer-events: none;
+    white-space: nowrap;
+    max-width: 90%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* ==========================
+   CONTENT CHAT
+========================== */
+.message-content {
+    padding: 14px 12px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+}
+
+.text {
+    font-size: clamp(14px, 3.6vw, 17px);
+    font-weight: 600;
+    line-height: 1.4;
+    color: #111;
+    text-align: center;
+    word-break: break-word;
+}
+
+/* IMAGE / STICKER */
+.content-image {
+    width: 100%;
+    max-height: 200px;
+    object-fit: contain;
+    margin-top: 10px;
+}
+
+/* HIDE ELEMENT LAIN */
+.badges, .source-icon, .physics-bg, .particle, .header {
+    display: none !important;
+}
+
+/* RESPONSIVE */
+@media (max-width: 768px) {
+    .message {
+        width: 260px; /* Tetap konsisten di mobile */
+    }
+}
+    </style>
+</head>
+<body>
+    <div class="physics-bg"></div>
+    <div id="container">
+        <div id="output"></div>
+    </div>
+
+    <script src="../../tts.js"></script>
+    <script>
+        const urlParams = new URLSearchParams(window.location.search);
+        const roomID = urlParams.get('session') || urlParams.get('room') || urlParams.get('roomid') || 'TESTROOM';
+        const password = urlParams.get('password') || urlParams.get('pass') || urlParams.get('pw') || "false";
+        
+        function createIframe() {
+            var iframe = document.createElement("iframe");
+            iframe.src = "https://vdo.socialstream.ninja/?ln&password=" + password + "&notmobile&salt=vdo.ninja&label=overlay&exclude=" + roomID + "&scene&novideo&noaudio&cleanoutput&room=" + roomID;
+            iframe.style.width = "0px"; iframe.style.height = "0px"; iframe.style.position = "fixed";
+            iframe.id = "frame1";
+            document.body.appendChild(iframe);
+
+            window.addEventListener("message", function (e) {
+                if (e.source != iframe.contentWindow) return;
+                if (e.data.dataReceived && e.data.dataReceived.overlayNinja) {
+                    processData({ contents: e.data.dataReceived.overlayNinja });
+                }
+            });
+        }
+
+        function processData(data) {
+            if (!data || data.contents === false) { hideMessage(); return; }
+            if (data.contents) showMessage(data.contents);
+        }
+
+        let currentMessage = null;
+
+        function showMessage(content) {
+            if (!content.chatmessage && !content.chatname) return;
+
+            hideMessage(() => {
+                const wrapper = document.createElement('div');
+                wrapper.className = 'message-wrapper';
+                
+                const message = document.createElement('div');
+                message.className = 'message';
+
+                // 1. Avatar (Foto Utama)
+                if (content.chatimg) {
+                    const avatar = document.createElement('img');
+                    avatar.className = 'avatar';
+                    avatar.src = content.chatimg;
+                    avatar.onerror = () => { avatar.src = '../../sources/images/unknown.png'; };
+                    message.appendChild(avatar);
+                }
+
+                // 2. Username (Ditempel di atas Avatar)
+                if (content.chatname) {
+                    const name = document.createElement('div');
+                    name.className = 'username';
+                    // Decode HTML entities
+                    const tempDiv = document.createElement('div');
+                    tempDiv.innerHTML = content.chatname;
+                    name.textContent = tempDiv.textContent || tempDiv.innerText || '';
+                    message.appendChild(name);
+                }
+
+                // 3. Content Chat (Di bawah foto)
+                const contentDiv = document.createElement('div');
+                contentDiv.className = 'message-content';
+
+                if (content.chatmessage) {
+                    const text = document.createElement('div');
+                    text.className = 'text';
+                    text.innerHTML = content.chatmessage;
+                    contentDiv.appendChild(text);
+                }
+
+                if (content.contentimg) {
+                    const img = document.createElement('img');
+                    img.className = 'content-image';
+                    img.src = content.contentimg;
+                    contentDiv.appendChild(img);
+                }
+
+                message.appendChild(contentDiv);
+                wrapper.appendChild(message);
+                
+                const output = document.getElementById('output');
+                output.innerHTML = '';
+                output.appendChild(wrapper);
+
+                requestAnimationFrame(() => { wrapper.classList.add('show'); });
+                currentMessage = wrapper;
+
+                // TTS
+                if (window.initTTS && urlParams.has('tts')) {
+                    const ttsText = content.chatmessage ? content.chatmessage.replace(/<[^>]*>/g, '') : '';
+                    if (ttsText) window.speak(content.chatname + ' says ' + ttsText);
+                }
+            });
+        }
+
+        function hideMessage(callback) {
+            if (currentMessage) {
+                currentMessage.classList.remove('show');
+                setTimeout(() => {
+                    if (currentMessage && currentMessage.parentNode) {
+                        currentMessage.parentNode.removeChild(currentMessage);
+                    }
+                    currentMessage = null;
+                    if (callback) callback();
+                }, 450);
+            } else if (callback) {
+                callback();
+            }
+        }
+
+        if (urlParams.has('tts') && window.initTTS) {
+            window.initTTS({
+                lang: urlParams.get('tts') || 'en-US',
+                pitch: parseFloat(urlParams.get('pitch') || '1'),
+                rate: parseFloat(urlParams.get('rate') || '1')
+            });
+        }
+
+        createIframe();
+    </script>
+</body>
+</html>
