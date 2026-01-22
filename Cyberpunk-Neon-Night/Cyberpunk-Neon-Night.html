@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Featured Message - Dynamic Physics</title>
+    <link rel="icon" href="../../favicon.ico" />
+    <link rel="preload" href="../../thirdparty/NotoColorEmoji.ttf" as="font" type="font/ttf" crossorigin="anonymous">
+<style>
+/* =========================================
+   THEME: GAMER MASTER UX FIXED - NO LEAK
+============================================ */
+
+body {
+    background: transparent;
+    margin: 0;
+    font-family: 'Inter', 'Segoe UI', sans-serif;
+    overflow: hidden;
+}
+
+#container {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    height: 100vh;
+    padding-left: 80px;
+}
+
+/* WRAPPER UTAMA */
+.message-wrapper {
+    position: relative;
+    width: fit-content;
+    opacity: 0;
+    transform: scale(0.9) translateX(-30px);
+    transition: all 0.5s ease;
+}
+
+.message-wrapper.show {
+    opacity: 1;
+    transform: scale(1) translateX(0);
+}
+
+/* =========================================
+   ULTRA GLOW RGB RUNNING BORDER
+============================================ */
+.message-wrapper::before {
+    content: "";
+    position: absolute;
+    inset: -4px; /* Sedikit lebih tebal biar cahayanya kuat */
+    z-index: 1;
+    
+    /* Warna Neon Merah & Cyan */
+    background: linear-gradient(90deg, #ff0050, #00f2ea, #ff0050, #00f2ea);
+    background-size: 300% 100%;
+    border-radius: 6px 27px 27px 27px;
+    
+    /* ANIMASI BERJALAN */
+    animation: rgbMove 3s linear infinite;
+    
+    /* TRIPLE GLOW LAYER (Ini rahasianya!) */
+    filter: blur(1px); /* Bikin garisnya lebih lembut/neon */
+    box-shadow: 
+        0 0 10px rgba(255, 0, 80, 0.8),  /* Glow dekat Merah */
+        0 0 20px rgba(0, 242, 234, 0.8), /* Glow dekat Cyan */
+        0 0 40px rgba(0, 242, 234, 0.4), /* Bias cahaya jauh 1 */
+        0 0 70px rgba(255, 0, 80, 0.2);  /* Bias cahaya jauh 2 */
+}
+
+/* Biar glow-nya makin hidup, kita tambahkan animasi berdenyut pada bayangannya */
+@keyframes rgbMove {
+    0% { 
+        background-position: 0% 50%; 
+        filter: blur(1px) brightness(1);
+    }
+    50% { 
+        filter: blur(1.5px) brightness(1.3); /* Pas di tengah makin terang & ngeblur */
+    }
+    100% { 
+        background-position: 100% 50%; 
+        filter: blur(1px) brightness(1);
+    }
+}
+
+/* =========================================
+   LABEL "MESSAGE CONTENT" - SHARP & CLEAR
+============================================ */
+.message::before {
+    content: "MALIKA STUDIO";
+    position: absolute;
+    top: -30px; 
+    left: -3px; 
+    
+    /* BACKGROUND GRADIENT TETAP JALAN */
+    background: linear-gradient(90deg, #ff0050, #00f2ea, #ff0050, #00f2ea);
+    background-size: 300% 100%;
+    animation: rgbMove 3s linear infinite;
+    
+    /* FIX TEKS BURAM */
+    color: #000000 !important; /* Hitam pekat */
+    font-family: 'Arial Black', sans-serif !important; /* Font yang lebih tegas */
+    font-size: 11px;
+    font-weight: 900;
+    text-align: center;
+    text-transform: uppercase;
+    
+    /* Menghilangkan blur pada teks */
+    filter: none !important; 
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    
+    padding: 7px 22px;
+    border-radius: 10px 15px 0 0;
+    letter-spacing: 1.5px;
+    
+    /* Glow luar saja, jangan kena teks */
+    box-shadow: 0 -5px 15px rgba(0, 0, 0, 0.3);
+    
+    z-index: 100;
+    line-height: 1;
+}
+
+/* =========================================
+   BOX CHAT UTAMA
+============================================ */
+.message {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    padding: 20px 25px;
+    
+    /* UKURAN FIXED (PAS TIDAK MELUBER) */
+    width: 500px; 
+    min-height: 100px;
+    
+    background: #0d0f16a6 !important;
+    border-radius: 0 22px 22px 22px;
+    z-index: 5; /* Di atas border running */
+}
+
+/* AVATAR DENGAN BORDER GLOW */
+.avatar {
+    width: 75px;
+    height: 75px;
+    border-radius: 12px;
+    object-fit: cover;
+    flex-shrink: 0;
+    border: 2px solid #00f2ea;
+    box-shadow: 0 0 15px rgba(0, 242, 234, 0.6);
+    z-index: 10;
+}
+
+/* TEXT AREA */
+.message-content {
+    display: flex;
+    flex-direction: column;
+    z-index: 10;
+    overflow: hidden;
+}
+
+.username {
+    font-size: 16px;
+    font-weight: 900;
+    color: #00f2ea !important;
+    text-transform: lowercase; /* Style khas mockup */
+    margin-bottom: 2px;
+}
+
+.text {
+    font-size: 19px;
+    font-weight: 700;
+    color: #ffffff !important;
+    line-height: 1.2;
+}
+
+/* TIKTOK ICON POJOK KANAN BAWAH */
+.message::after {
+    content: "";
+    position: absolute;
+    right: -15px;
+    bottom: -15px;
+    width: 42px;         /* Ukuran lingkaran tetap */
+    height: 42px;        /* Ukuran lingkaran tetap */
+    background: #0d0f16a6 url("tiktok.png") no-repeat center;
+    background-size: 130%; /* PERUBAHAN DI SINI: dari 60% ke 90% supaya gambar TikTok terlihat besar */
+    border-radius: 50%;
+    border: 2px solid #00f2ea;
+    box-shadow: 0 0 15px rgba(0, 242, 234, 0.8);
+    z-index: 20;
+}
+
+/* MATIKAN ELEMENT TIDAK PERLU */
+.badges, .source-icon, .donation-info, .content-image, .physics-bg {
+    display: none !important;
+}
+
+</style>
+</head>
+<body>
+    <div class="physics-bg"></div>
+    <div id="container">
+        <div id="output"></div>
+    </div>
+
+    <script src="../../tts.js"></script>
+    <script>
+        // Configuration
+        const urlParams = new URLSearchParams(window.location.search);
+        const roomID = urlParams.get('session') || urlParams.get('room') || urlParams.get('roomid') || 'TESTROOM';
+        const style = urlParams.get('style') || 'elastic'; // elastic, spring, pendulum, gravity, magnetic
+        const password = urlParams.get('password') || urlParams.get('pass') || urlParams.get('pw') || "false";
+        //const showtime = parseInt(urlParams.get('showtime') || urlParams.get('timer') || '30000');
+        
+        // Apply selected style
+        document.body.className = `style-${style}`;
+
+        // Create physics particles
+        const bgContainer = document.querySelector('.physics-bg');
+        for (let i = 0; i < 10; i++) {
+            const particle = document.createElement('div');
+            particle.className = 'particle';
+            particle.style.left = Math.random() * 100 + '%';
+            particle.style.animationDelay = Math.random() * 3 + 's';
+            particle.style.animationDuration = (Math.random() * 2 + 2) + 's';
+            particle.style.backgroundColor = `hsl(${Math.random() * 360}, 70%, 60%)`;
+            bgContainer.appendChild(particle);
+        }
+
+        // State
+        let messageTimeout = null;
+        let currentMessage = null;
+
+        // Create VDO.Ninja iframe for receiving messages
+        function createIframe() {
+            var iframe = document.createElement("iframe");
+            
+            iframe.src = "https://vdo.socialstream.ninja/?ln&password=" + password + "&notmobile&salt=vdo.ninja&label=overlay&exclude=" + roomID + "&scene&novideo&noaudio&cleanoutput&room=" + roomID;
+            
+            iframe.style.width = "0px";
+            iframe.style.height = "0px";
+            iframe.style.position = "fixed";
+            iframe.style.left = "-100px";
+            iframe.style.top = "-100px";
+            iframe.id = "frame1";
+            iframe.allow = "microphone";
+            document.body.appendChild(iframe);
+
+            var eventMethod = window.addEventListener ? "addEventListener" : "attachEvent";
+            var eventer = window[eventMethod];
+            var messageEvent = eventMethod === "attachEvent" ? "onmessage" : "message";
+
+            eventer(messageEvent, function (e) {
+                if (e.source != iframe.contentWindow) return;
+                
+                if ("dataReceived" in e.data) {
+                    if ("overlayNinja" in e.data.dataReceived) {
+                        if (e.data.dataReceived.overlayNinja && "response" in e.data.dataReceived.overlayNinja) {
+                            // pass
+                        } else {
+                            processData({ contents: e.data.dataReceived.overlayNinja });
+                        }
+                    }
+                }
+            });
+        }
+
+        // Process incoming messages
+        function processData(data) {
+            // Handle clear command
+            if (!data || data === false) {
+                hideMessage();
+                return;
+            }
+            
+            // Handle different data formats
+            if (data.contents === false) {
+                hideMessage();
+                return;
+            }
+            
+            // If data has contents property, use it
+            if (data && data.contents) {
+                showMessage(data.contents);
+            } 
+            // If data has content property (from dock)
+            else if (data && "content" in data) {
+                if (data.content) {
+                    processData({ contents: data.content });
+                } else {
+                    hideMessage();
+                }
+            }
+            // If data has action property
+            else if (data.action && "value" in data && data.action == "content") {
+                if (data.value) {
+                    try {
+                        const parsed = JSON.parse(data.value);
+                        if (parsed && "chatmessage" in parsed) {
+                            showMessage(parsed);
+                        }
+                    } catch (e) {
+                        console.error("Error parsing value:", e);
+                    }
+                } else {
+                    hideMessage();
+                }
+            }
+            // Direct message format
+            else if (data && "chatmessage" in data) {
+                showMessage(data);
+            }
+        }
+
+        // Display message
+        function showMessage(content) {
+            if (!content.chatmessage && !content.chatname) return;
+
+            hideMessage(() => {
+                const wrapper = document.createElement('div');
+                wrapper.className = 'message-wrapper';
+                
+                // Add special classes for donations/memberships
+                if (content.hasDonation) {
+                    wrapper.classList.add('has-donation');
+                }
+                if (content.membership) {
+                    wrapper.classList.add('has-membership');
+                }
+                
+                const message = document.createElement('div');
+                message.className = 'message';
+
+                // Avatar
+                if (content.chatimg) {
+                    const avatar = document.createElement('img');
+                    avatar.className = 'avatar';
+                    avatar.src = content.chatimg;
+                    avatar.onerror = () => {
+                        avatar.src = '../../sources/images/unknown.png';
+                    };
+                    message.appendChild(avatar);
+                }
+
+                // Content wrapper
+                const contentDiv = document.createElement('div');
+                contentDiv.className = 'message-content';
+
+                // Header
+                const header = document.createElement('div');
+                header.className = 'header';
+                
+                // Username with animated letters
+                if (content.chatname) {
+                    const name = document.createElement('span');
+                    name.className = 'username';
+                    
+                    // Decode HTML entities before splitting
+                    const tempDiv = document.createElement('div');
+                    tempDiv.innerHTML = content.chatname;
+                    const decodedName = tempDiv.textContent || tempDiv.innerText || '';
+                    
+                    // Split username into individual letters for wave animation
+                    decodedName.split('').forEach((letter, index) => {
+                        const span = document.createElement('span');
+                        span.textContent = letter;
+                        span.style.setProperty('--i', index);
+                        name.appendChild(span);
+                    });
+                    
+                    header.appendChild(name);
+                }
+
+                // Badges
+                if (content.chatbadges && Array.isArray(content.chatbadges)) {
+                    const badges = document.createElement('div');
+                    badges.className = 'badges';
+                    content.chatbadges.forEach(badge => {
+                        if (typeof badge === 'string') {
+                            const img = document.createElement('img');
+                            img.className = 'badge';
+                            img.src = badge;
+                            badges.appendChild(img);
+                        } else if (badge.src) {
+                            const img = document.createElement('img');
+                            img.className = 'badge';
+                            img.src = badge.src;
+                            badges.appendChild(img);
+                        }
+                    });
+                    header.appendChild(badges);
+                }
+
+                // Source icon
+                if (content.type) {
+                    const sourceIcon = document.createElement('img');
+                    sourceIcon.className = 'source-icon';
+                    sourceIcon.src = `../../sources/images/${content.type}.png`;
+                    sourceIcon.onerror = () => { sourceIcon.style.display = 'none'; };
+                    header.appendChild(sourceIcon);
+                }
+
+                contentDiv.appendChild(header);
+
+                // Message text
+                if (content.chatmessage) {
+                    const text = document.createElement('div');
+                    text.className = 'text';
+                    text.innerHTML = content.chatmessage;
+                    contentDiv.appendChild(text);
+                }
+
+                // Donation/Membership info
+                if (content.hasDonation || content.membership) {
+                    const donationDiv = document.createElement('div');
+                    donationDiv.className = 'donation-info';
+                    
+                    if (content.hasDonation) {
+                        const amount = content.hasDonation;
+                        const title = content.title || 'Donation';
+                        donationDiv.innerHTML = `💰 ${title}: ${amount}`;
+                    } else if (content.membership) {
+                        const memberInfo = typeof content.membership === 'string' ? 
+                            content.membership : 'New Member';
+                        donationDiv.innerHTML = `⭐ ${memberInfo}`;
+                    }
+                    
+                    contentDiv.appendChild(donationDiv);
+                }
+
+                // Content image (stickers, etc)
+                if (content.contentimg) {
+                    const img = document.createElement('img');
+                    img.className = 'content-image';
+                    img.src = content.contentimg;
+                    contentDiv.appendChild(img);
+                }
+
+                message.appendChild(contentDiv);
+                wrapper.appendChild(message);
+                
+                const output = document.getElementById('output');
+                output.innerHTML = '';
+                output.appendChild(wrapper);
+
+                // Trigger animation
+                requestAnimationFrame(() => {
+                    wrapper.classList.add('show');
+                });
+
+                currentMessage = wrapper;
+
+                // TTS support
+                if (window.initTTS && urlParams.has('tts')) {
+                    const ttsText = content.chatmessage ? 
+                        content.chatmessage.replace(/<[^>]*>/g, '') : '';
+                    if (ttsText) {
+                        window.speak(content.chatname + ' says ' + ttsText);
+                    }
+                }
+
+                // Auto-hide after showtime
+                if (messageTimeout) clearTimeout(messageTimeout);
+                messageTimeout = setTimeout(() => {
+                    hideMessage();
+                }, showtime);
+            });
+        }
+
+        // Hide current message
+        function hideMessage(callback) {
+            if (messageTimeout) {
+                clearTimeout(messageTimeout);
+                messageTimeout = null;
+            }
+
+            if (currentMessage) {
+                currentMessage.classList.remove('show');
+                currentMessage.classList.add('hide');
+                setTimeout(() => {
+                    if (currentMessage && currentMessage.parentNode) {
+                        currentMessage.parentNode.removeChild(currentMessage);
+                    }
+                    currentMessage = null;
+                    if (callback) callback();
+                }, 800); // Match animation duration
+            } else if (callback) {
+                callback();
+            }
+        }
+
+        // Initialize TTS if requested
+        if (urlParams.has('tts') && window.initTTS) {
+            window.initTTS({
+                lang: urlParams.get('tts') || urlParams.get('lang') || 'en-US',
+                pitch: parseFloat(urlParams.get('pitch') || '1'),
+                rate: parseFloat(urlParams.get('rate') || '1'),
+                voice: urlParams.get('voice') || null
+            });
+        }
+
+        // Initialize iframe connection
+        createIframe();
+    </script>
+</body>
+</html>
