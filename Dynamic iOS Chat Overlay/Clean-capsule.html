@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dynamic iOS Chat Overlay</title>
+    <style>
+        body {
+            background: transparent !important;
+            margin: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            overflow: hidden;
+            height: 100vh;
+            width: 100vw;
+        }
+
+        /* CONTAINER DINAMIS */
+        #container {
+            display: flex;
+            padding: 20px;
+            gap: 15px;
+            height: calc(100vh - 40px);
+            width: calc(100vw - 40px);
+        }
+
+        /* Mode Atas-Bawah */
+        .layout-vertical {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        /* Mode Kiri-Kanan */
+        .layout-horizontal {
+            flex-direction: row;
+            align-items: flex-start;
+            flex-wrap: nowrap;
+        }
+
+        /* BOX UTAMA - HITAM TRANSPARAN */
+        .notification-card {
+            min-width: 280px;
+            max-width: 320px;
+            background: rgba(0, 0, 0, 0.75); 
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            border-radius: 18px;
+            padding: 12px 16px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+            animation: slideIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            flex-shrink: 0; 
+        }
+
+        .notif-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 6px;
+        }
+
+        /* PERUBAHAN ICON: BACKGROUND PUTIH & LEBIH KECIL */
+        .app-icon-bg {
+            width: 18px;
+            height: 18px;
+            background-color: #ffffff; /* Background putih solid */
+            border-radius: 5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 8px;
+            flex-shrink: 0;
+        }
+
+        .app-icon {
+            width: 11px; /* Ukuran icon di dalam diperkecil */
+            height: 11px;
+            /* Filter dihapus agar warna asli icon muncul di atas putih */
+        }
+
+        .app-name {
+            font-size: 11px;
+            font-weight: 600;
+            color: rgba(255, 255, 255, 0.5);
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            flex-grow: 1;
+        }
+
+        .notif-time {
+            font-size: 11px;
+            color: rgba(255, 255, 255, 0.4);
+        }
+
+        .content {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .username {
+            font-size: 14px;
+            font-weight: 700;
+            color: #ffffff;
+            margin-bottom: 2px;
+        }
+
+        .message-text {
+            font-size: 14px;
+            color: #e0e0e0;
+            line-height: 1.3;
+            word-break: break-word;
+        }
+
+        @keyframes slideIn {
+            0% { opacity: 0; transform: translateY(-15px) scale(0.9); }
+            100% { opacity: 1; transform: translateY(0) scale(1); }
+        }
+    </style>
+</head>
+<body>
+    <div id="container"></div>
+
+    <script>
+        const urlParams = new URLSearchParams(window.location.search);
+        
+        const roomID = urlParams.get('session') || 'TESTROOM';
+        const password = urlParams.get('password') || "false";
+        const layoutMode = urlParams.get('layout') || 'vertical'; 
+        const chatLimit = parseInt(urlParams.get('limit')) || 1;
+
+        const container = document.getElementById('container');
+        if (layoutMode === 'horizontal') {
+            container.classList.add('layout-horizontal');
+        } else {
+            container.classList.add('layout-vertical');
+        }
+
+        function createIframe() {
+            var iframe = document.createElement("iframe");
+            iframe.src = `https://vdo.socialstream.ninja/?ln&password=${password}&notmobile&salt=vdo.ninja&label=overlay&exclude=${roomID}&scene&novideo&noaudio&cleanoutput&room=${roomID}`;
+            iframe.style.display = "none";
+            document.body.appendChild(iframe);
+
+            window.addEventListener("message", function (e) {
+                if (e.source != iframe.contentWindow) return;
+                if (e.data.dataReceived && e.data.dataReceived.overlayNinja) {
+                    const data = e.data.dataReceived.overlayNinja;
+                    if (data.chatmessage) updateMessage(data);
+                }
+            });
+        }
+
+        function updateMessage(data) {
+            const card = document.createElement('div');
+            card.className = 'notification-card';
+
+            const tiktokIcon = "https://cdn-icons-png.flaticon.com/512/3046/3046121.png"; 
+
+            card.innerHTML = `
+                <div class="notif-header">
+                    <div class="app-icon-bg">
+                        <img src="${tiktokIcon}" class="app-icon">
+                    </div>
+                    <span class="app-name">MESSAGES</span>
+                    <span class="notif-time">NOW</span>
+                </div>
+                <div class="content">
+                    <div class="username">${data.chatname}</div>
+                    <div class="message-text">${data.chatmessage}</div>
+                </div>
+            `;
+
+            container.appendChild(card);
+
+            const currentMessages = container.getElementsByClassName('notification-card');
+            if (currentMessages.length > chatLimit) {
+                container.removeChild(currentMessages[0]);
+            }
+
+            if (layoutMode === 'horizontal') {
+                container.scrollLeft = container.scrollWidth;
+            }
+        }
+
+        createIframe();
+    </script>
+</body>
+</html>
