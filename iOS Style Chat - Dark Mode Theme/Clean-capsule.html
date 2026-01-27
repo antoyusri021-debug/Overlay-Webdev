@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>iOS Style Chat - Dark Mode Theme</title>
+    <style>
+        body {
+            background: transparent !important;
+            margin: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            overflow: hidden;
+            height: 100vh;
+            width: 100vw;
+        }
+
+        #container {
+            display: flex;
+            padding: 20px;
+            gap: 15px;
+            width: 100%;
+            height: 100%;
+            box-sizing: border-box;
+        }
+
+        .layout-vertical { flex-direction: column; align-items: flex-start; }
+        .layout-horizontal { flex-direction: row; align-items: flex-start; flex-wrap: nowrap; }
+
+        /* KARTU NOTIFIKASI UTAMA (DARK GLASS) */
+        .notification-card {
+            width: 380px;
+            background: rgba(30, 30, 30, 0.4); /* Darker transparency */
+            backdrop-filter: blur(25px);
+            -webkit-backdrop-filter: blur(25px);
+            border-radius: 24px; 
+            display: flex;
+            align-items: stretch;
+            border: 0.5px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            animation: fadeIn 0.4s ease-out forwards;
+            flex-shrink: 0;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* AREA KONTEN KIRI (DARK SOLID) */
+        .content-area {
+            background: rgba(25, 25, 25, 0.9); /* Hampir hitam solid sesuai gambar bawah */
+            padding: 10px 14px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            flex-grow: 1;
+            border-radius: 24px 0 0 24px;
+            position: relative;
+            z-index: 2;
+            box-shadow: 5px 0 15px rgba(0,0,0,0.2);
+        }
+
+        .header-row {
+            display: flex;
+            align-items: center;
+            margin-bottom: 2px;
+        }
+
+        .app-icon-container {
+            width: 18px;
+            height: 18px;
+            background-color: #fff; /* Icon container jadi putih di dark mode */
+            border-radius: 5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 8px;
+            flex-shrink: 0;
+        }
+
+        .tiktok-logo {
+            width: 11px;
+            height: 11px;
+            filter: invert(0); /* Logo tetap hitam karena bg container putih */
+        }
+
+        .username {
+            font-size: 13px;
+            font-weight: 800;
+            color: #ffffff; /* Teks putih */
+            text-transform: uppercase;
+        }
+
+        .message {
+            font-size: 14px;
+            color: #cccccc; /* Teks pesan abu-abu terang */
+            line-height: 1.2;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        /* AREA AVATAR KANAN (DARK GLASS ANIMATED) */
+        .avatar-area {
+            padding: 8px 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            position: relative;
+            z-index: 1;
+            animation: slideFromBehind 0.8s cubic-bezier(0.165, 0.84, 0.44, 1) 0.2s forwards;
+            transform: translateX(-100%);
+            opacity: 0;
+        }
+
+        .user-avatar {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            object-fit: cover;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        /* ANIMASI */
+        @keyframes fadeIn {
+            0% { opacity: 0; transform: translateY(-10px); }
+            100% { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes slideFromBehind {
+            0% { transform: translateX(-80%); opacity: 0; }
+            100% { transform: translateX(0); opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+    <div id="container"></div>
+
+    <script>
+        const urlParams = new URLSearchParams(window.location.search);
+        const roomID = urlParams.get('session') || 'TESTROOM';
+        const password = urlParams.get('password') || "false";
+        const layoutMode = urlParams.get('layout') || 'vertical'; 
+        const chatLimit = parseInt(urlParams.get('limit')) || 1;
+
+        const container = document.getElementById('container');
+        if (layoutMode === 'horizontal') container.classList.add('layout-horizontal');
+        else container.classList.add('layout-vertical');
+
+        function createIframe() {
+            var iframe = document.createElement("iframe");
+            iframe.src = `https://vdo.socialstream.ninja/?ln&password=${password}&notmobile&salt=vdo.ninja&label=overlay&exclude=${roomID}&scene&novideo&noaudio&cleanoutput&room=${roomID}`;
+            iframe.style.display = "none";
+            document.body.appendChild(iframe);
+            window.addEventListener("message", function (e) {
+                if (e.source != iframe.contentWindow) return;
+                if (e.data.dataReceived && e.data.dataReceived.overlayNinja) {
+                    const data = e.data.dataReceived.overlayNinja;
+                    if (data.chatmessage) updateMessage(data);
+                }
+            });
+        }
+
+        function updateMessage(data) {
+            const card = document.createElement('div');
+            card.className = 'notification-card';
+            const userPhoto = data.chatimg ? data.chatimg : `https://api.dicebear.com/7.x/initials/svg?seed=${data.chatname}`;
+            const tiktokIconUrl = "https://cdn-icons-png.flaticon.com/512/3046/3046121.png"; 
+
+            card.innerHTML = `
+                <div class="content-area">
+                    <div class="header-row">
+                        <div class="app-icon-container"><img src="${tiktokIconUrl}" class="tiktok-logo"></div>
+                        <div class="username">${data.chatname}</div>
+                    </div>
+                    <div class="message">${data.chatmessage}</div>
+                </div>
+                <div class="avatar-area">
+                    <img src="${userPhoto}" class="user-avatar">
+                </div>
+            `;
+
+            container.appendChild(card);
+            const currentCards = container.getElementsByClassName('notification-card');
+            if (currentCards.length > chatLimit) container.removeChild(currentCards[0]);
+            if (layoutMode === 'horizontal') container.scrollLeft = container.scrollWidth;
+        }
+        createIframe();
+    </script>
+</body>
+</html>

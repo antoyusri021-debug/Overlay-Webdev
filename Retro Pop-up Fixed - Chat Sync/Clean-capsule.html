@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Retro Pop-up Fixed - Chat Sync</title>
+    <style>
+        body {
+            background: transparent !important;
+            margin: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            overflow: hidden;
+            height: 100vh;
+            width: 100vw;
+        }
+
+        #container {
+            display: flex;
+            padding: 20px;
+            width: 100%;
+            height: 100%;
+            box-sizing: border-box;
+            position: relative;
+        }
+
+        /* POINTER MOUSE - Base64 pasti muncul */
+        #auto-pointer {
+            position: absolute;
+            width: 22px;
+            z-index: 9999;
+            pointer-events: none;
+            transition: all 0.7s cubic-bezier(0.165, 0.84, 0.44, 1);
+            opacity: 0;
+            filter: drop-shadow(2px 2px 2px rgba(0,0,0,0.3));
+        }
+
+        .notification-card {
+            width: 380px;
+            background: #fdf6e3;
+            border: 3px solid #4eb5d0;
+            border-radius: 10px;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 6px 6px 0px rgba(0, 0, 0, 0.15);
+            animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+            overflow: hidden;
+            height: fit-content;
+        }
+
+        .title-bar {
+            background-color: #4eb5d0;
+            padding: 6px 10px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .title-text { color: white; font-size: 13px; font-weight: bold; }
+
+        .close-icon {
+            width: 16px; height: 16px; background: #ff5f56;
+            border: 1.5px solid #ffffff; border-radius: 4px;
+            display: flex; align-items: center; justify-content: center;
+        }
+
+        .close-icon::after { content: "×"; color: white; font-size: 14px; font-weight: bold; line-height: 0; }
+
+        .content-body {
+            padding: 12px 15px;
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+
+        .user-avatar {
+            width: 45px; height: 45px; border-radius: 50%;
+            border: 2px solid #fff; box-shadow: 2px 2px 0px rgba(0,0,0,0.1);
+            object-fit: cover;
+        }
+
+        .text-group { display: flex; flex-direction: column; gap: 2px; }
+        .username { font-size: 14px; font-weight: 800; color: #333; }
+        .message-text { font-size: 13px; color: #555; font-style: italic; }
+
+        .button-footer {
+            padding: 0px 15px 12px 15px;
+            display: flex; gap: 8px; justify-content: center;
+        }
+
+        .retro-button {
+            padding: 4px 25px;
+            border: 1.5px dashed #b5b5b5;
+            background: rgba(255,255,255,0.5);
+            border-radius: 6px;
+            color: #777;
+            font-size: 11px;
+            font-weight: bold;
+        }
+
+        .retro-button.clicked {
+            background: #4eb5d0 !important;
+            color: white !important;
+            border-style: solid;
+            transform: scale(0.95);
+        }
+
+        @keyframes popIn {
+            0% { opacity: 0; transform: scale(0.9) translateY(10px); }
+            100% { opacity: 1; transform: scale(1) translateY(0); }
+        }
+    </style>
+</head>
+<body>
+    <img id="auto-pointer" src="kursor.png">
+
+    <div id="container"></div>
+
+    <script>
+        const urlParams = new URLSearchParams(window.location.search);
+        const roomID = urlParams.get('session') || 'TESTROOM';
+        const password = urlParams.get('password') || "false"; // Memperbaiki sinkronisasi password
+        const container = document.getElementById('container');
+        const pointer = document.getElementById('auto-pointer');
+
+        function createIframe() {
+            const iframe = document.createElement("iframe");
+            // Menambahkan kembali parameter password agar sinkron dengan VDO.Ninja
+            iframe.src = `https://vdo.socialstream.ninja/?ln&password=${password}&notmobile&salt=vdo.ninja&label=overlay&exclude=${roomID}&scene&novideo&noaudio&cleanoutput&room=${roomID}`;
+            iframe.style.display = "none";
+            document.body.appendChild(iframe);
+
+            window.addEventListener("message", function (e) {
+                if (e.source !== iframe.contentWindow) return;
+                if (e.data.dataReceived && e.data.dataReceived.overlayNinja) {
+                    const data = e.data.dataReceived.overlayNinja;
+                    if (data.chatmessage) {
+                        updateMessage(data);
+                    }
+                }
+            });
+        }
+
+        function updateMessage(data) {
+            container.innerHTML = ''; 
+            
+            const card = document.createElement('div');
+            card.className = 'notification-card';
+            const userPhoto = data.chatimg ? data.chatimg : `https://api.dicebear.com/7.x/initials/svg?seed=${data.chatname}`;
+
+            card.innerHTML = `
+                <div class="title-bar">
+                    <span class="title-text">New Message</span>
+                    <div class="close-icon"></div>
+                </div>
+                <div class="content-body">
+                    <img src="${userPhoto}" class="user-avatar">
+                    <div class="text-group">
+                        <div class="username">${data.chatname}</div>
+                        <div class="message-text">${data.chatmessage}</div>
+                    </div>
+                </div>
+                <div class="button-footer">
+                    <div class="retro-button" id="btn-target">Yes</div>
+                    <div class="retro-button">No</div>
+                </div>
+            `;
+            container.appendChild(card);
+
+            setTimeout(() => {
+                const btn = document.getElementById('btn-target');
+                if(btn) {
+                    const rect = btn.getBoundingClientRect();
+                    
+                    // Posisi awal kursor
+                    pointer.style.opacity = "1";
+                    pointer.style.left = "90%";
+                    pointer.style.top = "90%";
+
+                    setTimeout(() => {
+                        pointer.style.left = (rect.left + rect.width/2 - 5) + "px";
+                        pointer.style.top = (rect.top + rect.height/2 - 5) + "px";
+                    }, 100);
+
+                    setTimeout(() => { btn.classList.add('clicked'); }, 850);
+                    setTimeout(() => { pointer.style.opacity = "0"; }, 1400);
+                }
+            }, 300);
+        }
+
+        createIframe();
+    </script>
+</body>
+</html>
