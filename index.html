@@ -57,7 +57,7 @@
 </div>
 
 <script>
-    // Data ini saya ambil langsung dari file themes.json kamu
+    // Data ini sudah saya sesuaikan dengan Nama Folder asli di GitHub kamu (Case Sensitive)
     const themesData = {
         "Akatsuki Itachi": "https://antoyusr021-debug.github.io/Overlay-Webdev/Akatsuki-uchiha/akatsuki-itachi.html",
         "Clean Capsule Horizontal": "https://antoyusr021-debug.github.io/Overlay-Webdev/Clean-capsule-horizontal/Hitam%20Putih%20Horizontal%20Kiri.html",
@@ -83,10 +83,10 @@
         "Fixed Dark Red": "https://antoyusr021-debug.github.io/Overlay-Webdev/Fixed-Dark-Red-Chat/Fixed-Dark-Red-Chat.html",
         "Floating Avatar Fixed Style": "https://antoyusr021-debug.github.io/Overlay-Webdev/Floating-Avatar-Fixed-Style/Floating-Avatar-Fixed-Style.html",
         "iPhone Style": "https://antoyusr021-debug.github.io/Overlay-Webdev/iPhone-Style-Fix/iPhone-Style-Fix.html",
-        "iOS Chat Overlay": "https://antoyusr021-debug.github.io/Overlay-Webdev/Dynamic-iOS-Chat-Overlay/Clean-capsule.html",
-        "iOS Style Chat - Dark Mode Theme": "https://antoyusr021-debug.github.io/Overlay-Webdev/iOS-Style-Chat-Dark-Mode-Theme/Clean-capsule.html",
-        "iOS Style Chat with Behind Animation": "https://antoyusr021-debug.github.io/Overlay-Webdev/iOS-Style-Chat-with-Behind-Animation/Clean-capsule.html",
-        "Retro Pop-up Fixed - Chat Sync": "https://antoyusr021-debug.github.io/Overlay-Webdev/Retro-Pop-up-Fixed-Chat-Sync/Clean-capsule.html"
+        "iOS Chat Overlay": "https://antoyusr021-debug.github.io/Overlay-Webdev/Dynamic%20iOS%20Chat%20Overlay/Clean-capsule.html",
+        "iOS Style Chat - Dark Mode Theme": "https://antoyusr021-debug.github.io/Overlay-Webdev/iOS%20Style%20Chat%20-%20Dark%20Mode%20Theme/Clean-capsule.html",
+        "iOS Style Chat with Behind Animation": "https://antoyusr021-debug.github.io/Overlay-Webdev/iOS%20Style%20Chat%20with%20Behind%20Animation/Clean-capsule.html",
+        "Retro Pop-up Fixed - Chat Sync": "https://antoyusr021-debug.github.io/Overlay-Webdev/Retro%20Pop-up%20Fixed%20-%20Chat%20Sync/Clean-capsule.html"
     };
 
     const select = document.getElementById('themeSelect');
@@ -102,7 +102,9 @@
         const id = document.getElementById('sessionId').value.trim();
         if (!url || !id) return alert("Pilih tema & isi Session ID dulu ya!");
 
-        document.getElementById('finalLink').innerText = `${url}?session=${id}`;
+        // Pakai encodeURI untuk menangani spasi di folder
+        const finalUrl = `${url}?session=${id}`;
+        document.getElementById('finalLink').innerText = finalUrl;
         document.getElementById('resultWrapper').classList.remove('hidden');
     }
 
@@ -113,3 +115,4 @@
 </script>
 </body>
 </html>
+
