@@ -5,52 +5,50 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Zami Overlay Generator</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        body { background: #0f172a; color: #e2e8f0; font-family: sans-serif; }
-        .glass { background: rgba(30, 41, 59, 0.8); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.1); }
-        .accent { color: #10b981; }
+        body { background: #0f172a; color: #e2e8f0; font-family: 'Inter', sans-serif; }
+        .glass { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.1); }
+        .accent-green { color: #10b981; }
         .bg-accent { background: #10b981; color: #0f172a; }
         .bg-accent:hover { background: #059669; }
     </style>
 </head>
 <body class="min-h-screen flex items-center justify-center p-4">
 
-<div class="max-w-md w-full">
+<div class="container max-w-lg">
     <div class="glass p-8 rounded-2xl shadow-2xl">
         <div class="text-center mb-8">
-            <h1 class="text-2xl font-bold uppercase tracking-widest"><span class="accent">Zami</span> Generator</h1>
-            <p class="text-slate-400 text-xs mt-1">Buat link chat overlay kamu dalam hitungan detik</p>
+            <h1 class="text-3xl font-extrabold tracking-tight uppercase">
+                <span class="accent-green">Zami</span> Overlay
+            </h1>
+            <p class="text-slate-400 text-sm mt-2">Generate link Social Stream Ninja kamu</p>
         </div>
 
-        <div class="space-y-4">
+        <div class="space-y-5">
             <div>
-                <label class="block text-[10px] font-bold uppercase text-slate-500 mb-1 ml-1">Pilih Desain</label>
-                <select id="themeSelect" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-3 text-sm outline-none focus:border-emerald-500">
-                    <option value="">-- Pilih Overlay --</option>
-                    <option value="https://antoyusr021-debug.github.io/Overlay-Webdev/Akatsuki-uchiha/akatsuki-itachi.html">Akatsuki Itachi</option>
-                    <option value="https://antoyusr021-debug.github.io/Overlay-Webdev/Clean-capsule-kuning/Clean-capsule-kuning.html">Clean Capsule Kuning</option>
-                    <option value="https://antoyusr021-debug.github.io/Overlay-Webdev/Cyberpunk-Neon-Night/Cyberpunk-Neon-Night.html">Cyberpunk Neon Night</option>
-                    <option value="https://antoyusr021-debug.github.io/Overlay-Webdev/Neo-box-1/chatcomic.html">Neo Box 1 (Tiktok Style)</option>
-                    <option value="https://antoyusr021-debug.github.io/Overlay-Webdev/Supreme-red/supreme.html">Supreme Red</option>
-                    <option value="https://antoyusr021-debug.github.io/Overlay-Webdev/iPhone-Style-Fix/iPhone-Style-Fix.html">iPhone Style</option>
-                </select>
+                <label class="block text-xs font-semibold uppercase text-slate-500 mb-1.5 ml-1">Pilih Desain Overlay</label>
+                <select id="themeSelect" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3.5 outline-none focus:border-emerald-500 transition-all text-sm">
+                    <option value="">-- Klik untuk memilih tema --</option>
+                    </select>
             </div>
 
             <div>
-                <label class="block text-[10px] font-bold uppercase text-slate-500 mb-1 ml-1">Session ID (Social Stream)</label>
-                <input type="text" id="sessionId" placeholder="Contoh: user_12345" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-3 text-sm outline-none focus:border-emerald-500">
+                <label class="block text-xs font-semibold uppercase text-slate-500 mb-1.5 ml-1 text-emerald-500">Social Stream Ninja ID</label>
+                <input type="text" id="sessionId" placeholder="Masukkan Session ID kamu" 
+                       class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3.5 outline-none focus:border-emerald-500 transition-all text-sm">
             </div>
 
-            <button onclick="generateLink()" class="w-full bg-accent font-bold py-3 rounded-lg shadow-lg transition-all active:scale-95">
-                GENERATE LINK
+            <button onclick="generateLink()" class="w-full bg-accent font-bold py-4 rounded-xl shadow-lg transition-all active:scale-95 mt-2">
+                GENERATE FULL LINK
             </button>
         </div>
 
-        <div id="resultWrapper" class="mt-8 hidden">
-            <div class="p-4 bg-black/40 border border-emerald-500/30 rounded-xl">
-                <p class="text-[10px] text-emerald-500 font-bold mb-2">HASIL LINK OBS:</p>
-                <div id="finalLink" class="text-[11px] break-all font-mono text-slate-300 mb-4 bg-black/20 p-2 rounded"></div>
-                <button onclick="copyLink()" class="w-full bg-slate-700 text-white text-xs py-2 rounded hover:bg-slate-600 transition-all">
+        <div id="resultWrapper" class="mt-8 hidden animate-in fade-in slide-in-from-bottom-4 duration-500">
+            <div class="bg-emerald-500/5 p-5 rounded-xl border border-emerald-500/20 relative">
+                <p class="text-[10px] text-emerald-500 font-bold uppercase mb-3 tracking-widest text-center">Hasil Link Browser Source:</p>
+                <div id="finalLink" class="text-xs break-all font-mono text-slate-300 bg-black/30 p-3 rounded-lg border border-slate-800 mb-4 text-center"></div>
+                <button onclick="copyLink()" class="w-full bg-slate-800 hover:bg-slate-700 text-white text-sm py-3 rounded-lg font-semibold transition-all">
                     SALIN LINK
                 </button>
             </div>
@@ -59,28 +57,59 @@
 </div>
 
 <script>
+    // Data ini saya ambil langsung dari file themes.json kamu
+    const themesData = {
+        "Akatsuki Itachi": "https://antoyusr021-debug.github.io/Overlay-Webdev/Akatsuki-uchiha/akatsuki-itachi.html",
+        "Clean Capsule Horizontal": "https://antoyusr021-debug.github.io/Overlay-Webdev/Clean-capsule-horizontal/Hitam%20Putih%20Horizontal%20Kiri.html",
+        "Clean Capsule BG Black": "https://antoyusr021-debug.github.io/Overlay-Webdev/Clean-capsule-bg-hitam/Border-radius.html",
+        "Clean Capsule BG DarkYellow": "https://antoyusr021-debug.github.io/Overlay-Webdev/Clean-capsule-bg-kuning-dark/Border-radius-kuning.html",
+        "Clean Capsule BG White": "https://antoyusr021-debug.github.io/Overlay-Webdev/Clean-capsule-bg-putih/Border-radius.html",
+        "Clean Capsule Black": "https://antoyusr021-debug.github.io/Overlay-Webdev/Clean-capsule-hitam/Clean-capsule-hitam.html",
+        "Clean Capsule Yellow": "https://antoyusr021-debug.github.io/Overlay-Webdev/Clean-capsule-kuning/Clean-capsule-kuning.html",
+        "Malika Tiktok Edition Black": "https://antoyusr021-debug.github.io/Overlay-Webdev/Malika-TikTok-Edition-black/Malika-TikTok-Edition.html",
+        "Malika Tiktok Edition White": "https://antoyusr021-debug.github.io/Overlay-Webdev/Malika-TikTok-Edition-white/Malika-TikTok-Edition.html",
+        "Neo Box": "https://antoyusr021-debug.github.io/Overlay-Webdev/Neo-box/chatcomic.html",
+        "Neo Box 1": "https://antoyusr021-debug.github.io/Overlay-Webdev/Neo-box-1/chatcomic.html",
+        "Neo Box 2": "https://antoyusr021-debug.github.io/Overlay-Webdev/Neo-box-2/chatcomic.html",
+        "Neo Box 3": "https://antoyusr021-debug.github.io/Overlay-Webdev/Neo-box-3/chatcomic.html",
+        "Supreme": "https://antoyusr021-debug.github.io/Overlay-Webdev/Supreme-red/supreme.html",
+        "AVATAR VIEW DOANG": "https://antoyusr021-debug.github.io/Overlay-Webdev/View-avatar/upsent.html",
+        "Line Neo Bubble Green": "https://antoyusr021-debug.github.io/Overlay-Webdev/Line-neo-bubble-green/Line-neo-bubble-green.html",
+        "Line Neo Bubble White": "https://antoyusr021-debug.github.io/Overlay-Webdev/Line-neo-bubble-white/Line-neo-bubble-white.html",
+        "Cyberpunk Neon Night": "https://antoyusr021-debug.github.io/Overlay-Webdev/Cyberpunk-Neon-Night/Cyberpunk-Neon-Night.html",
+        "Cyber Slide topdown": "https://antoyusr021-debug.github.io/Overlay-Webdev/Cyber-Slide-topdown/Cyber-Slide-topdown.html",
+        "Spin Minimalist": "https://antoyusr021-debug.github.io/Overlay-Webdev/Spin-Minimalist/Spin-Minimalist.html",
+        "Barista Overlay Tyo": "https://antoyusr021-debug.github.io/Overlay-Webdev/Barista-Overlay-Custom-Bean/Barista-Overlay-Custom-Bean.html",
+        "Fixed Dark Red": "https://antoyusr021-debug.github.io/Overlay-Webdev/Fixed-Dark-Red-Chat/Fixed-Dark-Red-Chat.html",
+        "Floating Avatar Fixed Style": "https://antoyusr021-debug.github.io/Overlay-Webdev/Floating-Avatar-Fixed-Style/Floating-Avatar-Fixed-Style.html",
+        "iPhone Style": "https://antoyusr021-debug.github.io/Overlay-Webdev/iPhone-Style-Fix/iPhone-Style-Fix.html",
+        "iOS Chat Overlay": "https://antoyusr021-debug.github.io/Overlay-Webdev/Dynamic-iOS-Chat-Overlay/Clean-capsule.html",
+        "iOS Style Chat - Dark Mode Theme": "https://antoyusr021-debug.github.io/Overlay-Webdev/iOS-Style-Chat-Dark-Mode-Theme/Clean-capsule.html",
+        "iOS Style Chat with Behind Animation": "https://antoyusr021-debug.github.io/Overlay-Webdev/iOS-Style-Chat-with-Behind-Animation/Clean-capsule.html",
+        "Retro Pop-up Fixed - Chat Sync": "https://antoyusr021-debug.github.io/Overlay-Webdev/Retro-Pop-up-Fixed-Chat-Sync/Clean-capsule.html"
+    };
+
+    const select = document.getElementById('themeSelect');
+    for (const [name, url] of Object.entries(themesData)) {
+        let opt = document.createElement('option');
+        opt.value = url;
+        opt.textContent = name;
+        select.appendChild(opt);
+    }
+
     function generateLink() {
-        const themeUrl = document.getElementById('themeSelect').value;
-        const sid = document.getElementById('sessionId').value.trim();
-        const wrapper = document.getElementById('resultWrapper');
-        const res = document.getElementById('finalLink');
+        const url = select.value;
+        const id = document.getElementById('sessionId').value.trim();
+        if (!url || !id) return alert("Pilih tema & isi Session ID dulu ya!");
 
-        if (!themeUrl || !sid) {
-            alert("Pilih tema dan isi Session ID dulu ya!");
-            return;
-        }
-
-        const fullLink = `${themeUrl}?session=${sid}`;
-        res.innerText = fullLink;
-        wrapper.classList.remove('hidden');
+        document.getElementById('finalLink').innerText = `${url}?session=${id}`;
+        document.getElementById('resultWrapper').classList.remove('hidden');
     }
 
     function copyLink() {
-        const text = document.getElementById('finalLink').innerText;
-        navigator.clipboard.writeText(text);
+        navigator.clipboard.writeText(document.getElementById('finalLink').innerText);
         alert("Link berhasil disalin!");
     }
 </script>
-
 </body>
 </html>
