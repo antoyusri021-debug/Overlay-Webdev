@@ -7,6 +7,20 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;700&family=Fira+Code:wght@400&display=swap" rel="stylesheet">
     <style>
+        /* Menghilangkan scrollbar di semua browser (Chrome, Safari, TLS) */
+        ::-webkit-scrollbar {
+            display: none;
+            width: 0 !important;
+        }
+
+        /* Memastikan body tidak bisa di-scroll sama sekali */
+        html, body {
+            overflow: hidden !important;
+            height: 100%;
+            width: 100%;
+            margin: 0;
+            padding: 0;
+        }
         :root { --accent: #10b981; }
         body { 
             font-family: 'Plus Jakarta Sans', sans-serif;
@@ -121,9 +135,7 @@
         "iOS Chat Overlay": "https://antoyusri021-debug.github.io/Overlay-Webdev/Dynamic%20iOS%20Chat%20Overlay/Clean-capsule.html",
         "iOS Style Dark": "https://antoyusri021-debug.github.io/Overlay-Webdev/iOS%20Style%20Chat%20-%20Dark%20Mode%20Theme/Clean-capsule.html",
         "iOS Style Animation": "https://antoyusri021-debug.github.io/Overlay-Webdev/iOS%20Style%20Chat%20with%20Behind%20Animation/Clean-capsule.html",
-        "Retro Pop-up Sync": "https://antoyusri021-debug.github.io/Overlay-Webdev/Retro%20Pop-up%20Fixed%20-%20Chat%20Sync/Clean-capsule.html",
-        "Bento Style": "https://antoyusri021-debug.github.io/Overlay-Webdev/Bento-Style-Overlay/bento.html",
-        "Glassmorphism": "https://antoyusri021-debug.github.io/Overlay-Webdev/Glassmorphism-Chat/glass.html"
+        "Retro Pop-up Sync": "https://antoyusri021-debug.github.io/Overlay-Webdev/Retro%20Pop-up%20Fixed%20-%20Chat%20Sync/Clean-capsule.html"
     };
 
     const sel = document.getElementById('themeSelect');
