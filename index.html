@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Theme Generator - Antoyusri021</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #121212; color: white; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+        .container { background: #1e1e1e; padding: 2rem; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); width: 100%; max-width: 450px; }
+        h2 { text-align: center; color: #00ff88; margin-bottom: 20px; }
+        .form-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; font-size: 14px; color: #bbb; }
+        select, input { width: 100%; padding: 12px; border-radius: 6px; border: 1px solid #333; background: #2a2a2a; color: white; box-sizing: border-box; outline: none; }
+        select:focus, input:focus { border-color: #00ff88; }
+        button { width: 100%; padding: 12px; border: none; border-radius: 6px; background: #00ff88; color: #000; font-weight: bold; cursor: pointer; transition: 0.3s; margin-top: 10px; }
+        button:hover { background: #00cc6e; transform: translateY(-2px); }
+        .result-box { margin-top: 20px; padding: 15px; background: #111; border-radius: 6px; border: 1px dashed #444; word-break: break-all; font-family: monospace; font-size: 13px; display: none; }
+        .copy-btn { background: #3498db; color: white; margin-top: 10px; display: none; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>Overlay Generator</h2>
+    
+    <div class="form-group">
+        <label>Pilih Tema Chat:</label>
+        <select id="themeSelect">
+            <option value="">-- Loading Themes --</option>
+        </select>
+    </div>
+
+    <div class="form-group">
+        <label>Social Stream Ninja Session ID:</label>
+        <input type="text" id="sessionId" placeholder="Contoh: user_abc123">
+    </div>
+
+    <button onclick="generateLink()">GENERATE LINK</button>
+
+    <div id="resultBox" class="result-box"></div>
+    <button id="copyBtn" class="copy-btn" onclick="copyToClipboard()">SALIN LINK</button>
+</div>
+
+<script>
+    const jsonUrl = 'https://raw.githubusercontent.com/antoyusr021-debug/Overlay-Webdev/main/themes.json';
+    const themeSelect = document.getElementById('themeSelect');
+    const resultBox = document.getElementById('resultBox');
+    const copyBtn = document.getElementById('copyBtn');
+
+    // Ambil data dari JSON GitHub kamu
+    fetch(jsonUrl)
+        .then(response => response.json())
+        .then(data => {
+            themeSelect.innerHTML = '<option value="">-- Pilih Tema --</option>';
+            for (const [name, url] of Object.entries(data)) {
+                let option = document.createElement('option');
+                option.value = url;
+                option.textContent = name;
+                themeSelect.appendChild(option);
+            }
+        })
+        .catch(err => {
+            themeSelect.innerHTML = '<option value="">Gagal ambil data</option>';
+            console.error(err);
+        });
+
+    function generateLink() {
+        const url = themeSelect.value;
+        const id = document.getElementById('sessionId').value.trim();
+
+        if (!url || !id) {
+            alert("Pilih tema dan isi Session ID dulu ya!");
+            return;
+        }
+
+        const finalUrl = `${url}?session=${id}`;
+        resultBox.innerText = finalUrl;
+        resultBox.style.display = 'block';
+        copyBtn.style.display = 'block';
+    }
+
+    function copyToClipboard() {
+        const text = resultBox.innerText;
+        navigator.clipboard.writeText(text).then(() => {
+            alert("Link berhasil disalin!");
+        });
+    }
+</script>
+
+</body>
+</html>
