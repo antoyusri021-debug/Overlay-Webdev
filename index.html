@@ -7,13 +7,9 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;700&family=Fira+Code:wght@400&display=swap" rel="stylesheet">
     <style>
-        /* Menghilangkan scrollbar di semua browser (Chrome, Safari, TLS) */
-        ::-webkit-scrollbar {
-            display: none;
-            width: 0 !important;
-        }
+        /* Menghilangkan scrollbar */
+        ::-webkit-scrollbar { display: none; width: 0 !important; }
 
-        /* Memastikan body tidak bisa di-scroll sama sekali */
         html, body {
             overflow: hidden !important;
             height: 100%;
@@ -30,10 +26,8 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            overflow: hidden;
         }
 
-        /* Card Setup */
         .dev-card {
             background: rgba(15, 23, 42, 0.8);
             backdrop-filter: blur(20px);
@@ -41,10 +35,6 @@
             width: 100%;
             max-width: 400px;
         }
-
-        /* Custom Scrollbar untuk Dropdown (Khusus Chrome/Safari) */
-        select::-webkit-scrollbar { width: 6px; }
-        select::-webkit-scrollbar-thumb { background: #334155; border-radius: 10px; }
 
         .input-dev {
             background: #0f172a;
@@ -77,16 +67,14 @@
             <div class="space-y-6">
                 <div class="group">
                     <label class="text-[9px] font-bold uppercase tracking-widest text-emerald-500 mb-2 block ml-1">Template Engine</label>
-                    <select id="themeSelect" size="1" onfocus='this.size=6;' onblur='this.size=1;' onchange='this.size=1; this.blur();' 
-                        class="w-full input-dev rounded-2xl px-5 py-4 text-sm cursor-pointer appearance-none">
+                    <select id="themeSelect" class="w-full input-dev rounded-2xl px-5 py-4 text-sm cursor-pointer appearance-none">
                         <option value="">-- [ SELECT_OVERLAY ] --</option>
-                        </select>
+                    </select>
                 </div>
 
                 <div class="group">
                     <label class="text-[9px] font-bold uppercase tracking-widest text-emerald-500 mb-2 block ml-1">Session Identity</label>
-                    <input type="text" id="sessionId" placeholder="user_ID..." 
-                        class="w-full input-dev rounded-2xl px-5 py-4 text-sm font-mono">
+                    <input type="text" id="sessionId" placeholder="user_ID..." class="w-full input-dev rounded-2xl px-5 py-4 text-sm font-mono">
                 </div>
 
                 <button onclick="generate()" class="w-full btn-green py-5 rounded-2xl text-[10px] uppercase tracking-[0.3em] hover:brightness-110 active:scale-95 transition-all mt-4 shadow-xl">
@@ -94,7 +82,7 @@
                 </button>
             </div>
 
-            <div id="resWrap" class="hidden mt-8 pt-8 border-t border-white/5 animate-in fade-in slide-in-from-bottom-2">
+            <div id="resWrap" class="hidden mt-8 pt-8 border-t border-white/5">
                 <div class="bg-black/40 rounded-2xl p-5 border border-emerald-500/10 text-center">
                     <p id="resLink" class="text-[10px] font-mono text-emerald-400/70 break-all mb-4"></p>
                     <button onclick="copy()" class="text-[9px] font-bold text-slate-400 uppercase tracking-widest hover:text-white transition-all underline underline-offset-8">
@@ -106,7 +94,6 @@
     </div>
 
 <script>
-    // DATA 30 TEMA LENGKAP & FIXED PATH
     const list = {
         "Akatsuki Itachi": "https://antoyusri021-debug.github.io/Overlay-Webdev/Akatsuki-uciha/akatsuki-itachi.html",
         "Clean Capsule Horizontal": "https://antoyusri021-debug.github.io/Overlay-Webdev/Celan-capsule-horizontal/HItam%20Putih%20Horizontal%20kiri.html",
@@ -147,15 +134,47 @@
     }
 
     function generate() {
-        const url = sel.value; const sid = document.getElementById('sessionId').value.trim();
-        if(!url || !sid) return;
-        document.getElementById('resLink').innerText = url + "?session=" + sid;
+        const url = sel.value; 
+        const sid = document.getElementById('sessionId').value.trim();
+        if(!url || !sid) {
+            alert("Harap pilih tema dan isi User ID!");
+            return;
+        }
+        // Perbaikan penggabungan link
+        const finalLink = url + "?session=" + sid;
+        document.getElementById('resLink').innerText = finalLink;
         document.getElementById('resWrap').classList.remove('hidden');
     }
 
     function copy() {
-        navigator.clipboard.writeText(document.getElementById('resLink').innerText);
-        alert("System: Link Copied");
+        const textToCopy = document.getElementById('resLink').innerText;
+        
+        // Cara Modern
+        if (navigator.clipboard && window.isSecureContext) {
+            navigator.clipboard.writeText(textToCopy).then(() => {
+                alert("System: Full Link Copied!");
+            }).catch(err => {
+                fallbackCopy(textToCopy);
+            });
+        } else {
+            // Pakai Fallback kalau cara modern gagal
+            fallbackCopy(textToCopy);
+        }
+    }
+
+    function fallbackCopy(text) {
+        const textArea = document.createElement("textarea");
+        textArea.value = text;
+        document.body.appendChild(textArea);
+        textArea.focus();
+        textArea.select();
+        try {
+            document.execCommand('copy');
+            alert("System: Full Link Copied (Fallback)!");
+        } catch (err) {
+            alert("System: Gagal menyalin link.");
+        }
+        document.body.removeChild(textArea);
     }
 </script>
 </body>
