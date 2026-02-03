@@ -3,57 +3,108 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Zami Overlay Generator</title>
+    <title>WebDev Overlay Generator</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;700&display=swap" rel="stylesheet">
     <style>
-        body { background: #0f172a; color: #e2e8f0; font-family: sans-serif; }
-        .glass { background: rgba(30, 41, 59, 0.8); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.1); }
-        .accent { color: #10b981; }
-        .bg-accent { background: #10b981; color: #0f172a; }
-        .bg-accent:hover { background: #059669; }
+        body { 
+            background: #0b0e14; 
+            color: #94a3b8; 
+            font-family: 'Fira Code', monospace; 
+        }
+        .dev-card { 
+            background: #161b22; 
+            border: 1px solid #30363d; 
+            box-shadow: 0 20px 50px rgba(0,0,0,0.5); 
+        }
+        .input-dev {
+            background: #0d1117;
+            border: 1px solid #30363d;
+            color: #e6edf3;
+            transition: all 0.2s;
+        }
+        .input-dev:focus {
+            border-color: #58a6ff;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(88,166,255,0.1);
+        }
+        .btn-primary {
+            background: #238636;
+            color: #ffffff;
+            transition: 0.2s;
+        }
+        .btn-primary:hover {
+            background: #2ea043;
+            transform: translateY(-1px);
+        }
+        .accent-blue { color: #58a6ff; }
+        .terminal-dots span { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
     </style>
 </head>
-<body class="min-h-screen flex items-center justify-center p-4">
+<body class="min-h-screen flex items-center justify-center p-6">
 
-<div class="max-w-md w-full">
-    <div class="glass p-8 rounded-2xl shadow-2xl">
-        <div class="text-center mb-8">
-            <h1 class="text-2xl font-bold uppercase tracking-widest"><span class="accent">Zami</span> Generator</h1>
-            <p class="text-slate-400 text-xs mt-1">Generate Link Social Stream Ninja</p>
+<div class="max-w-lg w-full">
+    <div class="dev-card rounded-t-xl p-3 border-b-0 flex justify-between items-center">
+        <div class="terminal-dots flex gap-2 ml-2">
+            <span class="bg-red-500"></span>
+            <span class="bg-yellow-500"></span>
+            <span class="bg-green-500"></span>
+        </div>
+        <div class="text-[10px] uppercase tracking-widest font-bold opacity-50">Generator_v2.0.exe</div>
+        <div class="w-10"></div>
+    </div>
+
+    <div class="dev-card rounded-b-xl p-8 pt-4">
+        <div class="mb-8">
+            <h1 class="text-xl font-bold text-white mb-2">
+                <span class="accent-blue">WebDev</span> Overlay Tools
+            </h1>
+            <p class="text-xs text-slate-500 italic">// Generate your stream link effectively.</p>
         </div>
 
-        <div class="space-y-4">
+        <div class="space-y-6">
             <div>
-                <label class="block text-[10px] font-bold uppercase text-slate-500 mb-1 ml-1">Pilih Desain</label>
-                <select id="themeSelect" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-3 text-sm outline-none focus:border-emerald-500">
-                    <option value="">-- Pilih Overlay --</option>
+                <label class="block text-[10px] uppercase font-bold text-slate-400 mb-2 tracking-wider">Select Theme Template</label>
+                <select id="themeSelect" class="w-full input-dev rounded-md px-4 py-3 text-sm cursor-pointer">
+                    <option value="">-- [ CHOOSE_TEMPLATE ] --</option>
                 </select>
             </div>
 
             <div>
-                <label class="block text-[10px] font-bold uppercase text-slate-500 mb-1 ml-1 text-emerald-500">Social Stream Ninja ID</label>
-                <input type="text" id="sessionId" placeholder="Contoh: user_12345" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-3 text-sm outline-none focus:border-emerald-500">
+                <label class="block text-[10px] uppercase font-bold text-slate-400 mb-2 tracking-wider">Session ID (Social Stream)</label>
+                <div class="relative">
+                    <span class="absolute left-4 top-3 text-slate-600 text-sm">$</span>
+                    <input type="text" id="sessionId" placeholder="Enter ID here..." 
+                           class="w-full input-dev rounded-md pl-8 pr-4 py-3 text-sm">
+                </div>
             </div>
 
-            <button onclick="generateLink()" class="w-full bg-accent font-bold py-3 rounded-lg shadow-lg transition-all active:scale-95">
-                GENERATE LINK
+            <button onclick="generateLink()" class="w-full btn-primary font-bold py-4 rounded-md shadow-lg active:scale-95 flex items-center justify-center gap-2">
+                <span>EXECUTE GENERATE</span>
             </button>
         </div>
 
-        <div id="resultWrapper" class="mt-8 hidden">
-            <div class="p-4 bg-black/40 border border-emerald-500/30 rounded-xl text-center">
-                <p class="text-[10px] text-emerald-500 font-bold mb-2 uppercase">Hasil Link Browser Source:</p>
-                <div id="finalLink" class="text-[11px] break-all font-mono text-slate-300 mb-4 bg-black/20 p-3 rounded border border-slate-800"></div>
-                <button onclick="copyLink()" class="w-full bg-slate-700 text-white text-xs py-2 rounded hover:bg-slate-600 transition-all">
-                    SALIN LINK
+        <div id="resultWrapper" class="mt-8 hidden animate-pulse">
+            <div class="bg-black rounded-lg p-4 border border-slate-800">
+                <div class="text-[10px] text-blue-400 mb-2 underline">Console_Output:</div>
+                <div id="finalLink" class="text-[11px] break-all text-green-400 font-mono leading-relaxed select-all"></div>
+                
+                <button onclick="copyLink()" class="mt-4 w-full border border-slate-700 hover:border-slate-500 text-slate-300 text-[10px] py-2 rounded uppercase tracking-widest transition-all">
+                    [ Copy to Clipboard ]
                 </button>
             </div>
         </div>
     </div>
+
+    <footer class="text-center mt-6">
+        <p class="text-[10px] text-slate-600 tracking-widest uppercase">
+            &copy; 2026 <span class="text-slate-400 font-bold">WebDev</span> Repository
+        </p>
+    </footer>
 </div>
 
 <script>
-    // Data mentah dari kamu (Sudah dikoreksi spasinya agar tidak 404)
+    // Data Sinkron dengan GitHub kamu
     const themesData = {
         "Akatsuki Itachi": "https://antoyusri021-debug.github.io/Overlay-Webdev/Akatsuki-uciha/akatsuki-itachi.html",
         "Clean Capsule Horizontal": "https://antoyusri021-debug.github.io/Overlay-Webdev/Celan-capsule-horizontal/HItam%20Putih%20Horizontal%20kiri.html",
@@ -64,25 +115,25 @@
         "Clean Capsule Yellow": "https://antoyusri021-debug.github.io/Overlay-Webdev/Clean-capsule-kuning/Clean-capsule-kuning.html",
         "Malika Tiktok Edition Black": "https://antoyusri021-debug.github.io/Overlay-Webdev/Malika-TikTok-Edition-black/Malika-TikTok-Edition.html",
         "Malika Tiktok Edition White": "https://antoyusri021-debug.github.io/Overlay-Webdev/Malika-TikTok-Edition-white/Malika-TikTok-Edition.html",
-        "Neo Box": "https://antoyusri021-debug.github.io/Overlay-Webdev/Neo-box/chatcomic.html",
+        "Neo Box (Comic)": "https://antoyusri021-debug.github.io/Overlay-Webdev/Neo-box/chatcomic.html",
         "Neo Box 1": "https://antoyusri021-debug.github.io/Overlay-Webdev/Neo-box-1/chatcomic.html",
         "Neo Box 2": "https://antoyusri021-debug.github.io/Overlay-Webdev/Neo-box-2/chatcomic.html",
         "Neo Box 3": "https://antoyusri021-debug.github.io/Overlay-Webdev/Neo-box-3/chatcomic.html",
-        "Supreme": "https://antoyusri021-debug.github.io/Overlay-Webdev/Supreme-red/supreme.html",
-        "AVATAR VIEW DOANG": "https://antoyusri021-debug.github.io/Overlay-Webdev/View-avatar/upsent.html",
-        "Line Neo Bubble Green": "https://antoyusri021-debug.github.io/Overlay-Webdev/Line-neo-bubble-green/Line-neo-bubble-green.html",
-        "Line Neo Bubble White": "https://antoyusri021-debug.github.io/Overlay-Webdev/Line-neo-bubble-white/Line-neo-bubble-white.html",
+        "Supreme Red": "https://antoyusri021-debug.github.io/Overlay-Webdev/Supreme-red/supreme.html",
+        "Avatar View": "https://antoyusri021-debug.github.io/Overlay-Webdev/View-avatar/upsent.html",
+        "Line Neo Green": "https://antoyusri021-debug.github.io/Overlay-Webdev/Line-neo-bubble-green/Line-neo-bubble-green.html",
+        "Line Neo White": "https://antoyusri021-debug.github.io/Overlay-Webdev/Line-neo-bubble-white/Line-neo-bubble-white.html",
         "Cyberpunk Neon Night": "https://antoyusri021-debug.github.io/Overlay-Webdev/Cyberpunk-Neon-Night/Cyberpunk-Neon-Night.html",
-        "Cyber Slide topdown": "https://antoyusri021-debug.github.io/Overlay-Webdev/Cyber-Slide-topdown/Cyber-Slide-topdown.html",
+        "Cyber Slide TopDown": "https://antoyusri021-debug.github.io/Overlay-Webdev/Cyber-Slide-topdown/Cyber-Slide-topdown.html",
         "Spin Minimalist": "https://antoyusri021-debug.github.io/Overlay-Webdev/Spin-Minimalist/Spin-Minimalist.html",
-        "Barista Overlay Tyo": "https://antoyusri021-debug.github.io/Overlay-Webdev/Barista-Overlay-Custom-Bean/Barista-Overlay-Custom-Bean.html",
+        "Barista Custom": "https://antoyusri021-debug.github.io/Overlay-Webdev/Barista-Overlay-Custom-Bean/Barista-Overlay-Custom-Bean.html",
         "Fixed Dark Red": "https://antoyusri021-debug.github.io/Overlay-Webdev/Fixed-Dark-Red-Chat/Fixed-Dark-Red-Chat.html",
-        "Floating Avatar Fixed Style": "https://antoyusri021-debug.github.io/Overlay-Webdev/Floating-Avatar-Fixed-Style/Floating-Avatar-Fixed-Style.html",
-        "Iphone Style": "https://antoyusri021-debug.github.io/Overlay-Webdev/iPhone-Style-Fix/iPhone-Style-Fix.html",
-        "iOS Chat Overlay": "https://antoyusri021-debug.github.io/Overlay-Webdev/Dynamic%20iOS%20Chat%20Overlay/Clean-capsule.html",
-        "iOS Style Chat - Dark Mode Theme": "https://antoyusri021-debug.github.io/Overlay-Webdev/iOS%20Style%20Chat%20-%20Dark%20Mode%20Theme/Clean-capsule.html",
-        "iOS Style Chat with Behind Animation": "https://antoyusri021-debug.github.io/Overlay-Webdev/iOS%20Style%20Chat%20with%20Behind%20Animation/Clean-capsule.html",
-        "Retro Pop-up Fixed - Chat Sync": "https://antoyusri021-debug.github.io/Overlay-Webdev/Retro%20Pop-up%20Fixed%20-%20Chat%20Sync/Clean-capsule.html"
+        "Floating Avatar Style": "https://antoyusri021-debug.github.io/Overlay-Webdev/Floating-Avatar-Fixed-Style/Floating-Avatar-Fixed-Style.html",
+        "iPhone Style Fix": "https://antoyusri021-debug.github.io/Overlay-Webdev/iPhone-Style-Fix/iPhone-Style-Fix.html",
+        "iOS Dynamic Chat": "https://antoyusri021-debug.github.io/Overlay-Webdev/Dynamic%20iOS%20Chat%20Overlay/Clean-capsule.html",
+        "iOS Dark Theme": "https://antoyusri021-debug.github.io/Overlay-Webdev/iOS%20Style%20Chat%20-%20Dark%20Mode%20Theme/Clean-capsule.html",
+        "iOS Animation Style": "https://antoyusri021-debug.github.io/Overlay-Webdev/iOS%20Style%20Chat%20with%20Behind%20Animation/Clean-capsule.html",
+        "Retro Pop-up Sync": "https://antoyusri021-debug.github.io/Overlay-Webdev/Retro%20Pop-up%20Fixed%20-%20Chat%20Sync/Clean-capsule.html"
     };
 
     const select = document.getElementById('themeSelect');
@@ -98,19 +149,20 @@
         const sid = document.getElementById('sessionId').value.trim();
 
         if (!themeUrl || !sid) {
-            alert("Harap pilih tema dan masukkan Session ID!");
+            alert("System Error: Please select theme and provide Session ID.");
             return;
         }
 
-        // Link yang digenerate sudah bersih
         document.getElementById('finalLink').innerText = themeUrl + "?session=" + sid;
-        document.getElementById('resultWrapper').classList.remove('hidden');
+        const wrapper = document.getElementById('resultWrapper');
+        wrapper.classList.remove('hidden');
+        wrapper.classList.remove('animate-pulse');
     }
 
     function copyLink() {
         const text = document.getElementById('finalLink').innerText;
         navigator.clipboard.writeText(text);
-        alert("Link Berhasil Disalin!");
+        alert("Success: Link copied to clipboard.");
     }
 </script>
 
