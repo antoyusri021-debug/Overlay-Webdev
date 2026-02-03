@@ -3,97 +3,109 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>WebDev Generator</title>
+    <title>WEBDEV - Overlay Generator</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;700&family=Fira+Code:wght@400&display=swap" rel="stylesheet">
     <style>
+        :root {
+            --bg-deep: #0a0a0c;
+            --accent-green: #10b981; /* Warna Hijau */
+        }
         body { 
-            font-family: 'Inter', sans-serif;
-            background: linear-gradient(-45deg, #0f172a, #1e293b, #334155, #0f172a);
-            background-size: 400% 400%;
-            animation: gradient 15s ease infinite;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: var(--bg-deep);
+            background-image: 
+                radial-gradient(at 0% 0%, rgba(16, 185, 129, 0.1) 0px, transparent 50%),
+                radial-gradient(at 100% 100%, rgba(5, 150, 105, 0.05) 0px, transparent 50%);
             min-height: 100vh;
-        }
-
-        @keyframes gradient {
-            0% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
-        }
-
-        .glass-card {
-            background: rgba(15, 23, 42, 0.6);
-            backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 255, 255, 0.05);
-            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
-        }
-
-        .minimal-input {
-            background: rgba(255, 255, 255, 0.03);
-            border: 1px solid rgba(255, 255, 255, 0.1);
             color: #f8fafc;
-            transition: 0.3s;
         }
-
-        .minimal-input:focus {
-            border-color: #38bdf8;
-            background: rgba(255, 255, 255, 0.07);
+        .dev-card {
+            background: rgba(17, 17, 19, 0.85);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(16, 185, 129, 0.1);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
+        }
+        .input-field {
+            background: #111113;
+            border: 1px solid #27272a;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .input-field:focus {
+            border-color: var(--accent-green);
+            box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.1);
             outline: none;
         }
-
-        .btn-gen {
-            background: #38bdf8;
-            color: #0f172a;
-            font-weight: 600;
-            transition: 0.3s;
+        .btn-execute {
+            background: linear-gradient(45deg, #059669, #10b981);
+            transition: all 0.3s;
         }
-
-        .btn-gen:hover {
-            background: #7dd3fc;
-            box-shadow: 0 0 20px rgba(56, 189, 248, 0.4);
+        .btn-execute:hover {
+            filter: brightness(1.1);
             transform: translateY(-1px);
+            box-shadow: 0 10px 20px -5px rgba(16, 185, 129, 0.3);
         }
+        .text-accent { color: var(--accent-green); }
     </style>
 </head>
-<body class="flex items-center justify-center p-6">
+<body class="flex flex-col items-center justify-center p-6">
 
-<div class="max-w-md w-full glass-card rounded-3xl p-8 lg:p-10">
-    <div class="text-center mb-10">
-        <h1 class="text-2xl font-light tracking-widest text-white">WEB<span class="font-bold text-sky-400">DEV</span></h1>
-        <div class="h-1 w-12 bg-sky-500 mx-auto mt-2 rounded-full"></div>
-    </div>
-
-    <div class="space-y-6">
-        <div class="space-y-2">
-            <label class="text-[10px] uppercase tracking-[0.2em] text-slate-400 ml-1">Overlay Template</label>
-            <select id="themeSelect" class="w-full minimal-input rounded-2xl px-5 py-4 text-sm appearance-none cursor-pointer">
-                <option value="">Choose Theme</option>
-            </select>
+    <div class="w-full max-w-md">
+        <div class="text-center mb-10">
+            <h1 class="text-4xl font-extrabold tracking-tighter mb-2 italic">
+                WEB<span class="text-accent">DEV</span>
+            </h1>
+            <p class="text-slate-500 text-[10px] font-bold tracking-[0.3em] uppercase">
+                // System Aesthetics Specialist
+            </p>
         </div>
 
-        <div class="space-y-2">
-            <label class="text-[10px] uppercase tracking-[0.2em] text-slate-400 ml-1">Session ID</label>
-            <input type="text" id="sessionId" placeholder="Enter session id..." 
-                   class="w-full minimal-input rounded-2xl px-5 py-4 text-sm">
+        <div class="dev-card rounded-[2.5rem] p-8 lg:p-10">
+            <div class="space-y-8">
+                
+                <div class="space-y-3">
+                    <div class="flex items-center gap-2 ml-1 text-slate-400">
+                        <span class="text-[10px] font-bold uppercase tracking-widest text-accent">01</span>
+                        <label class="text-[10px] font-bold uppercase tracking-widest">Select Template</label>
+                    </div>
+                    <select id="themeSelect" class="w-full input-field rounded-2xl px-5 py-4 text-sm appearance-none cursor-pointer text-slate-300">
+                        <option value="">-- [ CHOOSE_TEMPLATE ] --</option>
+                    </select>
+                </div>
+
+                <div class="space-y-3">
+                    <div class="flex items-center gap-2 ml-1 text-slate-400">
+                        <span class="text-[10px] font-bold uppercase tracking-widest text-accent">02</span>
+                        <label class="text-[10px] font-bold uppercase tracking-widest">Social Ninja ID</label>
+                    </div>
+                    <input type="text" id="sessionId" placeholder="Enter session id..." 
+                           class="w-full input-field rounded-2xl px-5 py-4 text-sm font-mono">
+                </div>
+
+                <button onclick="generateLink()" class="w-full btn-execute text-black font-black py-5 rounded-2xl text-xs uppercase tracking-[0.3em] mt-2 shadow-inner">
+                    Execute Generate
+                </button>
+            </div>
+
+            <div id="resultWrapper" class="mt-10 hidden border-t border-white/5 pt-8 animate-in fade-in slide-in-from-bottom-2 duration-500">
+                <div class="bg-black/40 rounded-2xl p-6 border border-emerald-500/10">
+                    <p id="finalLink" class="text-[11px] font-mono text-emerald-400/80 break-all leading-relaxed text-center mb-4"></p>
+                    <button onclick="copyLink()" class="w-full text-[10px] font-bold uppercase tracking-[0.2em] text-emerald-500 hover:text-white transition-colors underline decoration-emerald-500/30 underline-offset-4">
+                        [ Copy Final Link ]
+                    </button>
+                </div>
+            </div>
         </div>
 
-        <button onclick="generateLink()" class="w-full btn-gen py-4 rounded-2xl text-sm uppercase tracking-widest mt-4">
-            Generate Link
-        </button>
+        <footer class="mt-12 text-center">
+            <p class="text-[9px] text-slate-600 uppercase tracking-[0.4em]">
+                &copy; 2026 <span class="text-slate-400 font-bold italic">WebDev</span> Interface
+            </p>
+        </footer>
     </div>
-
-    <div id="resultWrapper" class="mt-10 hidden border-t border-slate-800 pt-8 animate-in fade-in duration-700">
-        <div class="text-center">
-            <p id="finalLink" class="text-[11px] font-mono text-slate-400 break-all bg-black/20 p-4 rounded-2xl mb-4"></p>
-            <button onclick="copyLink()" class="text-sky-400 text-[10px] uppercase tracking-widest font-bold hover:text-white transition-colors">
-                [ Copy URL ]
-            </button>
-        </div>
-    </div>
-</div>
 
 <script>
-    // Data Sinkron (Sudah fixed path spasi %20)
+    // DATA LENGKAP 30 TEMA SESUAI FILE JSON KAMU
     const themesData = {
         "Akatsuki Itachi": "https://antoyusri021-debug.github.io/Overlay-Webdev/Akatsuki-uciha/akatsuki-itachi.html",
         "Clean Capsule Horizontal": "https://antoyusri021-debug.github.io/Overlay-Webdev/Celan-capsule-horizontal/HItam%20Putih%20Horizontal%20kiri.html",
@@ -102,17 +114,29 @@
         "Clean Capsule BG White": "https://antoyusri021-debug.github.io/Overlay-Webdev/Clean-capsule-bg-putih/Border-radius.html",
         "Clean Capsule Black": "https://antoyusri021-debug.github.io/Overlay-Webdev/Clean-capsule-hitam/Clean-capsule.html",
         "Clean Capsule Yellow": "https://antoyusri021-debug.github.io/Overlay-Webdev/Clean-capsule-kuning/Clean-capsule-kuning.html",
-        "Malika Tiktok Black": "https://antoyusri021-debug.github.io/Overlay-Webdev/Malika-TikTok-Edition-black/Malika-TikTok-Edition.html",
-        "Malika Tiktok White": "https://antoyusri021-debug.github.io/Overlay-Webdev/Malika-TikTok-Edition-white/Malika-TikTok-Edition.html",
+        "Malika Tiktok Edition Black": "https://antoyusri021-debug.github.io/Overlay-Webdev/Malika-TikTok-Edition-black/Malika-TikTok-Edition.html",
+        "Malika Tiktok Edition White": "https://antoyusri021-debug.github.io/Overlay-Webdev/Malika-TikTok-Edition-white/Malika-TikTok-Edition.html",
+        "Neo Box (Comic)": "https://antoyusri021-debug.github.io/Overlay-Webdev/Neo-box/chatcomic.html",
         "Neo Box 1": "https://antoyusri021-debug.github.io/Overlay-Webdev/Neo-box-1/chatcomic.html",
         "Neo Box 2": "https://antoyusri021-debug.github.io/Overlay-Webdev/Neo-box-2/chatcomic.html",
         "Neo Box 3": "https://antoyusri021-debug.github.io/Overlay-Webdev/Neo-box-3/chatcomic.html",
         "Supreme Red": "https://antoyusri021-debug.github.io/Overlay-Webdev/Supreme-red/supreme.html",
-        "Cyberpunk Neon": "https://antoyusri021-debug.github.io/Overlay-Webdev/Cyberpunk-Neon-Night/Cyberpunk-Neon-Night.html",
+        "Avatar View": "https://antoyusri021-debug.github.io/Overlay-Webdev/View-avatar/upsent.html",
+        "Line Neo Bubble Green": "https://antoyusri021-debug.github.io/Overlay-Webdev/Line-neo-bubble-green/Line-neo-bubble-green.html",
+        "Line Neo Bubble White": "https://antoyusri021-debug.github.io/Overlay-Webdev/Line-neo-bubble-white/Line-neo-bubble-white.html",
+        "Cyberpunk Neon Night": "https://antoyusri021-debug.github.io/Overlay-Webdev/Cyberpunk-Neon-Night/Cyberpunk-Neon-Night.html",
+        "Cyber Slide TopDown": "https://antoyusri021-debug.github.io/Overlay-Webdev/Cyber-Slide-topdown/Cyber-Slide-topdown.html",
+        "Spin Minimalist": "https://antoyusri021-debug.github.io/Overlay-Webdev/Spin-Minimalist/Spin-Minimalist.html",
+        "Barista Overlay Tyo": "https://antoyusri021-debug.github.io/Overlay-Webdev/Barista-Overlay-Custom-Bean/Barista-Overlay-Custom-Bean.html",
+        "Fixed Dark Red Chat": "https://antoyusri021-debug.github.io/Overlay-Webdev/Fixed-Dark-Red-Chat/Fixed-Dark-Red-Chat.html",
+        "Floating Avatar Style": "https://antoyusri021-debug.github.io/Overlay-Webdev/Floating-Avatar-Fixed-Style/Floating-Avatar-Fixed-Style.html",
         "iPhone Style Fix": "https://antoyusri021-debug.github.io/Overlay-Webdev/iPhone-Style-Fix/iPhone-Style-Fix.html",
-        "iOS Dynamic Chat": "https://antoyusri021-debug.github.io/Overlay-Webdev/Dynamic%20iOS%20Chat%20Overlay/Clean-capsule.html",
-        "iOS Animation Style": "https://antoyusri021-debug.github.io/Overlay-Webdev/iOS%20Style%20Chat%20with%20Behind%20Animation/Clean-capsule.html",
-        "Retro Pop-up Sync": "https://antoyusri021-debug.github.io/Overlay-Webdev/Retro%20Pop-up%20Fixed%20-%20Chat%20Sync/Clean-capsule.html"
+        "iOS Chat Overlay": "https://antoyusri021-debug.github.io/Overlay-Webdev/Dynamic%20iOS%20Chat%20Overlay/Clean-capsule.html",
+        "iOS Style Chat Dark": "https://antoyusri021-debug.github.io/Overlay-Webdev/iOS%20Style%20Chat%20-%20Dark%20Mode%20Theme/Clean-capsule.html",
+        "iOS Style Animation": "https://antoyusri021-debug.github.io/Overlay-Webdev/iOS%20Style%20Chat%20with%20Behind%20Animation/Clean-capsule.html",
+        "Retro Pop-up Sync": "https://antoyusri021-debug.github.io/Overlay-Webdev/Retro%20Pop-up%20Fixed%20-%20Chat%20Sync/Clean-capsule.html",
+        "Bento Style Overlay": "https://antoyusri021-debug.github.io/Overlay-Webdev/Bento-Style-Overlay/bento.html",
+        "Glassmorphism Chat": "https://antoyusri021-debug.github.io/Overlay-Webdev/Glassmorphism-Chat/glass.html"
     };
 
     const select = document.getElementById('themeSelect');
@@ -120,7 +144,7 @@
         let opt = document.createElement('option');
         opt.value = themesData[name];
         opt.textContent = name;
-        opt.className = "bg-[#0f172a]";
+        opt.className = "bg-[#141416]";
         select.appendChild(opt);
     }
 
@@ -134,11 +158,9 @@
     }
 
     function copyLink() {
-        const text = document.getElementById('finalLink').innerText;
-        navigator.clipboard.writeText(text);
-        alert("Copied!");
+        navigator.clipboard.writeText(document.getElementById('finalLink').innerText);
+        alert("Success: Copied to Clipboard!");
     }
 </script>
-
 </body>
 </html>
