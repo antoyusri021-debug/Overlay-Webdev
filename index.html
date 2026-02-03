@@ -3,108 +3,97 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>WebDev Overlay Generator</title>
+    <title>WebDev Generator</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
     <style>
         body { 
-            background: #0b0e14; 
-            color: #94a3b8; 
-            font-family: 'Fira Code', monospace; 
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(-45deg, #0f172a, #1e293b, #334155, #0f172a);
+            background-size: 400% 400%;
+            animation: gradient 15s ease infinite;
+            min-height: 100vh;
         }
-        .dev-card { 
-            background: #161b22; 
-            border: 1px solid #30363d; 
-            box-shadow: 0 20px 50px rgba(0,0,0,0.5); 
+
+        @keyframes gradient {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
         }
-        .input-dev {
-            background: #0d1117;
-            border: 1px solid #30363d;
-            color: #e6edf3;
-            transition: all 0.2s;
+
+        .glass-card {
+            background: rgba(15, 23, 42, 0.6);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
         }
-        .input-dev:focus {
-            border-color: #58a6ff;
+
+        .minimal-input {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: #f8fafc;
+            transition: 0.3s;
+        }
+
+        .minimal-input:focus {
+            border-color: #38bdf8;
+            background: rgba(255, 255, 255, 0.07);
             outline: none;
-            box-shadow: 0 0 0 3px rgba(88,166,255,0.1);
         }
-        .btn-primary {
-            background: #238636;
-            color: #ffffff;
-            transition: 0.2s;
+
+        .btn-gen {
+            background: #38bdf8;
+            color: #0f172a;
+            font-weight: 600;
+            transition: 0.3s;
         }
-        .btn-primary:hover {
-            background: #2ea043;
+
+        .btn-gen:hover {
+            background: #7dd3fc;
+            box-shadow: 0 0 20px rgba(56, 189, 248, 0.4);
             transform: translateY(-1px);
         }
-        .accent-blue { color: #58a6ff; }
-        .terminal-dots span { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
     </style>
 </head>
-<body class="min-h-screen flex items-center justify-center p-6">
+<body class="flex items-center justify-center p-6">
 
-<div class="max-w-lg w-full">
-    <div class="dev-card rounded-t-xl p-3 border-b-0 flex justify-between items-center">
-        <div class="terminal-dots flex gap-2 ml-2">
-            <span class="bg-red-500"></span>
-            <span class="bg-yellow-500"></span>
-            <span class="bg-green-500"></span>
-        </div>
-        <div class="text-[10px] uppercase tracking-widest font-bold opacity-50">Generator_v2.0.exe</div>
-        <div class="w-10"></div>
+<div class="max-w-md w-full glass-card rounded-3xl p-8 lg:p-10">
+    <div class="text-center mb-10">
+        <h1 class="text-2xl font-light tracking-widest text-white">WEB<span class="font-bold text-sky-400">DEV</span></h1>
+        <div class="h-1 w-12 bg-sky-500 mx-auto mt-2 rounded-full"></div>
     </div>
 
-    <div class="dev-card rounded-b-xl p-8 pt-4">
-        <div class="mb-8">
-            <h1 class="text-xl font-bold text-white mb-2">
-                <span class="accent-blue">WebDev</span> Overlay Tools
-            </h1>
-            <p class="text-xs text-slate-500 italic">// Generate your stream link effectively.</p>
+    <div class="space-y-6">
+        <div class="space-y-2">
+            <label class="text-[10px] uppercase tracking-[0.2em] text-slate-400 ml-1">Overlay Template</label>
+            <select id="themeSelect" class="w-full minimal-input rounded-2xl px-5 py-4 text-sm appearance-none cursor-pointer">
+                <option value="">Choose Theme</option>
+            </select>
         </div>
 
-        <div class="space-y-6">
-            <div>
-                <label class="block text-[10px] uppercase font-bold text-slate-400 mb-2 tracking-wider">Select Theme Template</label>
-                <select id="themeSelect" class="w-full input-dev rounded-md px-4 py-3 text-sm cursor-pointer">
-                    <option value="">-- [ CHOOSE_TEMPLATE ] --</option>
-                </select>
-            </div>
+        <div class="space-y-2">
+            <label class="text-[10px] uppercase tracking-[0.2em] text-slate-400 ml-1">Session ID</label>
+            <input type="text" id="sessionId" placeholder="Enter session id..." 
+                   class="w-full minimal-input rounded-2xl px-5 py-4 text-sm">
+        </div>
 
-            <div>
-                <label class="block text-[10px] uppercase font-bold text-slate-400 mb-2 tracking-wider">Session ID (Social Stream)</label>
-                <div class="relative">
-                    <span class="absolute left-4 top-3 text-slate-600 text-sm">$</span>
-                    <input type="text" id="sessionId" placeholder="Enter ID here..." 
-                           class="w-full input-dev rounded-md pl-8 pr-4 py-3 text-sm">
-                </div>
-            </div>
+        <button onclick="generateLink()" class="w-full btn-gen py-4 rounded-2xl text-sm uppercase tracking-widest mt-4">
+            Generate Link
+        </button>
+    </div>
 
-            <button onclick="generateLink()" class="w-full btn-primary font-bold py-4 rounded-md shadow-lg active:scale-95 flex items-center justify-center gap-2">
-                <span>EXECUTE GENERATE</span>
+    <div id="resultWrapper" class="mt-10 hidden border-t border-slate-800 pt-8 animate-in fade-in duration-700">
+        <div class="text-center">
+            <p id="finalLink" class="text-[11px] font-mono text-slate-400 break-all bg-black/20 p-4 rounded-2xl mb-4"></p>
+            <button onclick="copyLink()" class="text-sky-400 text-[10px] uppercase tracking-widest font-bold hover:text-white transition-colors">
+                [ Copy URL ]
             </button>
         </div>
-
-        <div id="resultWrapper" class="mt-8 hidden animate-pulse">
-            <div class="bg-black rounded-lg p-4 border border-slate-800">
-                <div class="text-[10px] text-blue-400 mb-2 underline">Console_Output:</div>
-                <div id="finalLink" class="text-[11px] break-all text-green-400 font-mono leading-relaxed select-all"></div>
-                
-                <button onclick="copyLink()" class="mt-4 w-full border border-slate-700 hover:border-slate-500 text-slate-300 text-[10px] py-2 rounded uppercase tracking-widest transition-all">
-                    [ Copy to Clipboard ]
-                </button>
-            </div>
-        </div>
     </div>
-
-    <footer class="text-center mt-6">
-        <p class="text-[10px] text-slate-600 tracking-widest uppercase">
-            &copy; 2026 <span class="text-slate-400 font-bold">WebDev</span> Repository
-        </p>
-    </footer>
 </div>
 
 <script>
-    // Data Sinkron dengan GitHub kamu
+    // Data Sinkron (Sudah fixed path spasi %20)
     const themesData = {
         "Akatsuki Itachi": "https://antoyusri021-debug.github.io/Overlay-Webdev/Akatsuki-uciha/akatsuki-itachi.html",
         "Clean Capsule Horizontal": "https://antoyusri021-debug.github.io/Overlay-Webdev/Celan-capsule-horizontal/HItam%20Putih%20Horizontal%20kiri.html",
@@ -113,25 +102,15 @@
         "Clean Capsule BG White": "https://antoyusri021-debug.github.io/Overlay-Webdev/Clean-capsule-bg-putih/Border-radius.html",
         "Clean Capsule Black": "https://antoyusri021-debug.github.io/Overlay-Webdev/Clean-capsule-hitam/Clean-capsule.html",
         "Clean Capsule Yellow": "https://antoyusri021-debug.github.io/Overlay-Webdev/Clean-capsule-kuning/Clean-capsule-kuning.html",
-        "Malika Tiktok Edition Black": "https://antoyusri021-debug.github.io/Overlay-Webdev/Malika-TikTok-Edition-black/Malika-TikTok-Edition.html",
-        "Malika Tiktok Edition White": "https://antoyusri021-debug.github.io/Overlay-Webdev/Malika-TikTok-Edition-white/Malika-TikTok-Edition.html",
-        "Neo Box (Comic)": "https://antoyusri021-debug.github.io/Overlay-Webdev/Neo-box/chatcomic.html",
+        "Malika Tiktok Black": "https://antoyusri021-debug.github.io/Overlay-Webdev/Malika-TikTok-Edition-black/Malika-TikTok-Edition.html",
+        "Malika Tiktok White": "https://antoyusri021-debug.github.io/Overlay-Webdev/Malika-TikTok-Edition-white/Malika-TikTok-Edition.html",
         "Neo Box 1": "https://antoyusri021-debug.github.io/Overlay-Webdev/Neo-box-1/chatcomic.html",
         "Neo Box 2": "https://antoyusri021-debug.github.io/Overlay-Webdev/Neo-box-2/chatcomic.html",
         "Neo Box 3": "https://antoyusri021-debug.github.io/Overlay-Webdev/Neo-box-3/chatcomic.html",
         "Supreme Red": "https://antoyusri021-debug.github.io/Overlay-Webdev/Supreme-red/supreme.html",
-        "Avatar View": "https://antoyusri021-debug.github.io/Overlay-Webdev/View-avatar/upsent.html",
-        "Line Neo Green": "https://antoyusri021-debug.github.io/Overlay-Webdev/Line-neo-bubble-green/Line-neo-bubble-green.html",
-        "Line Neo White": "https://antoyusri021-debug.github.io/Overlay-Webdev/Line-neo-bubble-white/Line-neo-bubble-white.html",
-        "Cyberpunk Neon Night": "https://antoyusri021-debug.github.io/Overlay-Webdev/Cyberpunk-Neon-Night/Cyberpunk-Neon-Night.html",
-        "Cyber Slide TopDown": "https://antoyusri021-debug.github.io/Overlay-Webdev/Cyber-Slide-topdown/Cyber-Slide-topdown.html",
-        "Spin Minimalist": "https://antoyusri021-debug.github.io/Overlay-Webdev/Spin-Minimalist/Spin-Minimalist.html",
-        "Barista Custom": "https://antoyusri021-debug.github.io/Overlay-Webdev/Barista-Overlay-Custom-Bean/Barista-Overlay-Custom-Bean.html",
-        "Fixed Dark Red": "https://antoyusri021-debug.github.io/Overlay-Webdev/Fixed-Dark-Red-Chat/Fixed-Dark-Red-Chat.html",
-        "Floating Avatar Style": "https://antoyusri021-debug.github.io/Overlay-Webdev/Floating-Avatar-Fixed-Style/Floating-Avatar-Fixed-Style.html",
+        "Cyberpunk Neon": "https://antoyusri021-debug.github.io/Overlay-Webdev/Cyberpunk-Neon-Night/Cyberpunk-Neon-Night.html",
         "iPhone Style Fix": "https://antoyusri021-debug.github.io/Overlay-Webdev/iPhone-Style-Fix/iPhone-Style-Fix.html",
         "iOS Dynamic Chat": "https://antoyusri021-debug.github.io/Overlay-Webdev/Dynamic%20iOS%20Chat%20Overlay/Clean-capsule.html",
-        "iOS Dark Theme": "https://antoyusri021-debug.github.io/Overlay-Webdev/iOS%20Style%20Chat%20-%20Dark%20Mode%20Theme/Clean-capsule.html",
         "iOS Animation Style": "https://antoyusri021-debug.github.io/Overlay-Webdev/iOS%20Style%20Chat%20with%20Behind%20Animation/Clean-capsule.html",
         "Retro Pop-up Sync": "https://antoyusri021-debug.github.io/Overlay-Webdev/Retro%20Pop-up%20Fixed%20-%20Chat%20Sync/Clean-capsule.html"
     };
@@ -141,28 +120,23 @@
         let opt = document.createElement('option');
         opt.value = themesData[name];
         opt.textContent = name;
+        opt.className = "bg-[#0f172a]";
         select.appendChild(opt);
     }
 
     function generateLink() {
         const themeUrl = select.value;
         const sid = document.getElementById('sessionId').value.trim();
-
-        if (!themeUrl || !sid) {
-            alert("System Error: Please select theme and provide Session ID.");
-            return;
-        }
+        if (!themeUrl || !sid) return;
 
         document.getElementById('finalLink').innerText = themeUrl + "?session=" + sid;
-        const wrapper = document.getElementById('resultWrapper');
-        wrapper.classList.remove('hidden');
-        wrapper.classList.remove('animate-pulse');
+        document.getElementById('resultWrapper').classList.remove('hidden');
     }
 
     function copyLink() {
         const text = document.getElementById('finalLink').innerText;
         navigator.clipboard.writeText(text);
-        alert("Success: Link copied to clipboard.");
+        alert("Copied!");
     }
 </script>
 
