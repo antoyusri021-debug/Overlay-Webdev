@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WEBDEV - Fifine Premium Overlay</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800&family=Open+Sans:wght@700&display=swap" rel="stylesheet">
+
+    <style>
+        /* [UI SYSTEM CORE] */
+        html, body {
+            margin: 0; padding: 0;
+            width: 100vw; height: 100vh;
+            overflow: hidden;
+            background: transparent;
+            display: flex;
+            justify-content: center; 
+            align-items: center;     
+        }
+
+        /* [ANIMATION WRAPPER] */
+        .message-wrapper {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            filter: drop-shadow(0 12px 35px rgba(0,0,0,0.15));
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            width: 580px;
+            margin-top: 50px; 
+        }
+
+        .message-wrapper.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* [BRANDING ASSET: RIGHT FLOAT] */
+        .fifine-logo-float {
+            position: absolute;
+            top: -45px; 
+            right: -5px; 
+            width: 200px; 
+            z-index: 100;
+            opacity: 0;
+            transform: translateY(-5px);
+            transition: all 0.8s ease-out 0.4s;
+            pointer-events: none;
+        }
+
+        .message-wrapper.show .fifine-logo-float {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* [HEADER SYSTEM] */
+        .header-section {
+            position: relative;
+            z-index: 30;
+            height: 40px; 
+            width: 100%;
+        }
+
+        .logo-bg-red {
+            background-color: #E61E3C;
+            width: 110px; height: 110px;
+            border-radius: 25px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 8px 25px rgba(230, 30, 60, 0.4);
+            position: absolute;
+            bottom: -5px; left: 0;
+            z-index: 45;
+            overflow: hidden;
+        }
+
+        .smile-png-inner {
+            width: 75%; height: auto;
+            object-fit: contain;
+        }
+
+        .username-tag {
+            background-color: #333;
+            color: white;
+            padding: 7px 25px 7px 125px; 
+            border-radius: 12px;
+            font-family: 'Montserrat', sans-serif;
+            font-size: 15px;
+            font-weight: 800;
+            text-transform: uppercase;
+            position: absolute;
+            bottom: 12px; left: 20px;
+            z-index: 35;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 230px;
+        }
+
+        /* [CHAT CONTAINER: CALIBRATED LEFT ALIGN] */
+        .chat-container {
+            background-color: white;
+            padding: 45px 45px 40px 50px; 
+            border-radius: 30px;
+            width: 100%;
+            z-index: 5;
+            min-height: 115px;
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+            box-sizing: border-box;
+            position: relative; 
+            margin-top: -5px;
+        }
+
+        .chat-text {
+            font-family: 'Open Sans', sans-serif;
+            color: #E61E3C;
+            font-weight: 700;
+            line-height: 1.3;
+            word-wrap: break-word;
+            text-align: left;
+            width: 100%;
+        }
+
+        /* [CTA COMPONENT] */
+        .install-now-btn {
+            position: absolute;
+            bottom: -32px; left: 50%;
+            transform: translateX(-50%);
+            background-color: #E61E3C;
+            color: white;
+            padding: 8px 35px; 
+            border-radius: 15px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            z-index: 60;
+            box-shadow: 0 8px 20px rgba(230, 30, 60, 0.4);
+        }
+
+        .btn-small-text {
+            font-family: 'Montserrat', sans-serif;
+            font-size: 8px; font-weight: 800;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            margin-bottom: 1px;
+        }
+
+        .btn-main-text {
+            font-family: 'Montserrat', sans-serif;
+            font-size: 16px; font-weight: 800;
+        }
+
+        iframe { display: none !important; }
+    </style>
+</head>
+<body>
+
+    <div id="output"></div>
+
+    <script>
+        /**
+         * [LOGIC CORE]
+         * Designed by WEBDEV BROADCAST
+         * Property of Yusriantolana
+         */
+        const urlParams = new URLSearchParams(window.location.search);
+        const roomID = urlParams.get('session') || urlParams.get('room') || 'TESTROOM';
+        const password = urlParams.get('password') || "false";
+        let currentMsg = null;
+
+        function createIframe() {
+            var iframe = document.createElement("iframe");
+            iframe.src = "https://vdo.socialstream.ninja/?ln&password=" + password + "&notmobile&salt=vdo.ninja&label=overlay&exclude=" + roomID + "&scene&novideo&noaudio&cleanoutput&room=" + roomID;
+            document.body.appendChild(iframe);
+
+            window.addEventListener("message", function (e) {
+                if (e.source != iframe.contentWindow) return;
+                if (e.data.dataReceived && e.data.dataReceived.overlayNinja) {
+                    processData({ contents: e.data.dataReceived.overlayNinja });
+                }
+            });
+        }
+
+        function processData(data) {
+            if (!data || data.contents === false) { hideMessage(); return; }
+            if (data.contents) showMessage(data.contents);
+        }
+
+        function showMessage(content) {
+            hideMessage(() => {
+                const output = document.getElementById('output');
+                const wrapper = document.createElement('div');
+                wrapper.className = 'message-wrapper';
+                
+                let msg = content.chatmessage;
+                // [DYNAMIC FONT SCALE LOGIC]
+                let fontSize = "22px";
+                if (msg.length > 80) fontSize = "19px";
+                if (msg.length > 150) fontSize = "16px";
+
+                wrapper.innerHTML = `
+                    <img src="fifinelogo.png" class="fifine-logo-float" alt="Fifine">
+                    <div class="header-section">
+                        <div class="logo-bg-red">
+                            <img src="fifinesmile.png" class="smile-png-inner" alt="Smile">
+                        </div>
+                        <div class="username-tag">${content.chatname}</div>
+                    </div>
+                    <div class="chat-container">
+                        <div class="chat-text" style="font-size: ${fontSize}">${msg}</div>
+                    </div>
+                    <div class="install-now-btn">
+                        <span class="btn-small-text">FIFINE GENIE</span>
+                        <span class="btn-main-text">Install Now!</span>
+                    </div>
+                `;
+
+                output.appendChild(wrapper);
+                setTimeout(() => { wrapper.classList.add('show'); }, 50);
+                currentMsg = wrapper;
+            });
+        }
+
+        function hideMessage(callback) {
+            if (currentMsg) {
+                currentMsg.classList.remove('show');
+                setTimeout(() => {
+                    currentMsg.remove();
+                    currentMsg = null;
+                    if (callback) callback();
+                }, 400);
+            } else if (callback) {
+                callback();
+            }
+        }
+
+        // INIT SYSTEM
+        createIframe();
+    </script>
+</body>
+</html>
