@@ -3,60 +3,55 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Overlay Generator Pro - Antoyusri021</title>
+    <title>Zami Overlay Generator</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        body { background: #0f172a; color: #e2e8f0; font-family: 'Inter', sans-serif; }
-        .glass { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.1); }
-        .accent-green { color: #10b981; }
-        .bg-accent { background: #10b981; }
+        body { background: #0f172a; color: #e2e8f0; font-family: sans-serif; }
+        .glass { background: rgba(30, 41, 59, 0.8); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.1); }
+        .accent { color: #10b981; }
+        .bg-accent { background: #10b981; color: #0f172a; }
         .bg-accent:hover { background: #059669; }
-        .preview-container img { max-height: 220px; object-fit: contain; width: 100%; border-radius: 8px; }
     </style>
 </head>
 <body class="min-h-screen flex items-center justify-center p-4">
 
-<div class="container max-w-lg">
+<div class="max-w-md w-full">
     <div class="glass p-8 rounded-2xl shadow-2xl">
         <div class="text-center mb-8">
-            <h1 class="text-3xl font-extrabold tracking-tight uppercase">
-                <span class="accent-green">Zami</span> Overlay
-            </h1>
-            <p class="text-slate-400 text-sm mt-2">Tools Generator untuk Pembeli</p>
+            <h1 class="text-2xl font-bold uppercase tracking-widest"><span class="accent">Zami</span> Generator</h1>
+            <p class="text-slate-400 text-xs mt-1">Buat link chat overlay kamu dalam hitungan detik</p>
         </div>
 
-        <div id="previewArea" class="preview-container mb-6 hidden">
-            <label class="text-[10px] font-bold uppercase tracking-widest text-emerald-500 mb-2 block">Live Preview</label>
-            <div id="imageContainer" class="border border-slate-700 p-2 rounded-lg bg-black/40 flex items-center justify-center min-h-[150px]">
-                </div>
-        </div>
-
-        <div class="space-y-5">
+        <div class="space-y-4">
             <div>
-                <label class="block text-xs font-semibold uppercase text-slate-500 mb-1.5 ml-1">Pilih Desain Overlay</label>
-                <select id="themeSelect" onchange="updatePreview()" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3.5 outline-none focus:border-emerald-500 transition-all text-sm">
-                    <option value="">Memuat list tema...</option>
+                <label class="block text-[10px] font-bold uppercase text-slate-500 mb-1 ml-1">Pilih Desain</label>
+                <select id="themeSelect" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-3 text-sm outline-none focus:border-emerald-500">
+                    <option value="">-- Pilih Overlay --</option>
+                    <option value="https://antoyusr021-debug.github.io/Overlay-Webdev/Akatsuki-uchiha/akatsuki-itachi.html">Akatsuki Itachi</option>
+                    <option value="https://antoyusr021-debug.github.io/Overlay-Webdev/Clean-capsule-kuning/Clean-capsule-kuning.html">Clean Capsule Kuning</option>
+                    <option value="https://antoyusr021-debug.github.io/Overlay-Webdev/Cyberpunk-Neon-Night/Cyberpunk-Neon-Night.html">Cyberpunk Neon Night</option>
+                    <option value="https://antoyusr021-debug.github.io/Overlay-Webdev/Neo-box-1/chatcomic.html">Neo Box 1 (Tiktok Style)</option>
+                    <option value="https://antoyusr021-debug.github.io/Overlay-Webdev/Supreme-red/supreme.html">Supreme Red</option>
+                    <option value="https://antoyusr021-debug.github.io/Overlay-Webdev/iPhone-Style-Fix/iPhone-Style-Fix.html">iPhone Style</option>
                 </select>
             </div>
 
             <div>
-                <label class="block text-xs font-semibold uppercase text-slate-500 mb-1.5 ml-1 text-emerald-500">Social Stream Ninja ID</label>
-                <input type="text" id="sessionId" placeholder="Contoh: user_abc123" 
-                       class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3.5 outline-none focus:border-emerald-500 transition-all text-sm">
+                <label class="block text-[10px] font-bold uppercase text-slate-500 mb-1 ml-1">Session ID (Social Stream)</label>
+                <input type="text" id="sessionId" placeholder="Contoh: user_12345" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-3 text-sm outline-none focus:border-emerald-500">
             </div>
 
-            <button onclick="generateLink()" class="w-full bg-accent text-slate-900 font-bold py-4 rounded-xl shadow-lg shadow-emerald-500/10 hover:shadow-emerald-500/30 transform active:scale-95 transition-all mt-2">
-                <i class="fa-solid fa-wand-magic-sparkles mr-2"></i> DAPATKAN LINK FULL
+            <button onclick="generateLink()" class="w-full bg-accent font-bold py-3 rounded-lg shadow-lg transition-all active:scale-95">
+                GENERATE LINK
             </button>
         </div>
 
-        <div id="resultWrapper" class="mt-8 hidden animate-in fade-in slide-in-from-bottom-4 duration-500">
-            <div class="bg-emerald-500/5 p-5 rounded-xl border border-emerald-500/20 relative">
-                <p class="text-[10px] text-emerald-500 font-bold uppercase mb-3 tracking-widest">Link OBS / Browser Source:</p>
-                <div id="finalLink" class="text-xs break-all font-mono text-slate-300 bg-black/30 p-3 rounded-lg border border-slate-800 mb-4 select-all"></div>
-                <button onclick="copyLink()" class="w-full bg-slate-800 hover:bg-slate-700 text-white text-sm py-3 rounded-lg font-semibold transition-all flex items-center justify-center">
-                    <i class="fa-solid fa-copy mr-2"></i> SALIN LINK SEKARANG
+        <div id="resultWrapper" class="mt-8 hidden">
+            <div class="p-4 bg-black/40 border border-emerald-500/30 rounded-xl">
+                <p class="text-[10px] text-emerald-500 font-bold mb-2">HASIL LINK OBS:</p>
+                <div id="finalLink" class="text-[11px] break-all font-mono text-slate-300 mb-4 bg-black/20 p-2 rounded"></div>
+                <button onclick="copyLink()" class="w-full bg-slate-700 text-white text-xs py-2 rounded hover:bg-slate-600 transition-all">
+                    SALIN LINK
                 </button>
             </div>
         </div>
@@ -64,71 +59,28 @@
 </div>
 
 <script>
-    const JSON_URL = 'https://raw.githubusercontent.com/antoyusr021-debug/Overlay-Webdev/main/themes.json';
-    
-    // Database Fallback Gambar (Opsional, jika nama file gambar beda-beda)
-    const previewMapping = {
-        "Neo-box-1": "tiktok.png",
-        "Neo-box-2": "tiktok.png",
-        "Neo-box-3": "tiktok.png",
-        "Clean-capsule-kuning": "Clean-capsule-kuning.png",
-        "Clean-capsule-bg-putih": "Border-radius.png"
-    };
-
-    fetch(JSON_URL)
-        .then(res => res.json())
-        .then(data => {
-            const select = document.getElementById('themeSelect');
-            select.innerHTML = '<option value="" disabled selected>-- Klik untuk memilih tema --</option>';
-            Object.entries(data).forEach(([name, url]) => {
-                const opt = document.createElement('option');
-                opt.value = url;
-                opt.textContent = name;
-                select.appendChild(opt);
-            });
-        });
-
-    function updatePreview() {
-        const url = document.getElementById('themeSelect').value;
-        const container = document.getElementById('imageContainer');
-        const area = document.getElementById('previewArea');
-
-        // Logika cerdas mencari gambar:
-        // Ambil path folder dari URL (misal: .../Neo-box-1/chatcomic.html)
-        // Coba cari tiktok.png atau nama_file.png
-        let folderPath = url.substring(0, url.lastIndexOf('/'));
-        let fileName = url.substring(url.lastIndexOf('/') + 1).replace('.html', '.png');
-        
-        // Cek apakah ada di mapping, kalau tidak pakai default nama file
-        let isSpecial = false;
-        for (let key in previewMapping) {
-            if (url.includes(key)) {
-                container.innerHTML = `<img src="${folderPath}/${previewMapping[key]}" onerror="this.src='https://placehold.co/400x200/0f172a/10b981?text=Preview+Tersedia'" class="animate-pulse">`;
-                isSpecial = true;
-                break;
-            }
-        }
-
-        if (!isSpecial) {
-            container.innerHTML = `<img src="${folderPath}/${fileName}" onerror="this.src='https://placehold.co/400x200/0f172a/10b981?text=Preview+Overlay'" class="rounded-lg">`;
-        }
-        
-        area.classList.remove('hidden');
-    }
-
     function generateLink() {
-        const url = document.getElementById('themeSelect').value;
-        const id = document.getElementById('sessionId').value.trim();
-        if (!url || !id) return alert("Pilih tema & isi Session ID dulu ya!");
+        const themeUrl = document.getElementById('themeSelect').value;
+        const sid = document.getElementById('sessionId').value.trim();
+        const wrapper = document.getElementById('resultWrapper');
+        const res = document.getElementById('finalLink');
 
-        document.getElementById('finalLink').innerText = `${url}?session=${id}`;
-        document.getElementById('resultWrapper').classList.remove('hidden');
+        if (!themeUrl || !sid) {
+            alert("Pilih tema dan isi Session ID dulu ya!");
+            return;
+        }
+
+        const fullLink = `${themeUrl}?session=${sid}`;
+        res.innerText = fullLink;
+        wrapper.classList.remove('hidden');
     }
 
     function copyLink() {
-        navigator.clipboard.writeText(document.getElementById('finalLink').innerText);
-        alert("✅ Link disalin! Masukkan ke Browser Source OBS.");
+        const text = document.getElementById('finalLink').innerText;
+        navigator.clipboard.writeText(text);
+        alert("Link berhasil disalin!");
     }
 </script>
+
 </body>
 </html>
