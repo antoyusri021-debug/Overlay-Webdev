@@ -3,86 +3,125 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Theme Generator - Antoyusri021</title>
+    <title>Overlay Generator Pro - Antoyusri021</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #121212; color: white; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
-        .container { background: #1e1e1e; padding: 2rem; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); width: 100%; max-width: 450px; }
-        h2 { text-align: center; color: #00ff88; margin-bottom: 20px; }
-        .form-group { margin-bottom: 15px; }
-        label { display: block; margin-bottom: 5px; font-size: 14px; color: #bbb; }
-        select, input { width: 100%; padding: 12px; border-radius: 6px; border: 1px solid #333; background: #2a2a2a; color: white; box-sizing: border-box; outline: none; }
-        select:focus, input:focus { border-color: #00ff88; }
-        button { width: 100%; padding: 12px; border: none; border-radius: 6px; background: #00ff88; color: #000; font-weight: bold; cursor: pointer; transition: 0.3s; margin-top: 10px; }
-        button:hover { background: #00cc6e; transform: translateY(-2px); }
-        .result-box { margin-top: 20px; padding: 15px; background: #111; border-radius: 6px; border: 1px dashed #444; word-break: break-all; font-family: monospace; font-size: 13px; display: none; }
-        .copy-btn { background: #3498db; color: white; margin-top: 10px; display: none; }
+        body { background: #0f172a; color: #e2e8f0; font-family: 'Inter', sans-serif; }
+        .glass { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.1); }
+        .accent-green { color: #10b981; }
+        .bg-accent { background: #10b981; }
+        .bg-accent:hover { background: #059669; }
+        .preview-container img { max-height: 200px; object-fit: contain; width: 100%; border-radius: 8px; background: #000; }
     </style>
 </head>
-<body>
+<body class="min-h-screen flex items-center justify-center p-4">
 
-<div class="container">
-    <h2>Overlay Generator</h2>
-    
-    <div class="form-group">
-        <label>Pilih Tema Chat:</label>
-        <select id="themeSelect">
-            <option value="">-- Loading Themes --</option>
-        </select>
+<div class="container max-w-lg">
+    <div class="glass p-8 rounded-2xl shadow-2xl">
+        <div class="text-center mb-8">
+            <h1 class="text-3xl font-extrabold tracking-tight">
+                <span class="accent-green uppercase">Overlay</span> Generator
+            </h1>
+            <p class="text-slate-400 text-sm mt-2">Generate link Social Stream Ninja kamu dengan mudah</p>
+        </div>
+
+        <div id="previewArea" class="preview-container mb-6 hidden">
+            <label class="text-xs font-semibold uppercase tracking-wider text-slate-500 mb-2 block text-center">Preview Tema</label>
+            <div id="imageContainer" class="border border-slate-700 p-2 rounded-lg bg-black/50">
+                </div>
+        </div>
+
+        <div class="space-y-4">
+            <div>
+                <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1 ml-1">1. Pilih Tema</label>
+                <select id="themeSelect" onchange="updatePreview()" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-3 outline-none focus:border-emerald-500 transition-all">
+                    <option value="">Memuat tema...</option>
+                </select>
+            </div>
+
+            <div>
+                <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1 ml-1">2. Session ID</label>
+                <input type="text" id="sessionId" placeholder="Masukkan ID dari Social Stream Ninja" 
+                       class="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-3 outline-none focus:border-emerald-500 transition-all">
+            </div>
+
+            <button onclick="generateLink()" class="w-full bg-accent text-slate-900 font-bold py-4 rounded-xl shadow-lg shadow-emerald-500/20 transform active:scale-95 transition-all">
+                <i class="fa-solid fa-wand-magic-sparkles mr-2"></i> GENERATE FULL LINK
+            </button>
+        </div>
+
+        <div id="resultWrapper" class="mt-8 hidden animate-in fade-in zoom-in duration-300">
+            <div class="bg-slate-900/80 p-4 rounded-lg border border-emerald-500/30 relative">
+                <p class="text-[10px] text-emerald-500 font-bold uppercase mb-2">Link Anda Siap:</p>
+                <p id="finalLink" class="text-xs break-all font-mono text-slate-300"></p>
+                <button onclick="copyLink()" class="mt-4 w-full bg-slate-800 hover:bg-slate-700 text-white text-xs py-2 rounded border border-slate-600 transition-colors">
+                    <i class="fa-solid fa-copy mr-2"></i> Salin ke Clipboard
+                </button>
+            </div>
+        </div>
     </div>
 
-    <div class="form-group">
-        <label>Social Stream Ninja Session ID:</label>
-        <input type="text" id="sessionId" placeholder="Contoh: user_abc123">
-    </div>
-
-    <button onclick="generateLink()">GENERATE LINK</button>
-
-    <div id="resultBox" class="result-box"></div>
-    <button id="copyBtn" class="copy-btn" onclick="copyToClipboard()">SALIN LINK</button>
+    <p class="text-center mt-6 text-slate-500 text-xs">
+        &copy; 2024 Antoyusri021 - Webdev Overlay Tools
+    </p>
 </div>
 
 <script>
-    const jsonUrl = 'https://raw.githubusercontent.com/antoyusr021-debug/Overlay-Webdev/main/themes.json';
+    // URL JSON kamu
+    const JSON_URL = 'https://raw.githubusercontent.com/antoyusr021-debug/Overlay-Webdev/main/themes.json';
     const themeSelect = document.getElementById('themeSelect');
-    const resultBox = document.getElementById('resultBox');
-    const copyBtn = document.getElementById('copyBtn');
+    const previewArea = document.getElementById('previewArea');
+    const imageContainer = document.getElementById('imageContainer');
+    const resultWrapper = document.getElementById('resultWrapper');
+    const finalLink = document.getElementById('finalLink');
 
-    // Ambil data dari JSON GitHub kamu
-    fetch(jsonUrl)
-        .then(response => response.json())
+    // Load Data
+    fetch(JSON_URL)
+        .then(res => res.json())
         .then(data => {
-            themeSelect.innerHTML = '<option value="">-- Pilih Tema --</option>';
-            for (const [name, url] of Object.entries(data)) {
-                let option = document.createElement('option');
-                option.value = url;
-                option.textContent = name;
-                themeSelect.appendChild(option);
-            }
+            themeSelect.innerHTML = '<option value="" disabled selected>Pilih salah satu tema...</option>';
+            Object.entries(data).forEach(([name, url]) => {
+                const opt = document.createElement('option');
+                opt.value = url;
+                opt.textContent = name;
+                themeSelect.appendChild(opt);
+            });
         })
-        .catch(err => {
-            themeSelect.innerHTML = '<option value="">Gagal ambil data</option>';
-            console.error(err);
-        });
+        .catch(() => themeSelect.innerHTML = '<option>Gagal memuat data!</option>');
+
+    function updatePreview() {
+        const url = themeSelect.value;
+        if (!url) return;
+
+        // Mencoba menebak link gambar (asumsi gambar ada di folder yang sama dengan format .png)
+        // Contoh: /folder/tema.html jadi /folder/tema.png atau /folder/tiktok.png (berdasarkan struktur di SS kamu)
+        let imgUrl = url.replace('.html', '.png');
+        
+        // Khusus folder "Neo box 1" dsb di SS kamu ada file tiktok.png
+        // Ini adalah fallback jika gambar tidak ditemukan atau kamu punya struktur folder khusus
+        imageContainer.innerHTML = `<img src="${imgUrl}" onerror="this.src='https://placehold.co/400x200/1e293b/white?text=No+Preview'" alt="Preview">`;
+        previewArea.classList.remove('hidden');
+    }
 
     function generateLink() {
         const url = themeSelect.value;
         const id = document.getElementById('sessionId').value.trim();
 
         if (!url || !id) {
-            alert("Pilih tema dan isi Session ID dulu ya!");
+            alert("⚠️ Pilih tema dan isi Session ID dulu bosku!");
             return;
         }
 
-        const finalUrl = `${url}?session=${id}`;
-        resultBox.innerText = finalUrl;
-        resultBox.style.display = 'block';
-        copyBtn.style.display = 'block';
+        const fullUrl = `${url}?session=${id}`;
+        finalLink.innerText = fullUrl;
+        resultWrapper.classList.remove('hidden');
+        resultWrapper.scrollIntoView({ behavior: 'smooth' });
     }
 
-    function copyToClipboard() {
-        const text = resultBox.innerText;
-        navigator.clipboard.writeText(text).then(() => {
-            alert("Link berhasil disalin!");
+    function copyLink() {
+        navigator.clipboard.writeText(finalLink.innerText).then(() => {
+            alert("🚀 Link berhasil disalin! Silakan paste di Browser Source OBS kamu.");
         });
     }
 </script>
