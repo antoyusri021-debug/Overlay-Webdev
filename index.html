@@ -3,100 +3,142 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>WEBDEV - Elite Generator</title>
+    <title>WEBDEV - Dark Elite</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;700&family=Fira+Code:wght@400&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;700;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
     <style>
-        /* Menghilangkan scrollbar */
-        ::-webkit-scrollbar { display: none; width: 0 !important; }
-
-        html, body {
-            overflow: hidden !important;
-            height: 100%;
-            width: 100%;
-            margin: 0;
-            padding: 0;
-        }
-        :root { --accent: #10b981; }
+        ::-webkit-scrollbar { display: none; }
+        
         body { 
             font-family: 'Plus Jakarta Sans', sans-serif;
-            background: radial-gradient(circle at top left, #111827, #020617);
-            min-height: 100vh;
-            color: #f8fafc;
+            height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
+            overflow: hidden;
+            margin: 0;
+            background: url('indexbg.jpg') no-repeat center center;
+            background-size: cover;
+            position: relative;
         }
 
-        .dev-card {
-            background: rgba(15, 23, 42, 0.8);
-            backdrop-filter: blur(20px);
-            border: 1px solid rgba(16, 185, 129, 0.1);
+        /* Overlay gelap agar background menyatu */
+        body::after {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.75);
+            z-index: 1;
+        }
+
+        .container-content {
+            position: relative;
+            z-index: 10;
             width: 100%;
-            max-width: 400px;
+            max-width: 420px;
+            padding: 0 20px;
         }
 
-        .input-dev {
-            background: #0f172a;
-            border: 1px solid #1e293b;
-            color: #e2e8f0;
+        /* Glassmorphism White-Dark */
+        .elite-card {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.8);
+        }
+
+        .glow-text {
+            text-shadow: 0 0 15px rgba(255, 255, 255, 0.3);
+            color: #ffffff;
+        }
+
+        .input-elite {
+            background: rgba(0, 0, 0, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: #ffffff;
             transition: 0.3s;
         }
-        .input-dev:focus {
-            border-color: var(--accent);
-            box-shadow: 0 0 15px rgba(16, 185, 129, 0.1);
+
+        .input-elite:focus {
+            border-color: rgba(255, 255, 255, 0.5);
+            background: rgba(0, 0, 0, 0.8);
             outline: none;
         }
 
-        .btn-green {
-            background: linear-gradient(to right, #059669, #10b981);
-            color: #064e3b;
+        /* Tombol Putih-Dark */
+        .btn-execute {
+            background: #ffffff;
+            color: #000000;
             font-weight: 800;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .btn-execute:hover {
+            background: #e2e8f0;
+            transform: translateY(-2px);
+            box-shadow: 0 0 20px rgba(255, 255, 255, 0.2);
+        }
+
+        .font-mono-elite {
+            font-family: 'JetBrains Mono', monospace;
         }
     </style>
 </head>
 <body>
 
-    <div class="p-6 w-full">
-        <div class="text-center mb-12">
-            <h1 class="text-4xl font-black tracking-tighter italic">WEB<span class="text-[#10b981]">DEV</span></h1>
-            <p class="text-[9px] text-slate-500 tracking-[0.4em] uppercase mt-2">Specialist System Aesthetics</p>
+    <div class="container-content">
+        <div class="text-center mb-10">
+            <h1 class="text-4xl font-black italic glow-text tracking-tighter">
+                WEB<span class="opacity-50 font-light">DEV</span>
+            </h1>
+            <div class="flex items-center justify-center gap-2 mt-3">
+                <div class="h-[1px] w-8 bg-white/20"></div>
+                <p class="text-[9px] text-white/40 tracking-[0.4em] uppercase font-bold">Elite System Interface</p>
+                <div class="h-[1px] w-8 bg-white/20"></div>
+            </div>
         </div>
 
-        <div class="dev-card rounded-[2.5rem] p-8 lg:p-10 mx-auto">
+        <div class="elite-card rounded-[2.5rem] p-8 lg:p-10 border-t border-white/20">
             <div class="space-y-6">
                 <div class="group">
-                    <label class="text-[9px] font-bold uppercase tracking-widest text-emerald-500 mb-2 block ml-1">Template Engine</label>
-                    <select id="themeSelect" class="w-full input-dev rounded-2xl px-5 py-4 text-sm cursor-pointer appearance-none">
-                        <option value="">-- [ SELECT_OVERLAY ] --</option>
+                    <label class="text-[10px] font-bold uppercase tracking-widest text-white/40 mb-3 block ml-1">Template Engine</label>
+                    <select id="themeSelect" class="w-full input-elite rounded-2xl px-6 py-5 text-sm cursor-pointer appearance-none font-semibold">
+                        <option value="" disabled selected>SELECT_SYSTEM_THEME</option>
                     </select>
                 </div>
 
                 <div class="group">
-                    <label class="text-[9px] font-bold uppercase tracking-widest text-emerald-500 mb-2 block ml-1">Session Identity</label>
-                    <input type="text" id="sessionId" placeholder="user_ID..." class="w-full input-dev rounded-2xl px-5 py-4 text-sm font-mono">
+                    <label class="text-[10px] font-bold uppercase tracking-widest text-white/40 mb-3 block ml-1">Session Identity</label>
+                    <input type="text" id="sessionId" placeholder="USER_UID_ROOT" class="w-full input-elite rounded-2xl px-6 py-5 text-sm font-mono-elite placeholder:text-white/10">
                 </div>
 
-                <button onclick="generate()" class="w-full btn-green py-5 rounded-2xl text-[10px] uppercase tracking-[0.3em] hover:brightness-110 active:scale-95 transition-all mt-4 shadow-xl">
+                <button onclick="generate()" class="w-full btn-execute py-5 rounded-2xl text-[11px] uppercase tracking-[0.4em] active:scale-95 mt-4">
                     Execute Script
                 </button>
             </div>
 
-            <div id="resWrap" class="hidden mt-8 pt-8 border-t border-white/5">
-                <div class="bg-black/40 rounded-2xl p-5 border border-emerald-500/10 text-center">
-                    <p id="resLink" class="text-[10px] font-mono text-emerald-400/70 break-all mb-4"></p>
-                    <button onclick="copy()" class="text-[9px] font-bold text-slate-400 uppercase tracking-widest hover:text-white transition-all underline underline-offset-8">
-                        [ Copy Clipboard ]
+            <div id="resWrap" class="hidden mt-10 pt-8 border-t border-white/5">
+                <div class="bg-black/60 rounded-2xl p-6 border border-white/10">
+                    <div class="flex items-center gap-2 mb-4">
+                        <div class="w-2 h-2 rounded-full bg-white/20"></div>
+                        <span class="text-[9px] font-mono-elite text-white/30 uppercase tracking-widest">Output_Data</span>
+                    </div>
+                    <p id="resLink" class="text-[10px] font-mono-elite text-white/70 break-all leading-relaxed mb-6 text-center"></p>
+                    <button onclick="copy()" class="w-full py-3 rounded-xl border border-white/10 text-[9px] font-bold text-white/40 uppercase tracking-widest hover:text-white hover:border-white/30 transition-all">
+                        [ Copy Memory ]
                     </button>
                 </div>
             </div>
         </div>
+
+        <p class="text-center mt-8 text-[9px] text-white/20 font-mono-elite uppercase tracking-widest">
+            STABLE_BUILD v4.0 // SECURE_ACCESS
+        </p>
     </div>
 
 <script>
     const list = {
         "Akatsuki Itachi": "https://antoyusri021-debug.github.io/Overlay-Webdev/Akatsuki-uciha/akatsuki-itachi.html",
-        "Clean Capsule Horizontal": "https://antoyusri021-debug.github.io/Overlay-Webdev/Celan-capsule-horizontal/HItam%20Putih%20Horizontal%20kiri.html",
         "Clean Capsule BG Black": "https://antoyusri021-debug.github.io/Overlay-Webdev/Clean-capsule-bg-hitam/Border-radius.html",
         "Clean Capsule BG DarkYellow": "https://antoyusri021-debug.github.io/Overlay-Webdev/Clean-capsule-bg-kuning-dark/Border-radius-kuning.html",
         "Clean Capsule BG White": "https://antoyusri021-debug.github.io/Overlay-Webdev/Clean-capsule-bg-putih/Border-radius.html",
@@ -108,13 +150,9 @@
         "Neo Box 1": "https://antoyusri021-debug.github.io/Overlay-Webdev/Neo-box-1/chatcomic.html",
         "Neo Box 2": "https://antoyusri021-debug.github.io/Overlay-Webdev/Neo-box-2/chatcomic.html",
         "Neo Box 3": "https://antoyusri021-debug.github.io/Overlay-Webdev/Neo-box-3/chatcomic.html",
-        "Supreme Red": "https://antoyusri021-debug.github.io/Overlay-Webdev/Supreme-red/supreme.html",
-        "Avatar View Only": "https://antoyusri021-debug.github.io/Overlay-Webdev/View-avatar/upsent.html",
         "Line Neo Green": "https://antoyusri021-debug.github.io/Overlay-Webdev/Line-neo-bubble-green/Line-neo-bubble-green.html",
         "Line Neo White": "https://antoyusri021-debug.github.io/Overlay-Webdev/Line-neo-bubble-white/Line-neo-bubble-white.html",
         "Cyberpunk Neon": "https://antoyusri021-debug.github.io/Overlay-Webdev/Cyberpunk-Neon-Night/Cyberpunk-Neon-Night.html",
-        "Cyber Slide TopDown": "https://antoyusri021-debug.github.io/Overlay-Webdev/Cyber-Slide-topdown/Cyber-Slide-topdown.html",
-        "Spin Minimalist": "https://antoyusri021-debug.github.io/Overlay-Webdev/Spin-Minimalist/Spin-Minimalist.html",
         "Barista Custom": "https://antoyusri021-debug.github.io/Overlay-Webdev/Barista-Overlay-Custom-Bean/Barista-Overlay-Custom-Bean.html",
         "Fixed Dark Red": "https://antoyusri021-debug.github.io/Overlay-Webdev/Fixed-Dark-Red-Chat/Fixed-Dark-Red-Chat.html",
         "Floating Avatar": "https://antoyusri021-debug.github.io/Overlay-Webdev/Floating-Avatar-Fixed-Style/Floating-Avatar-Fixed-Style.html",
@@ -123,14 +161,15 @@
         "iOS Style Dark": "https://antoyusri021-debug.github.io/Overlay-Webdev/iOS%20Style%20Chat%20-%20Dark%20Mode%20Theme/Clean-capsule.html",
         "iOS Style Animation": "https://antoyusri021-debug.github.io/Overlay-Webdev/iOS%20Style%20Chat%20with%20Behind%20Animation/Clean-capsule.html",
         "Retro Pop-up Sync": "https://antoyusri021-debug.github.io/Overlay-Webdev/Retro%20Pop-up%20Fixed%20-%20Chat%20Sync/Clean-capsule.html",
-        "Overlay Fifine": "https://antoyusri021-debug.github.io/Overlay-Webdev/fifine/fifine_.html"
+        "Fifine": "https://antoyusri021-debug.github.io/Overlay-Webdev/fifine/fifine_.html",
+        "TheNinjaBone":"https://antoyusri021-debug.github.io/Overlay-Webdev/TheNinjaBone/Border-radius.html"
     };
 
     const sel = document.getElementById('themeSelect');
     for (let name in list) {
         let o = document.createElement('option');
         o.value = list[name]; o.innerText = name;
-        o.className = "bg-[#0f172a] py-2";
+        o.className = "bg-[#111111] text-white";
         sel.appendChild(o);
     }
 
@@ -138,47 +177,20 @@
         const url = sel.value; 
         const sid = document.getElementById('sessionId').value.trim();
         if(!url || !sid) {
-            alert("Harap pilih tema dan isi User ID!");
+            alert("REQUIRED: Parameter is missing!");
             return;
         }
-        // Perbaikan penggabungan link
         const finalLink = url + "?session=" + sid;
         document.getElementById('resLink').innerText = finalLink;
         document.getElementById('resWrap').classList.remove('hidden');
     }
 
     function copy() {
-        const textToCopy = document.getElementById('resLink').innerText;
-        
-        // Cara Modern
-        if (navigator.clipboard && window.isSecureContext) {
-            navigator.clipboard.writeText(textToCopy).then(() => {
-                alert("System: Full Link Copied!");
-            }).catch(err => {
-                fallbackCopy(textToCopy);
-            });
-        } else {
-            // Pakai Fallback kalau cara modern gagal
-            fallbackCopy(textToCopy);
-        }
-    }
-
-    function fallbackCopy(text) {
-        const textArea = document.createElement("textarea");
-        textArea.value = text;
-        document.body.appendChild(textArea);
-        textArea.focus();
-        textArea.select();
-        try {
-            document.execCommand('copy');
-            alert("System: Full Link Copied (Fallback)!");
-        } catch (err) {
-            alert("System: Gagal menyalin link.");
-        }
-        document.body.removeChild(textArea);
+        const text = document.getElementById('resLink').innerText;
+        navigator.clipboard.writeText(text).then(() => {
+            alert("SYSTEM: Link Copied to Memory");
+        });
     }
 </script>
 </body>
 </html>
-
-
