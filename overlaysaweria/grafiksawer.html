@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <style>
+        body { 
+            background: transparent; 
+            font-family: 'Inter', sans-serif; 
+            display: flex; 
+            justify-content: center; 
+            padding-top: 50px; 
+        }
+        
+        .main-card {
+            background: #1a1c2c; 
+            width: 500px; 
+            padding: 25px; 
+            border-radius: 16px; 
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.1); 
+            box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+        }
+
+        .main-title {
+            font-size: 16px; 
+            font-weight: 800; 
+            text-align: center; 
+            margin-bottom: 20px;
+            color: #ffffff; /* Judul Putih */
+            text-transform: uppercase; 
+            letter-spacing: 2px;
+        }
+
+        /* List Donatur */
+        .donor-list {
+            display: flex; 
+            flex-direction: column; 
+            gap: 8px; 
+            margin-bottom: 25px;
+            max-height: 200px; 
+            overflow-y: auto; 
+            padding-right: 5px;
+        }
+
+        /* Scrollbar Style Putih */
+        .donor-list::-webkit-scrollbar { width: 4px; }
+        .donor-list::-webkit-scrollbar-thumb { background: #ffffff; border-radius: 10px; }
+
+        .donor-item {
+            display: flex; 
+            justify-content: space-between; 
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.05); 
+            border-radius: 6px; 
+            font-size: 13px;
+            border-left: 3px solid #ffffff; /* Border samping jadi Putih */
+        }
+
+        .donor-amount { color: #ffffff; font-weight: 700; } /* Angka donatur Putih */
+
+        /* Total Section */
+        .total-section { border-top: 1px solid rgba(255, 255, 255, 0.1); padding-top: 20px; }
+        .total-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+        .total-percent { font-size: 28px; font-weight: 900; color: #ffffff; text-shadow: 0 0 10px rgba(255,255,255,0.2); }
+
+        .progress-outline { background: rgba(255, 255, 255, 0.1); border-radius: 50px; height: 16px; overflow: hidden; }
+        .progress-bar {
+            height: 100%; 
+            background: linear-gradient(90deg, #d1d1d1, #ffffff); /* Gradasi Silver ke Putih */
+            width: 0%; 
+            transition: width 1.5s cubic-bezier(0.19, 1, 0.22, 1);
+            box-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
+        }
+
+        .total-footer { margin-top: 12px; font-size: 14px; color: #a0a0cc; text-align: center; }
+        .current-total { color: #ffffff; font-weight: 800; }
+    </style>
+</head>
+<body>
+
+<div class="main-card">
+    <div class="main-title">Project Upgrade PC</div>
+    
+    <div id="donor-list-container" class="donor-list"></div>
+
+    <div class="total-section">
+        <div class="total-header">
+            <span style="color: #ffffff; font-size: 12px; font-weight: bold; opacity: 0.7;">TOTAL PROGRESS</span>
+            <div id="persen-total" class="total-percent">0%</div>
+        </div>
+        <div class="progress-outline">
+            <div id="bar-total" class="progress-bar"></div>
+        </div>
+        <div class="total-footer">
+            <span id="val-sekarang" class="current-total">Rp 0</span> / <span id="val-target" style="color: #ffffff;">Rp 0</span>
+        </div>
+    </div>
+</div>
+
+<script>
+    const TARGET_DANA = 1500000; 
+
+    const DATA_SAWER = [
+        { nama: "Ogeng", jumlah: 250000 },
+        { nama: "Iqbal", jumlah: 150000 },
+        { nama: "Rahman", jumlah: 100000 },
+        { nama: "Deni", jumlah: 25000 }
+    ];
+
+    function jalankanUpdate() {
+        const container = document.getElementById('donor-list-container');
+        const totalTerkumpul = DATA_SAWER.reduce((acc, curr) => acc + curr.jumlah, 0);
+        
+        container.innerHTML = '';
+        DATA_SAWER.forEach(d => {
+            container.innerHTML += `
+                <div class="donor-item">
+                    <span>${d.nama}</span>
+                    <span class="donor-amount">Rp ${d.jumlah.toLocaleString('id-ID')}</span>
+                </div>`;
+        });
+
+        let persen = Math.floor((totalTerkumpul / TARGET_DANA) * 100);
+        if(persen > 100) persen = 100;
+
+        document.getElementById('bar-total').style.width = persen + "%";
+        document.getElementById('persen-total').innerText = persen + "%";
+        document.getElementById('val-sekarang').innerText = "Rp " + totalTerkumpul.toLocaleString('id-ID');
+        document.getElementById('val-target').innerText = "Rp " + TARGET_DANA.toLocaleString('id-ID');
+    }
+
+    jalankanUpdate();
+</script>
+
+</body>
+</html>
