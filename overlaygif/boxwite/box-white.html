@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="id">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Webdev Broadcast - Fireworks Sultan Edition</title>
+    <title>Webdev Broadcast - Fireworks Sultan Edition (Fix Voice)</title>
     <style>
         :root {
             --card-width: 450px; 
@@ -136,15 +136,10 @@
         <div id="output"></div>
     </div>
     <canvas id="fireworksCanvas"></canvas>
-    
-    <audio id="tts-audio" style="display:none;"></audio>
 
     <script>
         const urlParams = new URLSearchParams(window.location.search);
-        
-        // 1. LOGIKA NAMA OWNER OTOMATIS
         const ownerName = urlParams.get('name') || "Webdev Broadcast";
-        
         const roomID = urlParams.get('session') || urlParams.get('room') || 'TESTROOM';
         const password = urlParams.get('password') || "false";
 
@@ -152,14 +147,29 @@
         let isShowing = false;
         const displayDuration = 12000;
 
-        // --- SISTEM SUARA ---
-        function playGoogleTTS(text) {
-            const audio = document.getElementById('tts-audio');
-            const url = `https://translate.google.com/translate_tts?ie=UTF-8&q=${encodeURIComponent(text)}&tl=id&client=tw-ob`;
-            audio.src = url;
-            audio.playbackRate = 1.25; 
-            audio.play().catch(e => console.log("Klik 'Interact' di OBS dulu!"));
+        // --- SISTEM SUARA NATIVE (REPLACING GOOGLE TTS) ---
+        function playSpeech(text) {
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.cancel();
+                const utterance = new SpeechSynthesisUtterance(text);
+                
+                let voices = window.speechSynthesis.getVoices();
+                // Cari suara wanita Indonesia (Gadis)
+                let selectedVoice = voices.find(v => v.name.includes('Gadis')) || 
+                                    voices.find(v => v.lang === 'id-ID');
+
+                if (selectedVoice) utterance.voice = selectedVoice;
+
+                utterance.lang = 'id-ID';
+                utterance.rate = 1.1;     
+                utterance.pitch = 1.0;    
+                utterance.volume = 1.0;   
+                window.speechSynthesis.speak(utterance);
+            }
         }
+
+        // Pancing suara agar load di browser
+        window.speechSynthesis.onvoiceschanged = () => window.speechSynthesis.getVoices();
 
         // --- SISTEM KEMBANG API ---
         const canvas = document.getElementById('fireworksCanvas');
@@ -261,10 +271,8 @@
             const output = document.getElementById('output');
             const senderName = content.chatname || 'User';
             const gift = content.hasDonation || "NEW GIFT!";
-            
-            // Susun kalimat asisten dinamis
-            const intro = `Saya adalah asisten ${ownerName}. `;
-            const speechText = `${intro} ${senderName} telah mengirim donasi gifnya ${gift}. Terima kasih sudah mampir ya!`;
+            const intro = `Halo, saya asisten ${ownerName}. `;
+            const speechText = `${intro} ${senderName} mengirim donasi ${gift}. Terima kasih sudah mampir!`;
 
             output.innerHTML = `
                 <div class="message-wrapper">
@@ -284,7 +292,7 @@
             const wrapper = output.querySelector('.message-wrapper');
             setTimeout(() => {
                 wrapper.classList.add('show');
-                playGoogleTTS(speechText); // Suara jalan pas kartu muncul
+                playSpeech(speechText); 
             }, 100);
 
             setTimeout(() => {
