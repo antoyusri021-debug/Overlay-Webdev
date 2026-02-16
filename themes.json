@@ -31,5 +31,10 @@
   },
   "follow_themes": {
     "Black Cat Follow": "https://antoyusri021-debug.github.io/Overlay-Webdev/overlayfollow/catblaksound/sudahfollow.html"
+  },
+  "gif_themes": {
+    "Box White": "https://antoyusri021-debug.github.io/Overlay-Webdev/overlaygif/boxwite/box-white.html",
+    "Box Radius White": "https://antoyusri021-debug.github.io/Overlay-Webdev/overlaygif/boxwitespotlight/pro-spotlight-voice-white.html",
+    "Simple Fantasy": "https://antoyusri021-debug.github.io/Overlay-Webdev/overlaygif/simplefantasi/StyleFantasyMagic.html"
   }
 }
