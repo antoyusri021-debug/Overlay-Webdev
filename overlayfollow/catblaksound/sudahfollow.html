@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Black Cat - Follower Thanks</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;700;800&display=swap');
+
+        body {
+            background: transparent !important;
+            margin: 0;
+            font-family: 'Poppins', sans-serif;
+            overflow: hidden;
+            height: 100vh;
+            width: 100vw;
+        }
+
+        #container {
+            display: flex;
+            padding: 20px;
+            flex-direction: column;
+            align-items: flex-start;
+            width: 100%;
+            height: 100%;
+            box-sizing: border-box;
+        }
+
+        .notification-card {
+            width: 450px;
+            height: 130px;
+            display: flex;
+            align-items: center;
+            position: relative;
+            animation: fadeIn 0.4s ease-out forwards;
+            margin-bottom: 12px;
+        }
+
+        .content-area {
+            background: rgba(10, 10, 10, 0.98);
+            backdrop-filter: blur(20px);
+            width: 340px; 
+            height: 100px;
+            padding: 10px 15px 10px 55px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            border-radius: 25px;
+            border: 1px solid rgba(0, 255, 68, 0.2);
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.7);
+            z-index: 2;
+            margin-left: 60px;
+            box-sizing: border-box;
+            overflow: hidden;
+        }
+
+        .username {
+            font-size: 14px;
+            font-weight: 800;
+            color: #00ff44; /* Hijau Terang */
+            text-transform: uppercase;
+            margin-bottom: 2px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .thanks-msg {
+            font-size: 16px;
+            color: #ffffff;
+            font-weight: 700;
+            line-height: 1.2;
+        }
+
+        .action-text {
+            color: #ffff00; /* Kuning biar mencolok */
+            font-size: 13px;
+            font-weight: 400;
+        }
+
+        .cat-avatar-wrapper {
+            position: absolute;
+            left: 0;
+            width: 140px;
+            height: 140px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10;
+        }
+
+        .meong-frame {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        .user-photo {
+            position: absolute;
+            width: 65px;
+            height: 65px;
+            border-radius: 50%;
+            object-fit: cover;
+            z-index: -1;
+            border: 3px solid #00ff44;
+            animation: slideFromBehind 0.8s cubic-bezier(0.165, 0.84, 0.44, 1) 0.3s forwards;
+            opacity: 0;
+        }
+
+        @keyframes fadeIn {
+            0% { opacity: 0; transform: translateY(20px); }
+            100% { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes slideFromBehind {
+            0% { transform: scale(0.5) translateX(0); opacity: 0; }
+            100% { transform: scale(1) translateX(-8px); opacity: 1; }
+        }
+
+        .fade-out {
+            animation: fadeOut 0.5s ease-in forwards !important;
+        }
+
+        @keyframes fadeOut {
+            to { opacity: 0; transform: scale(0.8) translateY(-20px); }
+        }
+    </style>
+</head>
+<body>
+    <div id="container"></div>
+    <audio id="swoosh-sound" preload="auto"></audio>
+
+    <script>
+        const urlParams = new URLSearchParams(window.location.search);
+        const roomID = urlParams.get('session') || 'TESTROOM';
+        const password = urlParams.get('password') || "false";
+        
+        const soundFile = "swoosh.mp3";
+        const catFile = "meong.png";
+        const container = document.getElementById('container');
+        let isProcessing = false;
+        let queue = [];
+
+        function playSwoosh() {
+            const audio = document.getElementById('swoosh-sound');
+            audio.src = soundFile;
+            audio.volume = 0.6;
+            audio.play().catch(() => {});
+        }
+
+        function createIframe() {
+            const iframe = document.createElement("iframe");
+            // Menambahkan &events=1 agar data follow terbaca
+            iframe.src = `https://vdo.socialstream.ninja/?ln&password=${password}&notmobile&salt=vdo.ninja&label=overlay&exclude=${roomID}&scene&novideo&noaudio&cleanoutput&includeavatars&events=1&room=${roomID}`;
+            iframe.style.display = "none";
+            document.body.appendChild(iframe);
+
+            window.addEventListener("message", function (e) {
+                if (e.source != iframe.contentWindow) return;
+                const data = e.data.dataReceived?.overlayNinja;
+                
+                if (data && data.event) {
+                    // MENDETEKSI EVENT FOLLOW
+                    if (data.event.type === 'follow' || data.event.type === 'followed') {
+                        queue.push({
+                            name: data.event.name || "New Friend",
+                            img: data.event.avatar || `https://api.dicebear.com/7.x/initials/svg?seed=${data.event.name}`
+                        });
+                        if (!isProcessing) processQueue();
+                    }
+                }
+            });
+        }
+
+        function processQueue() {
+            if (isProcessing || queue.length === 0) return;
+            isProcessing = true;
+            
+            const item = queue.shift();
+            const card = document.createElement('div');
+            card.className = 'notification-card';
+
+            card.innerHTML = `
+                <div class="cat-avatar-wrapper">
+                    <img src="${catFile}" class="meong-frame">
+                    <img src="${item.img}" class="user-photo">
+                </div>
+                <div class="content-area">
+                    <div class="username">${item.name}</div>
+                    <div class="thanks-msg">Thanks for Following! <span class="action-text">✨</span></div>
+                </div>
+            `;
+
+            container.appendChild(card);
+            playSwoosh();
+
+            // Tampil 6 detik
+            setTimeout(() => {
+                card.classList.add('fade-out');
+                setTimeout(() => {
+                    card.remove();
+                    isProcessing = false;
+                    processQueue();
+                }, 500);
+            }, 6000);
+        }
+
+        window.onload = createIframe;
+    </script>
+</body>
+</html>

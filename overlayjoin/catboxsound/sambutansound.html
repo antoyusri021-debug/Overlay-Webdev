@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Perfect Fit & Swoosh Overlay</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;800&display=swap');
+
+        body { 
+            background: transparent; 
+            margin: 0;
+            overflow: hidden;
+            height: 100vh;
+            display: flex;
+            justify-content: flex-start; 
+            align-items: center;     
+            padding-left: 30px;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        /* ANIMASI SUPER CEPAT & SINGKAT */
+        .welcome-content {
+            display: flex;
+            align-items: center;
+            opacity: 0;
+            transform: translateX(-150px);
+            transition: all 0.25s cubic-bezier(0.1, 0.9, 0.2, 1);
+        }
+
+        .welcome-content.show {
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+        /* KUCING SUPER BESAR */
+        .meong-avatar {
+            width: 320px; 
+            height: 320px;
+            object-fit: contain;
+            filter: drop-shadow(0 10px 20px rgba(0,0,0,0.5));
+            z-index: 2;
+        }
+
+        .text-content {
+            display: flex;
+            flex-direction: column;
+            /* JARAK MEPET: Dibuat minus agar mendekat ke gambar */
+            margin-left: -20px; 
+            z-index: 1;
+        }
+
+        .user-name {
+            color: #ffffff;
+            font-size: 34px; 
+            font-weight: 800;
+            margin: 0;
+            text-transform: capitalize;
+            text-shadow: 2px 4px 10px rgba(0,0,0,1);
+            line-height: 0.9;
+        }
+
+        .welcome-text {
+            color: #ffffff;
+            font-size: 22px;
+            font-weight: 400;
+            margin-top: 0px;
+            text-transform: lowercase;
+            text-shadow: 2px 2px 8px rgba(0,0,0,1);
+        }
+    </style>
+</head>
+<body>
+
+    <div id="output"></div>
+    <audio id="swoosh-sound" preload="auto"></audio>
+
+    <script>
+        const urlParams = new URLSearchParams(window.location.search);
+        const sessionID = urlParams.get('session') || urlParams.get('room') || 'TESTROOM';
+        const password = urlParams.get('password') || "false";
+
+        const soundFile = "swoosh.mp3"; 
+        const catFile = "meong.png"; 
+
+        let chatQueue = [];
+        let isShowing = false;
+        const greetedUsers = new Set();
+
+        function playSwoosh() {
+            const audio = document.getElementById('swoosh-sound');
+            audio.src = soundFile;
+            audio.volume = 1.0;
+            audio.play().catch(e => console.log("Klik Interact di OBS"));
+        }
+
+        function connectToNinja() {
+            const iframe = document.createElement("iframe");
+            iframe.src = `https://vdo.socialstream.ninja/?ln&password=${password}&notmobile&salt=vdo.ninja&label=overlay&exclude=${sessionID}&scene&novideo&noaudio&cleanoutput&room=${sessionID}`;
+            iframe.style.display = "none";
+            document.body.appendChild(iframe);
+
+            window.addEventListener("message", function (e) {
+                if (e.source != iframe.contentWindow) return;
+                if (e.data && e.data.dataReceived && e.data.dataReceived.overlayNinja) {
+                    let res = e.data.dataReceived.overlayNinja;
+                    let name = res.chatname || res.chatname_clean;
+                    if (name && !greetedUsers.has(name)) {
+                        greetedUsers.add(name);
+                        chatQueue.push(name);
+                        processQueue();
+                    }
+                }
+            });
+        }
+
+        function processQueue() {
+            if (isShowing || chatQueue.length === 0) return;
+            isShowing = true;
+            render(chatQueue.shift());
+        }
+
+        function render(userName) {
+            const output = document.getElementById('output');
+
+            output.innerHTML = `
+                <div class="welcome-content">
+                    <img src="${catFile}" class="meong-avatar">
+                    <div class="text-content">
+                        <div class="user-name">${userName}</div>
+                        <div class="welcome-text">welcome</div>
+                    </div>
+                </div>
+            `;
+            
+            const content = document.querySelector('.welcome-content');
+            
+            // Suara dan animasi barengan tanpa delay (Swoosh!)
+            playSwoosh();
+            setTimeout(() => {
+                if(content) content.classList.add('show');
+            }, 10);
+
+            setTimeout(() => {
+                if(content) {
+                    content.style.transition = "all 0.3s ease-in";
+                    content.style.transform = "translateX(200px)";
+                    content.style.opacity = "0";
+                }
+                setTimeout(() => {
+                    output.innerHTML = '';
+                    isShowing = false;
+                    processQueue();
+                }, 400);
+            }, 8000);
+        }
+
+        window.onload = connectToNinja;
+    </script>
+</body>
+</html>
