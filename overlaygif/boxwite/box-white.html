@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Webdev Broadcast - Fireworks Sultan Edition</title>
+    <style>
+        :root {
+            --card-width: 450px; 
+            --gold: #ffffff;
+        }
+
+        body { 
+            background: transparent; 
+            font-family: 'Inter', Arial, sans-serif; 
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            width: 100vw;
+            height: 100vh;
+        }
+
+        /* CONTAINER KARTU */
+        #main-display {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            padding-left: 50px;
+            z-index: 5;
+        }
+
+        /* KANVAS PETASAN */
+        #fireworksCanvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 99;
+        }
+
+        .gift-card {
+            display: flex;
+            flex-direction: column;
+            width: var(--card-width);
+            box-sizing: border-box;
+            filter: drop-shadow(0 25px 50px rgba(0,0,0,0.8));
+        }
+
+        .avatar-header {
+            width: 100%;
+            height: 400px; 
+            border-radius: 25px 25px 0 0; 
+            border: 5px solid var(--gold);
+            border-bottom: none;
+            overflow: hidden;
+            position: relative;
+            background: #000;
+        }
+
+        .avatar-header img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover; 
+            display: block;
+        }
+
+        .username-label {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: var(--gold);
+            color: #000 !important;
+            padding: 6px 18px;
+            font-weight: 900;
+            font-size: 20px;
+            border-radius: 10px;
+            text-transform: uppercase;
+            z-index: 10;
+        }
+
+        .message-body {
+            width: 100%;
+            height: 160px; 
+            background: #000;
+            border: 5px solid var(--gold);
+            border-radius: 0 0 25px 25px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        @keyframes heartBeat {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.08); }
+            100% { transform: scale(1); }
+        }
+
+        .thanks-text {
+            font-size: 34px;
+            font-weight: 900;
+            color: #ffffff;
+            text-transform: uppercase;
+            margin: 0;
+            animation: heartBeat 1.2s infinite ease-in-out;
+        }
+
+        .gift-info {
+            font-size: 28px;
+            color: var(--gold);
+            font-weight: 700;
+            margin-top: 5px;
+        }
+
+        .message-wrapper {
+            opacity: 0;
+            transform: scale(0.9) translateY(40px);
+            transition: all 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        .message-wrapper.show {
+            opacity: 1;
+            transform: scale(1) translateY(0);
+        }
+    </style>
+</head>
+<body>
+
+    <div id="main-display">
+        <div id="output"></div>
+    </div>
+    <canvas id="fireworksCanvas"></canvas>
+    
+    <audio id="tts-audio" style="display:none;"></audio>
+
+    <script>
+        const urlParams = new URLSearchParams(window.location.search);
+        
+        // 1. LOGIKA NAMA OWNER OTOMATIS
+        const ownerName = urlParams.get('name') || "Webdev Broadcast";
+        
+        const roomID = urlParams.get('session') || urlParams.get('room') || 'TESTROOM';
+        const password = urlParams.get('password') || "false";
+
+        let giftQueue = [];
+        let isShowing = false;
+        const displayDuration = 12000;
+
+        // --- SISTEM SUARA ---
+        function playGoogleTTS(text) {
+            const audio = document.getElementById('tts-audio');
+            const url = `https://translate.google.com/translate_tts?ie=UTF-8&q=${encodeURIComponent(text)}&tl=id&client=tw-ob`;
+            audio.src = url;
+            audio.playbackRate = 1.25; 
+            audio.play().catch(e => console.log("Klik 'Interact' di OBS dulu!"));
+        }
+
+        // --- SISTEM KEMBANG API ---
+        const canvas = document.getElementById('fireworksCanvas');
+        const ctx = canvas.getContext('2d');
+        let particles = [];
+
+        function resize() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resize);
+        resize();
+
+        class Particle {
+            constructor(x, y, color) {
+                this.x = x; this.y = y; this.color = color;
+                this.velocity = {
+                    x: (Math.random() - 0.5) * 15,
+                    y: (Math.random() - 0.5) * 15
+                };
+                this.alpha = 1;
+                this.friction = 0.95;
+            }
+            draw() {
+                ctx.save();
+                ctx.globalAlpha = this.alpha;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, 3, 0, Math.PI * 2);
+                ctx.fillStyle = this.color;
+                ctx.shadowBlur = 15;
+                ctx.shadowColor = this.color;
+                ctx.fill();
+                ctx.restore();
+            }
+            update() {
+                this.velocity.x *= this.friction;
+                this.velocity.y *= this.friction;
+                this.x += this.velocity.x;
+                this.y += this.velocity.y;
+                this.alpha -= 0.015;
+            }
+        }
+
+        function createFirework() {
+            const x = 70 + Math.random() * 400; 
+            const y = window.innerHeight / 2 + (Math.random() - 0.5) * 300;
+            const colors = ['#ffd700', '#ffffff', '#ff3300', '#ffec00'];
+            const color = colors[Math.floor(Math.random() * colors.length)];
+            for (let i = 0; i < 35; i++) {
+                particles.push(new Particle(x, y, color));
+            }
+        }
+
+        function animateFireworks() {
+            if (!isShowing && particles.length === 0) {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                return;
+            }
+            requestAnimationFrame(animateFireworks);
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            particles.forEach((p, i) => {
+                if (p.alpha <= 0) particles.splice(i, 1);
+                else { p.update(); p.draw(); }
+            });
+        }
+
+        // --- SISTEM DATA ---
+        function createIframe() {
+            var iframe = document.createElement("iframe");
+            iframe.src = "https://vdo.socialstream.ninja/?ln&password=" + password + "&notmobile&salt=vdo.ninja&label=overlay&exclude=" + roomID + "&scene&novideo&noaudio&cleanoutput&room=" + roomID;
+            iframe.style.width = "0px"; iframe.style.height = "0px"; iframe.style.position = "fixed";
+            document.body.appendChild(iframe);
+
+            window.addEventListener("message", function (e) {
+                if (e.source != iframe.contentWindow) return;
+                if (e.data && e.data.dataReceived && e.data.dataReceived.overlayNinja) {
+                    let res = e.data.dataReceived.overlayNinja;
+                    if (res.hasDonation || (res.chatmessage && res.chatmessage.toLowerCase().includes("sent"))) {
+                        giftQueue.push(res);
+                        processQueue();
+                    }
+                }
+            });
+        }
+
+        function processQueue() {
+            if (isShowing || giftQueue.length === 0) return;
+            isShowing = true;
+            renderGift(giftQueue.shift());
+            
+            animateFireworks();
+            let fireworkInterval = setInterval(() => {
+                if(isShowing) createFirework();
+                else clearInterval(fireworkInterval);
+            }, 500);
+        }
+
+        function renderGift(content) {
+            const output = document.getElementById('output');
+            const senderName = content.chatname || 'User';
+            const gift = content.hasDonation || "NEW GIFT!";
+            
+            // Susun kalimat asisten dinamis
+            const intro = `Saya adalah asisten ${ownerName}. `;
+            const speechText = `${intro} ${senderName} telah mengirim donasi gifnya ${gift}. Terima kasih sudah mampir ya!`;
+
+            output.innerHTML = `
+                <div class="message-wrapper">
+                    <div class="gift-card">
+                        <div class="avatar-header">
+                            <div class="username-label">${senderName}</div>
+                            <img src="${content.chatimg || 'https://via.placeholder.com/400'}" onerror="this.src='https://via.placeholder.com/400'">
+                        </div>
+                        <div class="message-body">
+                            <div class="thanks-text">THANK YOU!</div>
+                            <div class="gift-info">${gift}</div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            const wrapper = output.querySelector('.message-wrapper');
+            setTimeout(() => {
+                wrapper.classList.add('show');
+                playGoogleTTS(speechText); // Suara jalan pas kartu muncul
+            }, 100);
+
+            setTimeout(() => {
+                wrapper.classList.remove('show');
+                setTimeout(() => {
+                    output.innerHTML = '';
+                    isShowing = false;
+                    processQueue();
+                }, 600);
+            }, displayDuration);
+        }
+        
+        window.onload = createIframe;
+    </script>
+</body>
+</html>

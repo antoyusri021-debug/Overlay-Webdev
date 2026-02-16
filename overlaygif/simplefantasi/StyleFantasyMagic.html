@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Webdev Broadcast - Pro Assistant Multi-User</title>
+    <style>
+        /* STYLE TETAP MINIMALIS KECE SESUAI REQUEST */
+        :root {
+            --accent: #ffffff; 
+            --bg-dark: rgba(10, 10, 10, 0.98);
+            --text-main: #ffffff;
+        }
+
+        body { 
+            background: transparent; 
+            font-family: 'Inter', 'Segoe UI', sans-serif; 
+            margin: 0;
+            overflow: hidden;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+        }
+
+        #main-display { padding-left: 30px; }
+
+        .pro-card {
+            display: flex;
+            align-items: center;
+            background: var(--bg-dark);
+            min-width: 350px;
+            padding: 15px 25px;
+            border-radius: 12px;
+            border-left: 6px solid var(--accent);
+            box-shadow: 0 15px 40px rgba(0,0,0,0.8);
+            backdrop-filter: blur(5px);
+        }
+
+        .avatar-pro {
+            width: 65px;
+            height: 65px;
+            border-radius: 8px;
+            object-fit: cover;
+            margin-right: 18px;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .content-pro { display: flex; flex-direction: column; }
+        .name-pro { color: var(--accent); font-size: 17px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 2px; }
+        .thanks-pro { color: var(--text-main); font-size: 21px; font-weight: 400; margin: 0; line-height: 1.2; }
+        .gift-pro { color: rgba(255,255,255,0.5); font-size: 15px; font-weight: 600; margin-top: 5px; }
+
+        .message-wrapper {
+            opacity: 0;
+            transform: translateX(-40px);
+            transition: all 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+        }
+
+        .message-wrapper.show {
+            opacity: 1;
+            transform: translateX(0);
+        }
+    </style>
+</head>
+<body>
+
+    <div id="main-display">
+        <div id="output"></div>
+    </div>
+    
+    <audio id="tts-audio" style="display:none;"></audio>
+
+    <script>
+        // --- LOGIKA OTOMATISASI UNTUK JUALAN ---
+        const urlParams = new URLSearchParams(window.location.search);
+        
+        // 1. Ambil Nama Owner dari URL (?name=NAMA_PEMBELI)
+        // Kalau tidak diisi, defaultnya "Webdev Broadcast"
+        const ownerName = urlParams.get('name') || "Webdev Broadcast";
+        
+        const roomID = urlParams.get('room') || urlParams.get('session') || 'TESTROOM';
+        const password = urlParams.get('password') || "false";
+
+        let giftQueue = [];
+        let isShowing = false;
+        const displayDuration = 9000;
+
+        const keceQuotes = [
+            "Respect for the support!",
+            "You're amazing, thanks!",
+            "Sultan mah bebas, mantap!",
+            "Auto makin semangat nih!",
+            "The real support, thanks!",
+            "Kece parah, makasih ya!"
+        ];
+
+        function playGoogleTTS(text) {
+            const audio = document.getElementById('tts-audio');
+            const url = `https://translate.google.com/translate_tts?ie=UTF-8&q=${encodeURIComponent(text)}&tl=id&client=tw-ob`;
+            audio.src = url;
+            audio.playbackRate = 1.25;
+            audio.play().catch(e => console.log("Klik Interact di OBS!"));
+        }
+
+        function connectToNinja() {
+            var iframe = document.createElement("iframe");
+            iframe.src = "https://vdo.socialstream.ninja/?ln&password=" + password + "&notmobile&salt=vdo.ninja&label=overlay&exclude=" + roomID + "&scene&novideo&noaudio&cleanoutput&room=" + roomID;
+            iframe.style.width = "0px"; iframe.style.height = "0px"; iframe.style.position = "fixed"; iframe.style.visibility = "hidden";
+            document.body.appendChild(iframe);
+
+            window.addEventListener("message", function (e) {
+                if (e.source != iframe.contentWindow) return;
+                if (e.data && e.data.dataReceived && e.data.dataReceived.overlayNinja) {
+                    let res = e.data.dataReceived.overlayNinja;
+                    if (res.hasDonation || (res.chatmessage && res.chatmessage.toLowerCase().includes("sent"))) {
+                        giftQueue.push(res);
+                        processQueue();
+                    }
+                }
+            });
+        }
+
+        function processQueue() {
+            if (isShowing || giftQueue.length === 0) return;
+            isShowing = true;
+            renderPro(giftQueue.shift());
+        }
+
+        function renderPro(content) {
+            const output = document.getElementById('output');
+            const randomQuote = keceQuotes[Math.floor(Math.random() * keceQuotes.length)];
+            const senderName = content.chatname || 'Supporter';
+            const gift = content.hasDonation || "Awesome Gift";
+            
+            // SEBUTKAN NAMA OWNER SECARA DINAMIS
+            const intro = `Saya adalah asisten ${ownerName}. `;
+            const fullTeksBicara = `${intro} ${senderName} telah mengirim donasi gifnya ${gift}. Terima kasih sudah mampir ya!`;
+
+            output.innerHTML = `
+                <div class="message-wrapper">
+                    <div class="pro-card">
+                        <img class="avatar-pro" src="${content.chatimg || 'https://via.placeholder.com/100'}" onerror="this.src='https://via.placeholder.com/100'">
+                        <div class="content-pro">
+                            <span class="name-pro">${senderName}</span>
+                            <span class="thanks-pro">${randomQuote}</span>
+                            <span class="gift-pro">Sent: ${gift}</span>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            const wrapper = output.querySelector('.message-wrapper');
+            setTimeout(() => {
+                wrapper.classList.add('show');
+                playGoogleTTS(fullTeksBicara);
+            }, 100);
+
+            setTimeout(() => {
+                wrapper.classList.remove('show');
+                setTimeout(() => {
+                    output.innerHTML = '';
+                    isShowing = false;
+                    processQueue();
+                }, 800);
+            }, displayDuration);
+        }
+
+        window.onload = () => { connectToNinja(); };
+    </script>
+</body>
+</html>

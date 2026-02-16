@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Webdev Broadcast - Assistant White Edition (Dinamis)</title>
+    <style>
+        :root {
+            --accent: #ffffff; 
+            --glass: rgba(10, 10, 15, 0.95);
+            --text-gray: rgba(255, 255, 255, 0.7);
+        }
+
+        body { 
+            background: transparent; 
+            font-family: 'Poppins', sans-serif; 
+            margin: 0;
+            overflow: hidden;
+            height: 100vh;
+            display: flex;
+            justify-content: center; 
+            align-items: center;     
+        }
+
+        .spotlight-wrapper {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            width: 450px;
+            padding: 40px;
+            background: var(--glass);
+            border-radius: 40px;
+            border: 2px solid var(--accent);
+            box-shadow: 0 0 30px rgba(255, 255, 255, 0.2), inset 0 0 15px rgba(255, 255, 255, 0.1);
+            opacity: 0;
+            transform: scale(0.7);
+            transition: all 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            backdrop-filter: blur(10px);
+        }
+
+        .spotlight-wrapper.show {
+            opacity: 1;
+            transform: scale(1);
+        }
+
+        .avatar-spotlight {
+            width: 170px;
+            height: 170px;
+            border-radius: 50%;
+            border: 4px solid var(--accent);
+            margin-bottom: 25px;
+            object-fit: cover;
+            box-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
+        }
+
+        .user-name { 
+            color: var(--accent); 
+            font-weight: 800; 
+            font-size: 28px; 
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .action-text { 
+            color: var(--text-gray); 
+            font-size: 18px; 
+            font-weight: 300; 
+            margin: 5px 0; 
+        }
+
+        .gift-info { 
+            color: white; 
+            font-size: 36px; 
+            font-weight: 900; 
+            margin: 10px 0; 
+            text-shadow: 0 0 15px rgba(255, 255, 255, 0.5);
+        }
+
+        .thanks-note { 
+            color: var(--accent); 
+            font-size: 19px; 
+            font-style: italic; 
+            margin-top: 15px; 
+            border-top: 1px solid rgba(255, 255, 255, 0.2); 
+            padding-top: 15px; 
+            width: 100%; 
+        }
+
+        .branding-badge {
+            background: var(--accent);
+            color: black;
+            font-size: 11px;
+            font-weight: 900;
+            padding: 5px 15px;
+            border-radius: 20px;
+            margin-bottom: 15px;
+            text-transform: uppercase;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="output"></div>
+    <audio id="tts-audio" style="display:none;"></audio>
+
+    <script>
+        const urlParams = new URLSearchParams(window.location.search);
+        
+        // --- LOGIKA DINAMIS ---
+        // Mengambil nama owner dari URL (&name=...)
+        const ownerName = urlParams.get('name') || "Webdev Broadcast";
+        
+        const roomID = urlParams.get('room') || urlParams.get('session') || 'TESTROOM';
+        const password = urlParams.get('password') || "false";
+
+        let giftQueue = [];
+        let isShowing = false;
+
+        function playGoogleTTS(text) {
+            const audio = document.getElementById('tts-audio');
+            const url = `https://translate.google.com/translate_tts?ie=UTF-8&q=${encodeURIComponent(text)}&tl=id&client=tw-ob`;
+            audio.src = url;
+            audio.playbackRate = 1.25; 
+            audio.play().catch(e => console.log("Klik 'Interact' di OBS dulu!"));
+        }
+
+        function connectToNinja() {
+            var iframe = document.createElement("iframe");
+            iframe.src = "https://vdo.socialstream.ninja/?ln&password=" + password + "&notmobile&salt=vdo.ninja&label=overlay&exclude=" + roomID + "&scene&novideo&noaudio&cleanoutput&room=" + roomID;
+            iframe.style.width = "0px"; iframe.style.height = "0px"; iframe.style.position = "fixed";
+            document.body.appendChild(iframe);
+
+            window.addEventListener("message", function (e) {
+                if (e.source != iframe.contentWindow) return;
+                if (e.data && e.data.dataReceived && e.data.dataReceived.overlayNinja) {
+                    let res = e.data.dataReceived.overlayNinja;
+                    if (res.hasDonation || (res.chatmessage && res.chatmessage.toLowerCase().includes("sent"))) {
+                        giftQueue.push(res);
+                        processQueue();
+                    }
+                }
+            });
+        }
+
+        function processQueue() {
+            if (isShowing || giftQueue.length === 0) return;
+            isShowing = true;
+            renderSpotlight(giftQueue.shift());
+        }
+
+        function renderSpotlight(content) {
+            const output = document.getElementById('output');
+            const name = content.chatname || 'Kakak';
+            const gift = content.hasDonation || "Hadiah";
+            const closingMsg = "Terima kasih sudah mampir ya!";
+            
+            // Menggunakan ownerName yang diambil dari URL
+            const intro = `Saya adalah robot asisten ${ownerName}. `;
+            const fullTeksBicara = `${intro} ${name} telah mengirim donasi gifnya ${gift}. ${closingMsg}`;
+
+            output.innerHTML = `
+                <div class="spotlight-wrapper">
+                    <div class="branding-badge">Webdev Broadcast Assistant</div>
+                    <img class="avatar-spotlight" src="${content.chatimg || 'https://via.placeholder.com/170'}" onerror="this.src='https://via.placeholder.com/170'">
+                    <div class="user-name">${name}</div>
+                    <div class="action-text">Telah Mengirim Donasi</div>
+                    <div class="gift-info">${gift}</div>
+                    <div class="thanks-note">"${closingMsg} 🔥"</div>
+                </div>
+            `;
+            
+            const wrapper = output.querySelector('.spotlight-wrapper');
+            setTimeout(() => {
+                wrapper.classList.add('show');
+                playGoogleTTS(fullTeksBicara); 
+            }, 100);
+
+            setTimeout(() => {
+                wrapper.classList.remove('show');
+                setTimeout(() => {
+                    output.innerHTML = '';
+                    isShowing = false;
+                    processQueue();
+                }, 700);
+            }, 10500); 
+        }
+
+        window.onload = connectToNinja;
+    </script>
+</body>
+</html>
