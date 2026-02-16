@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="id">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -68,16 +68,10 @@
         <div id="output"></div>
     </div>
     
-    <audio id="tts-audio" style="display:none;"></audio>
-
     <script>
-        // --- LOGIKA OTOMATISASI UNTUK JUALAN ---
+        // --- LOGIKA OTOMATISASI ---
         const urlParams = new URLSearchParams(window.location.search);
-        
-        // 1. Ambil Nama Owner dari URL (?name=NAMA_PEMBELI)
-        // Kalau tidak diisi, defaultnya "Webdev Broadcast"
         const ownerName = urlParams.get('name') || "Webdev Broadcast";
-        
         const roomID = urlParams.get('room') || urlParams.get('session') || 'TESTROOM';
         const password = urlParams.get('password') || "false";
 
@@ -94,13 +88,36 @@
             "Kece parah, makasih ya!"
         ];
 
-        function playGoogleTTS(text) {
-            const audio = document.getElementById('tts-audio');
-            const url = `https://translate.google.com/translate_tts?ie=UTF-8&q=${encodeURIComponent(text)}&tl=id&client=tw-ob`;
-            audio.src = url;
-            audio.playbackRate = 1.25;
-            audio.play().catch(e => console.log("Klik Interact di OBS!"));
+        // --- SISTEM SUARA NATIVE (FIX UNTUK OBS) ---
+        function playSpeech(text) {
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.cancel(); // Reset suara biar gak tumpang tindih
+                const utterance = new SpeechSynthesisUtterance(text);
+                
+                // Ambil daftar suara
+                let voices = window.speechSynthesis.getVoices();
+                
+                // Cari suara wanita Indonesia (Gadis)
+                let selectedVoice = voices.find(v => v.name.includes('Gadis')) || 
+                                    voices.find(v => v.lang === 'id-ID');
+
+                if (selectedVoice) {
+                    utterance.voice = selectedVoice;
+                }
+
+                utterance.lang = 'id-ID';
+                utterance.rate = 1.1;     
+                utterance.pitch = 1.0;    
+                utterance.volume = 1.0;   
+
+                window.speechSynthesis.speak(utterance);
+            }
         }
+
+        // Pastikan suara ter-load sempurna
+        window.speechSynthesis.onvoiceschanged = () => {
+            window.speechSynthesis.getVoices();
+        };
 
         function connectToNinja() {
             var iframe = document.createElement("iframe");
@@ -132,9 +149,9 @@
             const senderName = content.chatname || 'Supporter';
             const gift = content.hasDonation || "Awesome Gift";
             
-            // SEBUTKAN NAMA OWNER SECARA DINAMIS
-            const intro = `Saya adalah asisten ${ownerName}. `;
-            const fullTeksBicara = `${intro} ${senderName} telah mengirim donasi gifnya ${gift}. Terima kasih sudah mampir ya!`;
+            // Kalimat bicara robot
+            const intro = `Halo, saya asisten ${ownerName}. `;
+            const fullTeksBicara = `${intro} ${senderName} telah mengirim donasi ${gift}. Terima kasih sudah mampir ya!`;
 
             output.innerHTML = `
                 <div class="message-wrapper">
@@ -152,7 +169,7 @@
             const wrapper = output.querySelector('.message-wrapper');
             setTimeout(() => {
                 wrapper.classList.add('show');
-                playGoogleTTS(fullTeksBicara);
+                playSpeech(fullTeksBicara); // Panggil fungsi suara baru
             }, 100);
 
             setTimeout(() => {
