@@ -1,218 +1,164 @@
 <!DOCTYPE html>
-<html lang="id">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Black Cat Join Overlay - Full Fix</title>
+    <title>Clean First Chat Overlay</title>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;700;800&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;800&display=swap');
 
-        body {
-            background: transparent !important;
+        body { 
+            background: transparent; 
             margin: 0;
-            font-family: 'Poppins', sans-serif;
             overflow: hidden;
             height: 100vh;
-            width: 100vw;
-        }
-
-        #container {
             display: flex;
-            padding: 20px;
-            flex-direction: column;
-            align-items: flex-start;
-            width: 100%;
-            height: 100%;
-            box-sizing: border-box;
+            justify-content: flex-start; 
+            align-items: center;     
+            padding-left: 40px;
+            font-family: 'Poppins', sans-serif;
         }
 
-        .notification-card {
-            width: 450px;
-            height: 120px;
+        .welcome-content {
             display: flex;
             align-items: center;
-            position: relative;
-            animation: fadeIn 0.4s ease-out forwards;
-            margin-bottom: 15px;
-        }
-
-        .content-area {
-            background: rgba(20, 20, 20, 0.95);
-            backdrop-filter: blur(20px);
-            width: 320px; 
-            height: 90px;
-            padding: 10px 15px 10px 50px;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            border-radius: 20px;
-            border: 0.5px solid rgba(255, 255, 255, 0.1);
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
-            z-index: 2;
-            margin-left: 60px;
-            box-sizing: border-box;
-            overflow: hidden;
-        }
-
-        .username {
-            font-size: 14px;
-            font-weight: 800;
-            color: #00ff44;
-            text-transform: uppercase;
-            margin-bottom: 2px;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-
-        .message {
-            font-size: 16px;
-            color: #ff00ff;
-            font-weight: bold;
-            line-height: 1.3;
-            text-shadow: 0 0 10px rgba(255, 0, 255, 0.5);
-        }
-
-        .cat-avatar-wrapper {
-            position: absolute;
-            left: 0;
-            width: 130px;
-            height: 130px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 10;
-        }
-
-        .meong-frame {
-            width: 100%;
-            height: 100%;
-            object-fit: contain;
-        }
-
-        .user-photo {
-            position: absolute;
-            width: 60px;
-            height: 60px;
-            border-radius: 50%;
-            object-fit: cover;
-            z-index: -1;
-            border: 2px solid #00ff44;
-            animation: slideFromBehind 0.8s cubic-bezier(0.165, 0.84, 0.44, 1) 0.3s forwards;
             opacity: 0;
+            transform: translateY(30px); /* Muncul dari bawah sedikit */
+            transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
 
-        @keyframes fadeIn {
-            0% { opacity: 0; transform: translateX(-30px); }
-            100% { opacity: 1; transform: translateX(0); }
+        .welcome-content.show {
+            opacity: 1;
+            transform: translateY(0);
         }
 
-        @keyframes slideFromBehind {
-            0% { transform: scale(0.5) translateX(0); opacity: 0; }
-            100% { transform: scale(1) translateX(-5px); opacity: 1; }
+        .meong-avatar {
+            width: 280px; 
+            height: 280px;
+            object-fit: contain;
+            /* Shadow supaya gambar kucingnya tetap "pop out" tanpa box */
+            filter: drop-shadow(0 10px 15px rgba(0,0,0,0.5));
+            z-index: 2;
         }
 
-        .fade-out {
-            animation: fadeOut 0.5s ease-in forwards !important;
+        .text-content {
+            display: flex;
+            flex-direction: column;
+            margin-left: -15px; 
+            z-index: 1;
         }
 
-        @keyframes fadeOut {
-            to { opacity: 0; transform: scale(0.9) translateX(30px); }
+        .user-name {
+            color: #ffffff;
+            font-size: 45px; /* Lebih besar karena tidak ada box */
+            font-weight: 800;
+            margin: 0;
+            text-transform: capitalize;
+            /* Stroke/Garis pinggir teks agar terbaca di background terang */
+            text-shadow: 3px 3px 0px #000, 
+                         -1px -1px 0px #000,  
+                          1px -1px 0px #000,
+                         -1px  1px 0px #000,
+                          1px  1px 0px #000;
+            line-height: 1;
+        }
+
+        .welcome-text {
+            color: #FFD700; /* Warna kuning emas */
+            font-size: 26px;
+            font-weight: 400;
+            margin-top: 5px;
+            text-transform: lowercase;
+            text-shadow: 2px 2px 4px rgba(0,0,0,1);
         }
     </style>
 </head>
 <body>
-    <div id="container"></div>
+
+    <div id="output"></div>
     <audio id="swoosh-sound" preload="auto"></audio>
 
     <script>
         const urlParams = new URLSearchParams(window.location.search);
-        const roomID = urlParams.get('room') || urlParams.get('session') || 'ROOM_TIDAK_TERDETEKSI';
+        const sessionID = urlParams.get('session') || urlParams.get('room') || 'TESTROOM';
         const password = urlParams.get('password') || "false";
-        
-        const soundFile = "swoosh.mp3";
-        const catFile = "meong.png";
-        const container = document.getElementById('container');
-        let isProcessing = false;
-        let queue = [];
 
-        console.log("Overlay Ready! Room ID:", roomID);
+        const soundFile = "swoosh.mp3"; 
+        const catFile = "meong.png"; 
 
-        function playAnnounce(userName) {
+        let chatQueue = [];
+        let isShowing = false;
+        const hasGreeted = new Set();
+
+        function playSwoosh() {
             const audio = document.getElementById('swoosh-sound');
             audio.src = soundFile;
             audio.volume = 0.6;
-            
-            audio.play().then(() => {
-                setTimeout(() => {
-                    const speech = new SpeechSynthesisUtterance(`Halo ${userName}, selamat bergabung!`);
-                    let voices = window.speechSynthesis.getVoices();
-                    let selectedVoice = voices.find(v => v.name.includes('Gadis')) || voices.find(v => v.lang.includes('id-ID'));
-                    if (selectedVoice) speech.voice = selectedVoice;
-                    speech.lang = 'id-ID';
-                    speech.rate = 1.2;
-                    window.speechSynthesis.speak(speech);
-                }, 400);
-            }).catch(err => console.warn("Audio butuh Interact!"));
+            audio.play().catch(e => console.log("Interaksi OBS diperlukan"));
         }
 
-        window.speechSynthesis.onvoiceschanged = () => window.speechSynthesis.getVoices();
-
-        function createIframe() {
+        function connectToNinja() {
             const iframe = document.createElement("iframe");
-            iframe.src = `https://vdo.socialstream.ninja/?ln&password=${password}&notmobile&salt=vdo.ninja&label=overlay&exclude=${roomID}&scene&novideo&noaudio&cleanoutput&includeavatars&events=1&room=${roomID}`;
+            iframe.src = `https://vdo.socialstream.ninja/?ln&password=${password}&notmobile&salt=vdo.ninja&label=overlay&exclude=${sessionID}&scene&novideo&noaudio&cleanoutput&chat=1&room=${sessionID}`;
             iframe.style.display = "none";
             document.body.appendChild(iframe);
 
             window.addEventListener("message", function (e) {
-                // Log untuk debug di console
-                const data = e.data.dataReceived?.overlayNinja;
-                
-                if (data && data.event && data.event.type === 'join') {
-                    console.log("Berhasil tangkap Join event:", data.event.name);
-                    queue.push({
-                        name: data.event.name || "User Baru",
-                        msg: "Joined the Live! 👋",
-                        img: data.event.avatar || `https://api.dicebear.com/7.x/initials/svg?seed=${data.event.name}`
-                    });
-                    if (!isProcessing) processQueue();
+                if (e.source != iframe.contentWindow) return;
+                if (e.data && e.data.dataReceived && e.data.dataReceived.overlayNinja) {
+                    let res = e.data.dataReceived.overlayNinja;
+                    let name = res.chatname || res.chatname_clean;
+                    
+                    if (name && !hasGreeted.has(name.toLowerCase())) {
+                        if (name.toLowerCase() !== "vdo.ninja") {
+                            hasGreeted.add(name.toLowerCase());
+                            chatQueue.push(name);
+                            if (!isShowing) processQueue();
+                        }
+                    }
                 }
             });
         }
 
         function processQueue() {
-            if (isProcessing || queue.length === 0) return;
-            isProcessing = true;
-            
-            const item = queue.shift();
-            const card = document.createElement('div');
-            card.className = 'notification-card';
-
-            card.innerHTML = `
-                <div class="cat-avatar-wrapper">
-                    <img src="${catFile}" class="meong-frame">
-                    <img src="${item.img}" class="user-photo">
-                </div>
-                <div class="content-area">
-                    <div class="username">${item.name}</div>
-                    <div class="message">${item.msg}</div>
-                </div>
-            `;
-
-            container.appendChild(card);
-            playAnnounce(item.name);
-
-            setTimeout(() => {
-                card.classList.add('fade-out');
-                setTimeout(() => {
-                    card.remove();
-                    isProcessing = false;
-                    processQueue();
-                }, 500);
-            }, 5000);
+            if (isShowing || chatQueue.length === 0) return;
+            isShowing = true;
+            render(chatQueue.shift());
         }
 
-        window.onload = createIframe;
+        function render(userName) {
+            const output = document.getElementById('output');
+            output.innerHTML = `
+                <div class="welcome-content">
+                    <img src="${catFile}" class="meong-avatar">
+                    <div class="text-content">
+                        <div class="user-name">${userName}</div>
+                        <div class="welcome-text">welcome</div>
+                    </div>
+                </div>
+            `;
+            
+            const content = document.querySelector('.welcome-content');
+            playSwoosh();
+            
+            setTimeout(() => { if(content) content.classList.add('show'); }, 100);
+
+            // Tampil 5 detik lalu hilang
+            setTimeout(() => {
+                if(content) {
+                    content.style.opacity = "0";
+                    content.style.transform = "scale(0.8)"; /* Efek mengecil saat hilang */
+                    content.style.transition = "all 0.4s ease-in";
+                }
+                setTimeout(() => {
+                    output.innerHTML = '';
+                    isShowing = false;
+                    processQueue();
+                }, 500);
+            }, 5000); 
+        }
+
+        window.onload = connectToNinja;
     </script>
 </body>
 </html>
