@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Webdev Broadcast - Assistant Sound Fix Edition</title>
+    <title>Webdev Broadcast - Assistant Indo Voice Fix</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;800;900&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -113,23 +113,38 @@
         let giftQueue = [];
         let isShowing = false;
 
-        // --- FUNGSI SUARA NATIVE (SOLUSI FIX) ---
+        // --- FUNGSI SUARA DENGAN FIX LOGAT INDO ---
         function playSpeech(text) {
             if ('speechSynthesis' in window) {
-                // Batalkan antrean suara sebelumnya agar tidak tumpang tindih
                 window.speechSynthesis.cancel();
 
                 const utterance = new SpeechSynthesisUtterance(text);
-                utterance.lang = 'id-ID'; // Set Bahasa Indonesia
-                utterance.rate = 1.1;     // Kecepatan bicara
-                utterance.pitch = 1.0;    // Nada suara
-                utterance.volume = 1.0;   // Volume maksimal
+                
+                // Ambil daftar suara yang tersedia di sistem
+                let voices = window.speechSynthesis.getVoices();
+                
+                // Cari suara wanita Indonesia (ID-ID)
+                let selectedVoice = voices.find(voice => 
+                    voice.lang.includes('id-ID') || voice.name.toLowerCase().includes('indonesian')
+                );
+
+                if (selectedVoice) {
+                    utterance.voice = selectedVoice;
+                }
+
+                utterance.lang = 'id-ID';
+                utterance.rate = 1.1;     
+                utterance.pitch = 1.0;    
+                utterance.volume = 1.0;   
 
                 window.speechSynthesis.speak(utterance);
-            } else {
-                console.error("Browser tidak mendukung Speech Synthesis!");
             }
         }
+
+        // Memastikan suara ter-load sempurna di browser
+        window.speechSynthesis.onvoiceschanged = () => {
+            console.log("Daftar suara sistem diperbarui.");
+        };
 
         function connectToNinja() {
             var iframe = document.createElement("iframe");
@@ -179,13 +194,11 @@
             
             const wrapper = output.querySelector('.spotlight-wrapper');
             
-            // Munculkan Animasi & Suara
             setTimeout(() => {
                 wrapper.classList.add('show');
                 playSpeech(fullTeksBicara); 
             }, 100);
 
-            // Durasi Tampil (10 detik)
             setTimeout(() => {
                 wrapper.classList.remove('show');
                 setTimeout(() => {
