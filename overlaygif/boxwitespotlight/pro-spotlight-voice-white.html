@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Webdev Broadcast - Assistant White Edition (Dinamis)</title>
+    <title>Webdev Broadcast - Assistant Sound Fix Edition</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;800;900&display=swap" rel="stylesheet">
     <style>
         :root {
             --accent: #ffffff; 
@@ -102,33 +103,40 @@
 <body>
 
     <div id="output"></div>
-    <audio id="tts-audio" style="display:none;"></audio>
 
     <script>
         const urlParams = new URLSearchParams(window.location.search);
-        
-        // --- LOGIKA DINAMIS ---
-        // Mengambil nama owner dari URL (&name=...)
         const ownerName = urlParams.get('name') || "Webdev Broadcast";
-        
         const roomID = urlParams.get('room') || urlParams.get('session') || 'TESTROOM';
         const password = urlParams.get('password') || "false";
 
         let giftQueue = [];
         let isShowing = false;
 
-        function playGoogleTTS(text) {
-            const audio = document.getElementById('tts-audio');
-            const url = `https://translate.google.com/translate_tts?ie=UTF-8&q=${encodeURIComponent(text)}&tl=id&client=tw-ob`;
-            audio.src = url;
-            audio.playbackRate = 1.25; 
-            audio.play().catch(e => console.log("Klik 'Interact' di OBS dulu!"));
+        // --- FUNGSI SUARA NATIVE (SOLUSI FIX) ---
+        function playSpeech(text) {
+            if ('speechSynthesis' in window) {
+                // Batalkan antrean suara sebelumnya agar tidak tumpang tindih
+                window.speechSynthesis.cancel();
+
+                const utterance = new SpeechSynthesisUtterance(text);
+                utterance.lang = 'id-ID'; // Set Bahasa Indonesia
+                utterance.rate = 1.1;     // Kecepatan bicara
+                utterance.pitch = 1.0;    // Nada suara
+                utterance.volume = 1.0;   // Volume maksimal
+
+                window.speechSynthesis.speak(utterance);
+            } else {
+                console.error("Browser tidak mendukung Speech Synthesis!");
+            }
         }
 
         function connectToNinja() {
             var iframe = document.createElement("iframe");
             iframe.src = "https://vdo.socialstream.ninja/?ln&password=" + password + "&notmobile&salt=vdo.ninja&label=overlay&exclude=" + roomID + "&scene&novideo&noaudio&cleanoutput&room=" + roomID;
-            iframe.style.width = "0px"; iframe.style.height = "0px"; iframe.style.position = "fixed";
+            iframe.style.width = "0px"; 
+            iframe.style.height = "0px"; 
+            iframe.style.position = "fixed";
             document.body.appendChild(iframe);
 
             window.addEventListener("message", function (e) {
@@ -153,11 +161,10 @@
             const output = document.getElementById('output');
             const name = content.chatname || 'Kakak';
             const gift = content.hasDonation || "Hadiah";
-            const closingMsg = "Terima kasih sudah mampir ya!";
+            const closingMsg = "Terima kasih banyak ya!";
             
-            // Menggunakan ownerName yang diambil dari URL
             const intro = `Saya adalah robot asisten ${ownerName}. `;
-            const fullTeksBicara = `${intro} ${name} telah mengirim donasi gifnya ${gift}. ${closingMsg}`;
+            const fullTeksBicara = `${intro} ${name} telah mengirim ${gift}. ${closingMsg}`;
 
             output.innerHTML = `
                 <div class="spotlight-wrapper">
@@ -171,11 +178,14 @@
             `;
             
             const wrapper = output.querySelector('.spotlight-wrapper');
+            
+            // Munculkan Animasi & Suara
             setTimeout(() => {
                 wrapper.classList.add('show');
-                playGoogleTTS(fullTeksBicara); 
+                playSpeech(fullTeksBicara); 
             }, 100);
 
+            // Durasi Tampil (10 detik)
             setTimeout(() => {
                 wrapper.classList.remove('show');
                 setTimeout(() => {
@@ -183,7 +193,7 @@
                     isShowing = false;
                     processQueue();
                 }, 700);
-            }, 10500); 
+            }, 10000); 
         }
 
         window.onload = connectToNinja;
