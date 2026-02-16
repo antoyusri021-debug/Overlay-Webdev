@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Black Cat - Join Only Overlay</title>
+    <title>Black Cat Join Overlay - Full Fix</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;700;800&display=swap');
 
@@ -127,7 +127,7 @@
 
     <script>
         const urlParams = new URLSearchParams(window.location.search);
-        const roomID = urlParams.get('session') || urlParams.get('room') || 'TESTROOM';
+        const roomID = urlParams.get('room') || urlParams.get('session') || 'ROOM_TIDAK_TERDETEKSI';
         const password = urlParams.get('password') || "false";
         
         const soundFile = "swoosh.mp3";
@@ -135,6 +135,8 @@
         const container = document.getElementById('container');
         let isProcessing = false;
         let queue = [];
+
+        console.log("Overlay Ready! Room ID:", roomID);
 
         function playAnnounce(userName) {
             const audio = document.getElementById('swoosh-sound');
@@ -146,13 +148,12 @@
                     const speech = new SpeechSynthesisUtterance(`Halo ${userName}, selamat bergabung!`);
                     let voices = window.speechSynthesis.getVoices();
                     let selectedVoice = voices.find(v => v.name.includes('Gadis')) || voices.find(v => v.lang.includes('id-ID'));
-                    
                     if (selectedVoice) speech.voice = selectedVoice;
                     speech.lang = 'id-ID';
                     speech.rate = 1.2;
                     window.speechSynthesis.speak(speech);
                 }, 400);
-            }).catch(e => console.log("Klik Interact di OBS untuk suara!"));
+            }).catch(err => console.warn("Audio butuh Interact!"));
         }
 
         window.speechSynthesis.onvoiceschanged = () => window.speechSynthesis.getVoices();
@@ -164,11 +165,11 @@
             document.body.appendChild(iframe);
 
             window.addEventListener("message", function (e) {
-                if (e.source != iframe.contentWindow) return;
+                // Log untuk debug di console
                 const data = e.data.dataReceived?.overlayNinja;
                 
-                // HANYA JOIN SAJA
                 if (data && data.event && data.event.type === 'join') {
+                    console.log("Berhasil tangkap Join event:", data.event.name);
                     queue.push({
                         name: data.event.name || "User Baru",
                         msg: "Joined the Live! 👋",
