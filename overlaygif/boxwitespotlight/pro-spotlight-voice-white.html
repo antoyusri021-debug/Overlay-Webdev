@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="id">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Webdev Broadcast - Assistant Indo Voice Fix</title>
+    <title>Webdev Assistant - Natural Voice Edition</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;800;900&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -113,20 +113,18 @@
         let giftQueue = [];
         let isShowing = false;
 
-        // --- FUNGSI SUARA DENGAN FIX LOGAT INDO ---
+        // --- FUNGSI SUARA NATURAL (ANTI-MEDOK) ---
         function playSpeech(text) {
             if ('speechSynthesis' in window) {
                 window.speechSynthesis.cancel();
 
                 const utterance = new SpeechSynthesisUtterance(text);
-                
-                // Ambil daftar suara yang tersedia di sistem
                 let voices = window.speechSynthesis.getVoices();
                 
-                // Cari suara wanita Indonesia (ID-ID)
-                let selectedVoice = voices.find(voice => 
-                    voice.lang.includes('id-ID') || voice.name.toLowerCase().includes('indonesian')
-                );
+                // PRIORITAS UTAMA: Mencari suara Wanita (Microsoft Gadis)
+                let selectedVoice = voices.find(v => v.name.includes('Gadis')) || 
+                                    voices.find(v => v.lang === 'id-ID') ||
+                                    voices.find(v => v.lang.includes('id-ID'));
 
                 if (selectedVoice) {
                     utterance.voice = selectedVoice;
@@ -141,17 +139,15 @@
             }
         }
 
-        // Memastikan suara ter-load sempurna di browser
+        // Pancing daftar suara agar siap di OBS
         window.speechSynthesis.onvoiceschanged = () => {
-            console.log("Daftar suara sistem diperbarui.");
+            window.speechSynthesis.getVoices();
         };
 
         function connectToNinja() {
             var iframe = document.createElement("iframe");
             iframe.src = "https://vdo.socialstream.ninja/?ln&password=" + password + "&notmobile&salt=vdo.ninja&label=overlay&exclude=" + roomID + "&scene&novideo&noaudio&cleanoutput&room=" + roomID;
-            iframe.style.width = "0px"; 
-            iframe.style.height = "0px"; 
-            iframe.style.position = "fixed";
+            iframe.style.width = "0px"; iframe.style.height = "0px"; iframe.style.position = "fixed";
             document.body.appendChild(iframe);
 
             window.addEventListener("message", function (e) {
@@ -178,12 +174,12 @@
             const gift = content.hasDonation || "Hadiah";
             const closingMsg = "Terima kasih banyak ya!";
             
-            const intro = `Saya adalah robot asisten ${ownerName}. `;
+            const intro = `Halo, saya asisten ${ownerName}. `;
             const fullTeksBicara = `${intro} ${name} telah mengirim ${gift}. ${closingMsg}`;
 
             output.innerHTML = `
                 <div class="spotlight-wrapper">
-                    <div class="branding-badge">Webdev Broadcast Assistant</div>
+                    <div class="branding-badge">Webdev Assistant</div>
                     <img class="avatar-spotlight" src="${content.chatimg || 'https://via.placeholder.com/170'}" onerror="this.src='https://via.placeholder.com/170'">
                     <div class="user-name">${name}</div>
                     <div class="action-text">Telah Mengirim Donasi</div>
