@@ -3,11 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Floating Avatar - Fixed Final</title>
+    <title>Floating Avatar - Fixed Logic</title>
     <style>
         body { background: transparent !important; margin: 0; font-family: 'Inter', sans-serif; overflow: hidden; }
         #container { display: flex; align-items: center; height: 100vh; padding-left: 60px; }
         
+        /* Animasi Masuk & Keluar */
         .message-wrapper { 
             position: relative; 
             opacity: 0; 
@@ -15,7 +16,7 @@
             transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
         }
         .message-wrapper.show { opacity: 1; transform: translateY(0); }
-        .message-wrapper.hide { opacity: 0; transform: translateY(-20px); }
+        .message-wrapper.hide { opacity: 0; transform: translateY(-20px) scale(0.9); }
 
         .chat-bubble {
             position: relative;
@@ -28,10 +29,18 @@
             display: flex; flex-direction: column; justify-content: center;
             box-shadow: 0 10px 30px rgba(0,0,0,0.5);
             box-sizing: border-box;
+            z-index: 5;
+        }
+
+        .chat-bubble::after {
+            content: ''; position: absolute; bottom: -8px; left: 20px;
+            width: 18px; height: 18px; background: #2d2d2d;
+            transform: rotate(45deg); border-right: 1px solid rgba(255, 255, 255, 0.2);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2); z-index: -1;
         }
 
         .avatar-wrapper { position: absolute; left: -35px; bottom: -10px; z-index: 10; }
-        .avatar { width: 55px; height: 55px; border-radius: 50%; border: 2px solid white; object-fit: cover; box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
+        .avatar { width: 55px; height: 55px; border-radius: 50%; border: 2px solid white; object-fit: cover; background: #222; box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
 
         .username { font-size: 14px; font-weight: 800; color: #00f2ea; margin-bottom: 2px; }
         .text { font-size: 15px; color: #fff; line-height: 1.2; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
@@ -47,60 +56,70 @@
         const roomID = urlParams.get('room') || 'TESTROOM';
         const password = urlParams.get('password') || "false";
         const showtime = parseInt(urlParams.get('timer') || '15000');
+        
         let messageTimeout = null;
+        let currentElement = null;
 
-        function showMessage(data) {
+        // FUNGSI TAMPIL (Sama seperti logika awalmu)
+        function showMessage(content) {
+            if (!content.chatmessage && !content.chatname) return;
+
             const output = document.getElementById('output');
+            
+            // Hapus yang lama
             if (messageTimeout) clearTimeout(messageTimeout);
             output.innerHTML = '';
 
             const wrapper = document.createElement('div');
             wrapper.className = 'message-wrapper';
-            
-            // Ambil data dari manapun dia berada (Social Stream sering ganti-ganti)
-            const msg = data.chatmessage || (data.contents && data.contents.chatmessage);
-            const name = data.chatname || (data.contents && data.contents.chatname) || "User";
-            const img = data.chatimg || (data.contents && data.contents.chatimg) || `https://api.dicebear.com/7.x/initials/svg?seed=${name}`;
 
-            if (!msg) return; // Kalau nggak ada pesan, batal tampil
+            const photo = content.chatimg ? content.chatimg : `https://api.dicebear.com/7.x/initials/svg?seed=${content.chatname}`;
 
             wrapper.innerHTML = `
-                <div class="avatar-wrapper"><img src="${img}" class="avatar"></div>
+                <div class="avatar-wrapper"><img src="${photo}" class="avatar"></div>
                 <div class="chat-bubble">
-                    <div class="username">${name}</div>
-                    <div class="text">${msg}</div>
+                    <div class="username">${content.chatname}</div>
+                    <div class="text">${content.chatmessage}</div>
                     <img src="https://cdn-icons-png.flaticon.com/512/3046/3046121.png" class="platform-icon">
                 </div>`;
 
             output.appendChild(wrapper);
+            currentElement = wrapper;
+
+            // Trigger Animasi
             setTimeout(() => wrapper.classList.add('show'), 50);
 
+            // Timer Hapus
             if (showtime > 0) {
                 messageTimeout = setTimeout(() => {
                     wrapper.classList.add('hide');
-                    setTimeout(() => { output.innerHTML = ''; }, 500);
+                    setTimeout(() => { 
+                        if(wrapper.parentNode) wrapper.parentNode.removeChild(wrapper); 
+                    }, 500);
                 }, showtime);
             }
         }
 
+        // LOGIKA PENERIMA DATA (Back to Original yang kamu punya)
         function createIframe() {
-            const iframe = document.createElement("iframe");
-            iframe.src = `https://vdo.socialstream.ninja/?ln&password=${password}&salt=vdo.ninja&label=overlay&exclude=${roomID}&scene&novideo&noaudio&cleanoutput&room=${roomID}`;
+            var iframe = document.createElement("iframe");
+            iframe.src = "https://vdo.socialstream.ninja/?ln&password=" + password + "&notmobile&salt=vdo.ninja&label=overlay&exclude=" + roomID + "&scene&novideo&noaudio&cleanoutput&room=" + roomID;
             iframe.style.display = "none";
             document.body.appendChild(iframe);
 
-            window.addEventListener("message", (e) => {
-                if (e.source !== iframe.contentWindow) return;
+            window.addEventListener("message", function (e) {
+                if (e.source != iframe.contentWindow) return;
                 
-                // LOGIKA TANGKAP DATA (Semua jalur dicoba)
-                let data = null;
-                if (e.data.dataReceived && e.data.dataReceived.overlayNinja) {
-                    data = e.data.dataReceived.overlayNinja;
-                } else if (e.data.action === "content") {
-                    try { data = JSON.parse(e.data.value); } catch(e){}
+                if ("dataReceived" in e.data) {
+                    if ("overlayNinja" in e.data.dataReceived) {
+                        var data = e.data.dataReceived.overlayNinja;
+                        if (data.contents) {
+                            showMessage(data.contents);
+                        } else {
+                            showMessage(data);
+                        }
+                    }
                 }
-
-                if (data) showMessage(data);
             });
         }
 
