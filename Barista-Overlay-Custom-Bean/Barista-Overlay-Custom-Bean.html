@@ -138,10 +138,9 @@
         const urlParams = new URLSearchParams(window.location.search);
         const roomID = urlParams.get('session') || 'TESTROOM';
         const password = urlParams.get('password') || "false";
-        const showtime = parseInt(urlParams.get('showtime') || urlParams.get('timer') || '10000'); 
+        let showtime = parseInt(urlParams.get('showtime') || urlParams.get('timer') || '10000'); 
         let messageTimeout = null;
 
-        // 1. HANDSHAKE FUNCTION (Kirim balik ke wadah)
         function sendHandshake() {
             if (window.parent !== window) {
                 window.parent.postMessage({
@@ -221,17 +220,29 @@
 
         // 2. LISTENERS
         window.addEventListener("message", (e) => {
-            // Data Chat
+            // Sinyal Test Chat dari Simulator Wadah
+            if (e.data.type === 'TEST_CHAT') {
+                updateMessage({
+                    chatname: e.data.name,
+                    chatmessage: e.data.message,
+                    chatimg: 'https://api.dicebear.com/7.x/bottts/svg?seed=WEBDEV'
+                });
+            }
+
+            // Data Chat Asli dari Social Stream
             if (e.data && e.data.dataReceived && e.data.dataReceived.overlayNinja) {
                 const data = e.data.dataReceived.overlayNinja;
                 if (data.chatmessage) updateMessage(data);
             }
 
-            // Style Update
+            // Style Update Real-time dari Wadah
             if (e.data.type === 'UPDATE_STYLE') {
                 const bubble = document.querySelector('.chat-bubble');
                 const userText = document.querySelector('.username');
                 const chatText = document.querySelector('.text');
+                
+                // Update global showtime jika timer diubah di wadah
+                if(e.data.timer) showtime = parseInt(e.data.timer);
 
                 if (bubble) {
                     bubble.style.borderRadius = e.data.radius + 'px';
@@ -256,7 +267,6 @@
         socialStreamIframe.style.display = "none";
         document.body.appendChild(socialStreamIframe);
 
-        // Kirim handshake segera setelah script terbaca & saat load selesai
         sendHandshake();
         window.addEventListener('load', sendHandshake);
     </script>
