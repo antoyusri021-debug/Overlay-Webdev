@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Barista Overlay - Atmosphere Text Sync</title>
+    <title>Barista Overlay - Atmosphere Sync V2.3</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Fredericka+the+Great&family=Poppins:wght@300;500&display=swap');
 
@@ -96,6 +96,7 @@
 
         .steam-container { position: absolute; bottom: 40px; right: 0; z-index: 11; }
         .steam { width: 2px; height: 15px; background: rgba(255,255,255,0.3); margin-bottom: 3px; filter: blur(2px); border-radius: 50%; animation: steamRise 2s infinite ease-in-out; }
+        
         @keyframes steamRise {
             0% { transform: translateY(0); opacity: 0; }
             50% { opacity: 0.5; }
@@ -106,7 +107,7 @@
         .username {
             font-family: 'Fredericka the Great', cursive;
             font-size: 24px; 
-            color: #ffecb3; /* Default */
+            color: #ffecb3;
             margin-bottom: 5px;
             display: block; 
             text-shadow: 1px 1px #000;
@@ -115,7 +116,7 @@
         .text {
             font-family: 'Poppins', sans-serif;
             font-size: 15px; 
-            color: #ffffff; /* Default */
+            color: #ffffff;
             line-height: 1.3; font-weight: 500;
             transition: all 0.3s ease;
         }
@@ -140,6 +141,24 @@
         const showtime = parseInt(urlParams.get('showtime') || urlParams.get('timer') || '10000'); 
         let messageTimeout = null;
 
+        // 1. HANDSHAKE FUNCTION (Kirim balik ke wadah)
+        function sendHandshake() {
+            if (window.parent !== window) {
+                window.parent.postMessage({
+                    type: 'THEME_DEFAULT_SETTINGS',
+                    settings: {
+                        radius: 15,
+                        font: 15,
+                        uColor: '#ffecb3',
+                        tColor: '#ffffff',
+                        bg: '#1a1a1a',
+                        opac: 1.0,
+                        mode: 'solid'
+                    }
+                }, '*');
+            }
+        }
+
         function hexToRgba(hex, alpha) {
             if (!hex.startsWith('#')) hex = '#' + hex;
             let r = parseInt(hex.slice(1, 3), 16),
@@ -156,7 +175,6 @@
             const container = document.createElement('div');
             container.className = 'message-container';
 
-            // Inisialisasi dari URL Params
             const rad = urlParams.get('radius') || '15';
             const fSize = urlParams.get('font') || '15';
             const uCol = urlParams.get('ucolor') ? '#' + urlParams.get('ucolor') : '#ffecb3';
@@ -201,13 +219,15 @@
             }
         }
 
+        // 2. LISTENERS
         window.addEventListener("message", (e) => {
+            // Data Chat
             if (e.data && e.data.dataReceived && e.data.dataReceived.overlayNinja) {
                 const data = e.data.dataReceived.overlayNinja;
                 if (data.chatmessage) updateMessage(data);
             }
 
-            // UPDATE STYLE REAL-TIME DARI WADAH
+            // Style Update
             if (e.data.type === 'UPDATE_STYLE') {
                 const bubble = document.querySelector('.chat-bubble');
                 const userText = document.querySelector('.username');
@@ -216,14 +236,12 @@
                 if (bubble) {
                     bubble.style.borderRadius = e.data.radius + 'px';
                     if (e.data.mode === 'solid') {
-                        bubble.style.background = e.data.bg; // Menggunakan RGBA dari wadah
+                        bubble.style.background = e.data.bg;
                         bubble.style.backgroundImage = "url('https://www.transparenttextures.com/patterns/dark-matter.png')";
                     } else {
                         bubble.style.background = `linear-gradient(135deg, ${e.data.g1}, ${e.data.g2})`;
                     }
                 }
-                
-                // Update Warna Teks Baru
                 if (userText) userText.style.color = e.data.uColor;
                 if (chatText) {
                     chatText.style.color = e.data.tColor;
@@ -232,29 +250,15 @@
             }
         });
 
-        const iframe = document.createElement("iframe");
-        iframe.src = `https://vdo.socialstream.ninja/?ln&password=${password}&notmobile&salt=vdo.ninja&label=overlay&exclude=${roomID}&scene&novideo&noaudio&cleanoutput&room=${roomID}`;
-        iframe.style.display = "none";
-        document.body.appendChild(iframe);
+        // 3. INITIALIZE
+        const socialStreamIframe = document.createElement("iframe");
+        socialStreamIframe.src = `https://vdo.socialstream.ninja/?ln&password=${password}&notmobile&salt=vdo.ninja&label=overlay&exclude=${roomID}&scene&novideo&noaudio&cleanoutput&room=${roomID}`;
+        socialStreamIframe.style.display = "none";
+        document.body.appendChild(socialStreamIframe);
 
-        // KIRIM DEFAULT SETTINGS KE WADAH SAAT LOAD
-        window.onload = () => {
-            if (window.parent !== window) {
-                window.parent.postMessage({
-                    type: 'THEME_DEFAULT_SETTINGS',
-                    settings: {
-                        radius: 15,         // Sesuai desain asli Barista
-                        font: 15,           // Sesuai desain asli Barista
-                        uColor: '#ffecb3',  // Warna coklat krem khas barista
-                        tColor: '#ffffff',  // Warna putih kapur
-                        bg: '#1a1a1a',      // Warna papan tulis
-                        opac: 1.0,
-                        mode: 'solid'
-                    }
-                }, '*');
-            }
-        };
+        // Kirim handshake segera setelah script terbaca & saat load selesai
+        sendHandshake();
+        window.addEventListener('load', sendHandshake);
     </script>
 </body>
 </html>
-
