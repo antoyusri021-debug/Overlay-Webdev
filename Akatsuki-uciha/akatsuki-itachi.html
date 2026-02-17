@@ -7,8 +7,13 @@
     <link rel="icon" href="../../favicon.ico" />
     <style>
         /* =====================================================
-           CHAT CONTAINER
+           VARIABLES (UNTUK DITARGET SLIDER)
         ===================================================== */
+        :root {
+            --custom-radius: 40px;
+            --custom-font-size: 19px;
+        }
+
         html, body {
             width: 100%; height: 100%;
             overflow: hidden !important;
@@ -28,9 +33,6 @@
             transition: all 0.5s ease;
         }
 
-        /* =====================================================
-           MESSAGE WRAPPER & ANIMATION
-        ===================================================== */
         .message-wrapper {
             position: relative;
             margin: 0;
@@ -46,7 +48,6 @@
             animation: pillIn 0.35s cubic-bezier(0.22, 1, 0.36, 1) forwards;
         }
 
-        /* Class untuk animasi keluar */
         .message-wrapper.hide {
             opacity: 0;
             transform: translateX(-50px) scale(0.9);
@@ -59,7 +60,8 @@
             align-items: center;
             gap: 12px;
             padding: 14px 18px;
-            border-radius: 40px;
+            /* TARGET RADIUS DI SINI */
+            border-radius: var(--custom-radius);
             background: none;
             overflow: visible;
             z-index: 1;
@@ -100,7 +102,8 @@
             position: absolute;
             inset: 0;
             background: rgb(255, 255, 255);
-            border-radius: 40px;
+            /* TARGET RADIUS DI SINI JUGA */
+            border-radius: var(--custom-radius);
             box-shadow: 0 8px 25px rgba(14, 12, 12, 0.6);
             z-index: 1;
             pointer-events: none;
@@ -109,9 +112,18 @@
         .avatar { position: relative; z-index: 2; width: 60px; height: 60px; border-radius: 50%; object-fit: cover; flex-shrink: 0; }
         .message-content { position: relative; z-index: 2; display: flex; flex-direction: column; gap: 4px; }
         .header { display: inline-flex; align-items: center; gap: 6px; }
-        .username { background: rgba(218, 3, 3, 0.85); padding: 4px 12px; border-radius: 999px; font-size: 0.95rem; font-weight: 900; color: #ffffff; font-family: Arial, Helvetica, sans-serif !important; box-shadow: 0 3px 10px rgba(0,0,0,0.18); line-height: 1; }
-        .badges img { width: 14px; height: 14px; margin-left: 2px; }
-        .text { font-size: 19px; font-weight: bold; line-height: 1.32; color: #000; opacity: 0.85; word-break: break-word; font-family: Arial, Helvetica, sans-serif !important; }
+        .username { background: rgba(218, 3, 3, 0.85); padding: 4px 12px; border-radius: 999px; font-size: 0.95rem; font-weight: 900; color: #ffffff; font-family: Arial, sans-serif !important; box-shadow: 0 3px 10px rgba(0,0,0,0.18); line-height: 1; }
+        
+        .text { 
+            /* TARGET FONT SIZE DI SINI */
+            font-size: var(--custom-font-size); 
+            font-weight: bold; 
+            line-height: 1.32; 
+            color: #000; 
+            opacity: 0.85; 
+            word-break: break-word; 
+            font-family: Arial, sans-serif !important; 
+        }
 
         @keyframes pillIn {
             0% { opacity: 0; transform: translateX(60px) scale(0.9); }
@@ -125,14 +137,34 @@
 
     <script src="../../tts.js"></script>
     <script>
+        // =====================================================
+        // LOGIKA PENERIMA DATA DARI EDITOR (BROWSER)
+        // =====================================================
         const urlParams = new URLSearchParams(window.location.search);
+        
+        // Ambil data awal dari URL (saat pertama load)
+        const initialRadius = urlParams.get('radius');
+        const initialFont = urlParams.get('font');
+        if(initialRadius) document.documentElement.style.setProperty('--custom-radius', initialRadius + 'px');
+        if(initialFont) document.documentElement.style.setProperty('--custom-font-size', initialFont + 'px');
+
+        // Dengerin perubahan LIVE dari Slider Editor
+        window.addEventListener('message', function(event) {
+            if (event.data.radius) {
+                document.documentElement.style.setProperty('--custom-radius', event.data.radius + 'px');
+            }
+            if (event.data.font) {
+                document.documentElement.style.setProperty('--custom-font-size', event.data.font + 'px');
+            }
+        });
+
+        // =====================================================
+        // LOGIKA ASLI TEMA (SSN & CHAT)
+        // =====================================================
         const roomID = urlParams.get('session') || urlParams.get('room') || 'TESTROOM';
         const password = urlParams.get('password') || "false";
         const chatLimit = parseInt(urlParams.get('limit') || '1'); 
-        
-        // LOGIKA TIMER
         const showtime = parseInt(urlParams.get('showtime') || urlParams.get('timer') || '10000'); 
-
         const container = document.getElementById('container');
 
         function showMessage(content) {
@@ -162,7 +194,6 @@
                 </div>
             `;
 
-            // Batasi jumlah pesan sesuai Limit
             const currentMessages = container.getElementsByClassName('message-wrapper');
             if (currentMessages.length >= chatLimit) {
                 container.removeChild(currentMessages[0]);
@@ -170,24 +201,21 @@
 
             container.appendChild(wrapper);
 
-            // Munculkan dengan animasi
             requestAnimationFrame(() => {
                 wrapper.classList.add('show');
             });
 
-            // LOGIKA AUTO-HIDE: Jika showtime > 0, hapus pesan ini setelah waktu tertentu
             if (showtime > 0) {
                 setTimeout(() => {
-                    wrapper.classList.add('hide'); // Tambah class animasi keluar
+                    wrapper.classList.add('hide');
                     setTimeout(() => {
                         if (wrapper.parentNode) {
                             wrapper.parentNode.removeChild(wrapper);
                         }
-                    }, 500); // Tunggu animasi transisi selesai
+                    }, 500);
                 }, showtime);
             }
 
-            // TTS Logic
             if (window.initTTS && urlParams.has('tts')) {
                 const ttsText = content.chatmessage.replace(/<[^>]*>/g, '');
                 window.speak(content.chatname + ' says ' + ttsText);
