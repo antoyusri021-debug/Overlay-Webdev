@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Theme: The Ninja Bone - Updated</title>
+    <title>Ninja Bone - Fixed 3 Lines</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         
         body {
-            font-family: 'Inter', 'Segoe UI', Roboto, sans-serif;
+            font-family: 'Inter', 'Segoe UI', sans-serif;
             background: transparent;
             overflow: hidden;
             width: 100vw;
@@ -23,10 +23,10 @@
             justify-content: center;
         }
 
-        /* --- ANIMASI POP & SLIDE --- */
+        /* --- ANIMASI --- */
         .message-wrapper {
             opacity: 0;
-            transform: scale(0.7) translateY(40px);
+            transform: scale(0.8) translateY(30px);
             transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
 
@@ -35,17 +35,23 @@
             transform: scale(1) translateY(0);
         }
 
-        /* --- DESIGN BOX (THE NINJA BONE) --- */
+        .message-wrapper.hide {
+            opacity: 0;
+            transform: scale(0.9) translateY(-20px);
+        }
+
+        /* --- DESIGN BOX FIXED --- */
         .message-box {
             display: flex;
             flex-direction: row;
             align-items: center;
-            background: #F5F2EB; /* Warna Krem Tulang */
-            padding: 15px 25px;
+            background: #F5F2EB;
+            padding: 12px 20px;
             border-radius: 20px 20px 5px 20px;
-            border: 2px solid #333333;
-            box-shadow: 6px 6px 0px rgba(0,0,0,0.1);
-            width: 460px;
+            border: 2.5px solid #333;
+            box-shadow: 6px 6px 0px rgba(0,0,0,0.15);
+            width: 450px;
+            height: 110px; /* TINGGI FIXED */
             position: relative;
         }
 
@@ -56,51 +62,48 @@
             bottom: -12px;
             right: 25px;
             border-left: 15px solid transparent;
-            border-top: 15px solid #333333; /* Warna Border */
+            border-top: 15px solid #333;
             z-index: -1;
         }
 
-        /* AREA TEKS */
         .text-area {
             flex-grow: 1;
             text-align: left;
-            padding-right: 20px;
+            padding-right: 15px;
+            overflow: hidden; /* Biar teks gak tumpah */
         }
 
         .username {
             display: block;
             font-weight: 800;
-            font-size: 13px;
-            color: #666;
+            font-size: 12px;
+            color: #d63031; /* Warna merah gelap biar kontras */
             text-transform: uppercase;
-            letter-spacing: 0.5px;
-            margin-bottom: 3px;
+            margin-bottom: 2px;
         }
 
+        /* LOGIKA 3 BARIS TEKS */
         .chat-text {
             font-weight: 700;
-            font-size: 17px;
+            font-size: 16px;
             color: #1a1a1a;
             line-height: 1.3;
-            word-break: break-word;
+            /* Clamp ke 3 baris */
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
 
-        /* AVATAR KANAN */
         .avatar {
-            width: 65px;
-            height: 65px;
+            width: 60px;
+            height: 60px;
             border-radius: 50%;
-            border: 3px solid #333;
+            border: 2.5px solid #333;
             background: #fff;
             object-fit: cover;
             flex-shrink: 0;
-        }
-
-        /* EXIT ANIMATION */
-        .message-wrapper.hide {
-            opacity: 0;
-            transform: scale(0.9) translateY(-20px);
-            transition: all 0.4s ease-in;
         }
     </style>
 </head>
@@ -111,9 +114,9 @@
 
     <script>
         const urlParams = new URLSearchParams(window.location.search);
-        const roomID = urlParams.get('session') || urlParams.get('room') || 'TESTROOM';
+        const roomID = urlParams.get('session') || 'TESTROOM';
         const password = urlParams.get('password') || "false";
-        const showDuration = parseInt(urlParams.get('timer')) || 15000; // Default 15 detik
+        const timerDur = parseInt(urlParams.get('timer')) || 15000;
 
         let currentMessage = null;
         let hideTimeout = null;
@@ -124,29 +127,22 @@
             iframe.style.display = "none";
             document.body.appendChild(iframe);
 
-            window.addEventListener("message", function (e) {
+            window.addEventListener("message", (e) => {
                 if (e.source != iframe.contentWindow) return;
-                if ("dataReceived" in e.data && "overlayNinja" in e.data.dataReceived) {
+                if (e.data.dataReceived && e.data.dataReceived.overlayNinja) {
                     const data = e.data.dataReceived.overlayNinja;
-                    if (data && !data.response && data.chatmessage) {
-                        renderChat(data);
-                    }
+                    if (data && data.chatmessage) renderChat(data);
                 }
             });
         }
 
         function renderChat(data) {
             const output = document.getElementById('output');
-            
-            // Bersihkan timer lama jika ada chat baru masuk
             if (hideTimeout) clearTimeout(hideTimeout);
 
             if (currentMessage) {
                 currentMessage.classList.add('hide');
-                setTimeout(() => { 
-                    output.innerHTML = ''; 
-                    generateNew(data); 
-                }, 450);
+                setTimeout(() => { output.innerHTML = ''; generateNew(data); }, 450);
             } else {
                 generateNew(data);
             }
@@ -168,19 +164,13 @@
 
             document.getElementById('output').appendChild(wrapper);
             currentMessage = wrapper;
-
-            // Trigger animasi muncul
             setTimeout(() => wrapper.classList.add('show'), 50);
 
-            // Auto-hide timer
-            if (showDuration > 0) {
+            if (timerDur > 0) {
                 hideTimeout = setTimeout(() => {
                     wrapper.classList.add('hide');
-                    setTimeout(() => {
-                        if (wrapper.parentNode) wrapper.parentNode.removeChild(wrapper);
-                        if (currentMessage === wrapper) currentMessage = null;
-                    }, 450);
-                }, showDuration);
+                    setTimeout(() => { if(wrapper.parentNode) wrapper.remove(); currentMessage = null; }, 450);
+                }, timerDur);
             }
         }
 
