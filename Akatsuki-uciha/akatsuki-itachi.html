@@ -3,11 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Featured Message - Itachi Edition Fixed (Centered)</title>
+    <title>Featured Message - Itachi Edition Pro Max</title>
     <link rel="icon" href="../../favicon.ico" />
     <style>
         /* =====================================================
-           VARIABLES (UNTUK DITARGET SLIDER)
+           VARIABLES (UNTUK DITARGET SLIDER EDITOR)
         ===================================================== */
         :root {
             --custom-radius: 40px;
@@ -15,29 +15,29 @@
         }
 
         html, body {
-            width: 100%; height: 100%;
+            width: 100%; 
+            height: 100%;
             overflow: hidden !important;
-            margin: 0; padding: 0;
+            margin: 0; 
+            padding: 0;
             background: transparent;
-            /* Memastikan body juga membantu centering */
-            display: flex;
-            align-items: center;
-            justify-content: center;
         }
 
+        /* FIX POSISI: Dipaksa ke tengah layar, bukan nempel bawah */
         #container {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
             display: flex;
             flex-direction: column;
-            /* RUBAH DISINI: Dari flex-end ke center */
             justify-content: center; 
             align-items: center;
-            height: 100vh;
-            width: 100%; /* Ambil lebar penuh */
-            max-width: 600px; /* Sedikit dilebarin biar nggak sesak */
-            margin: 0 auto;
+            width: 100%;
+            max-width: 550px;
             gap: 20px; 
-            padding: 0; /* Hapus padding bottom biar presisi tengah */
             transition: all 0.5s ease;
+            z-index: 999;
         }
 
         .message-wrapper {
@@ -46,20 +46,20 @@
             opacity: 0; 
             filter: blur(2px);
             flex-shrink: 0;
+            width: 90%;
             transition: all 0.5s ease;
-            width: 90%; /* Biar responsif di dalam container */
         }
 
         .message-wrapper.show {
             opacity: 1;
             filter: blur(0);
-            animation: pillIn 0.35s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+            animation: pillIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
         }
 
         .message-wrapper.hide {
             opacity: 0;
-            transform: translateY(20px) scale(0.9); /* Animasi keluar arah bawah */
-            filter: blur(5px);
+            transform: scale(0.8) translateY(30px);
+            filter: blur(10px);
         }
 
         .message {
@@ -67,103 +67,103 @@
             display: flex;
             align-items: center;
             gap: 15px;
-            padding: 16px 22px;
+            padding: 18px 24px;
             border-radius: var(--custom-radius);
             background: none;
             overflow: visible;
-            z-index: 1;
+            z-index: 10;
         }
 
-        /* POSISI ITACHI */
+        /* DEKORASI ITACHI */
         .message::before {
             content: "";
             position: absolute;
-            width: 160px; height: 160px;
-            left: -15px; /* Sedikit geser biar nggak numpuk banget */
-            top: -105px;
+            width: 170px; 
+            height: 170px;
+            left: -10px;
+            top: -110px;
             background-image: url("itachi.png");
             background-repeat: no-repeat;
             background-size: contain;
             background-position: center;
-            opacity: 1;
-            z-index: 0;
+            z-index: 5;
             pointer-events: none;
         }
 
-        /* POSISI MATA SHARINGAN */
+        /* MATA SHARINGAN DI POJOK */
         .message-wrapper::after {
             content: "";
             position: absolute;
-            top: -8px; 
-            right: 25px;
-            width: 24px; height: 24px;
+            top: -10px; 
+            right: 20px;
+            width: 28px; 
+            height: 28px;
             background-image: url("mata.png");
             background-repeat: no-repeat;
             background-position: center;
             background-size: contain;
-            background-color: #111;
+            background-color: #000;
             border-radius: 50%;
-            padding: 4px;
-            z-index: 20;
-            pointer-events: none;
-            box-shadow: 0 0 10px rgba(218, 3, 3, 0.5);
+            border: 2px solid #da0303;
+            padding: 2px;
+            z-index: 30;
+            box-shadow: 0 0 15px rgba(218, 3, 3, 0.7);
         }
 
+        /* BACKGROUND PUTIH PILL */
         .message::after {
             content: "";
             position: absolute;
             inset: 0;
-            background: rgb(255, 255, 255);
+            background: #ffffff;
             border-radius: var(--custom-radius);
-            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
             z-index: 1;
-            pointer-events: none;
         }
 
         .avatar { 
             position: relative; 
-            z-index: 10; 
-            width: 65px; height: 65px; 
+            z-index: 20; 
+            width: 65px; 
+            height: 65px; 
             border-radius: 50%; 
             object-fit: cover; 
-            flex-shrink: 0; 
             border: 3px solid #da0303;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
         }
 
         .message-content { 
             position: relative; 
-            z-index: 2; 
+            z-index: 20; 
             display: flex; 
             flex-direction: column; 
-            gap: 5px; 
+            gap: 4px; 
         }
 
-        .header { display: inline-flex; align-items: center; gap: 8px; }
-
         .username { 
-            background: linear-gradient(135deg, #da0303 0%, #8b0000 100%); 
-            padding: 5px 15px; 
+            background: linear-gradient(90deg, #da0303, #800000);
+            padding: 4px 16px; 
             border-radius: 999px; 
             font-size: 1rem; 
             font-weight: 900; 
-            color: #ffffff; 
+            color: #fff; 
             font-family: 'Arial Black', sans-serif !important; 
-            box-shadow: 0 4px 12px rgba(218, 3, 3, 0.3); 
-            line-height: 1; 
+            line-height: 1.2;
+            width: fit-content;
         }
         
         .text { 
             font-size: var(--custom-font-size); 
             font-weight: 800; 
-            line-height: 1.3; 
+            line-height: 1.35; 
             color: #111; 
             word-break: break-word; 
-            font-family: Arial, sans-serif !important; 
+            font-family: 'Plus Jakarta Sans', Arial, sans-serif !important; 
         }
 
-        /* ANIMASI MASUK: Dari bawah ke tengah biar lebih smooth */
+        /* ANIMASI MASUK LEBIH DYNAMIC */
         @keyframes pillIn {
-            0% { opacity: 0; transform: translateY(40px) scale(0.8); }
+            0% { opacity: 0; transform: translateY(50px) scale(0.5); }
             100% { opacity: 1; transform: translateY(0) scale(1); }
         }
     </style>
@@ -173,94 +173,83 @@
 
     <script src="../../tts.js"></script>
     <script>
-        // Logika Slider
+        // SYNC DENGAN EDITOR WADAH
         const urlParams = new URLSearchParams(window.location.search);
-        const initialRadius = urlParams.get('radius');
-        const initialFont = urlParams.get('font');
-        if(initialRadius) document.documentElement.style.setProperty('--custom-radius', initialRadius + 'px');
-        if(initialFont) document.documentElement.style.setProperty('--custom-font-size', initialFont + 'px');
+        
+        function applyStyles(radius, font) {
+            if(radius) document.documentElement.style.setProperty('--custom-radius', radius + 'px');
+            if(font) document.documentElement.style.setProperty('--custom-font-size', font + 'px');
+        }
 
-        window.addEventListener('message', function(event) {
-            if (event.data.radius) document.documentElement.style.setProperty('--custom-radius', event.data.radius + 'px');
-            if (event.data.font) document.documentElement.style.setProperty('--custom-font-size', event.data.font + 'px');
+        // Apply awal
+        applyStyles(urlParams.get('radius'), urlParams.get('font'));
+
+        // Listen live update
+        window.addEventListener('message', (e) => {
+            if (e.data.radius || e.data.font) applyStyles(e.data.radius, e.data.font);
         });
 
-        // Logika Chat & Session
-        const roomID = urlParams.get('session') || urlParams.get('room') || 'TESTROOM';
+        // LOGIKA CHAT
+        const roomID = urlParams.get('session') || 'TESTROOM';
         const password = urlParams.get('password') || "false";
         const chatLimit = parseInt(urlParams.get('limit') || '1'); 
         const showtime = parseInt(urlParams.get('showtime') || urlParams.get('timer') || '10000'); 
         const container = document.getElementById('container');
 
         function showMessage(content) {
-            if (!content.chatmessage && !content.chatname) return;
+            if (!content.chatmessage) return;
 
             const wrapper = document.createElement('div');
             wrapper.className = 'message-wrapper';
             
-            let badgeHTML = '';
-            if (content.chatbadges && Array.isArray(content.chatbadges)) {
-                content.chatbadges.forEach(b => {
-                    const src = typeof b === 'string' ? b : b.src;
-                    badgeHTML += `<img src="${src}" style="width:16px;height:16px;margin-left:3px;">`;
-                });
-            }
-
             wrapper.innerHTML = `
                 <div class="message">
                     <img class="avatar" src="${content.chatimg || '../../sources/images/unknown.png'}" onerror="this.src='../../sources/images/unknown.png'">
                     <div class="message-content">
                         <div class="header">
                             <span class="username">${content.chatname}</span>
-                            <div class="badges">${badgeHTML}</div>
                         </div>
                         <div class="text">${content.chatmessage}</div>
                     </div>
                 </div>
             `;
 
-            const currentMessages = container.getElementsByClassName('message-wrapper');
-            if (currentMessages.length >= chatLimit) {
-                container.removeChild(currentMessages[0]);
+            if (container.children.length >= chatLimit) {
+                container.removeChild(container.children[0]);
             }
 
             container.appendChild(wrapper);
 
-            requestAnimationFrame(() => {
-                wrapper.classList.add('show');
-            });
+            setTimeout(() => wrapper.classList.add('show'), 50);
 
             if (showtime > 0) {
                 setTimeout(() => {
                     wrapper.classList.add('hide');
-                    setTimeout(() => {
-                        if (wrapper.parentNode) wrapper.parentNode.removeChild(wrapper);
-                    }, 500);
+                    setTimeout(() => wrapper.remove(), 600);
                 }, showtime);
             }
 
+            // TTS Support
             if (window.initTTS && urlParams.has('tts')) {
-                const ttsText = content.chatmessage.replace(/<[^>]*>/g, '');
-                window.speak(content.chatname + ' says ' + ttsText);
+                window.speak(content.chatname + ' berkata ' + content.chatmessage.replace(/<[^>]*>/g, ''));
             }
         }
 
-        function createIframe() {
+        // KONEKSI KE SOCIAL STREAM NINJA
+        function connect() {
             const iframe = document.createElement("iframe");
             iframe.src = `https://vdo.socialstream.ninja/?ln&password=${password}&notmobile&salt=vdo.ninja&label=overlay&exclude=${roomID}&scene&novideo&noaudio&cleanoutput&room=${roomID}`;
             iframe.style.display = "none";
             document.body.appendChild(iframe);
 
             window.addEventListener("message", (e) => {
-                if (e.source != iframe.contentWindow) return;
-                if (e.data.dataReceived && e.data.dataReceived.overlayNinja) {
-                    const data = e.data.dataReceived.overlayNinja;
-                    if (data.chatmessage) showMessage(data);
-                }
+                if (e.source !== iframe.contentWindow) return;
+                const data = e.data.dataReceived?.overlayNinja;
+                if (data?.chatmessage) showMessage(data);
             });
         }
 
-        createIframe();
+        connect();
     </script>
 </body>
 </html>
