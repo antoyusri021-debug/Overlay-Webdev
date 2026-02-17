@@ -3,11 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Webdec Custom - Malika TikTok Sync V3.3.1</title>
+    <title>Webdec Custom - Malika TikTok Sync V3.3.2</title>
     <style>
 /* ===============================
    THEME: MALIKA STUDIO REPLICA (DARK EDITION)
-   FIXED: URL PARAMETER SYNC
+   UPDATED: AVATAR GEOMETRY SUPPORT
 ================================ */
 :root {
     --bg-color: rgba(0, 0, 0, 0.9);
@@ -15,6 +15,7 @@
     --chat-color: #ffffff;
     --font-size: 24px;
     --radius: 22px;
+    --avt-radius: 50%; /* Default Bulat */
 }
 
 body { 
@@ -62,10 +63,11 @@ body {
     position: absolute;
     left: -120px; top: 0px;
     width: 95px; height: 95px;
-    border-radius: 50%;
+    border-radius: var(--avt-radius); /* SYNC DENGAN DASHBOARD */
     border: 4px solid #ffffff;
     object-fit: cover;
     z-index: 10;
+    transition: border-radius 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
 .username {
@@ -127,11 +129,17 @@ body {
             return `rgba(${r}, ${g}, ${b}, ${alpha})`;
         }
 
-        // --- 1. FUNGSI LOAD AWAL (PENTING BIAR LINK COPY-PASTE JALAN) ---
+        // --- HELPER CONVERT SHAPE TO RADIUS ---
+        function getAvtRadius(shape) {
+            if (shape === 'square') return '0px';
+            if (shape === 'squircle') return '25%';
+            return '50%'; // default circle
+        }
+
+        // --- 1. FUNGSI LOAD AWAL (URL SYNC) ---
         function applyUrlSettings() {
             const root = document.documentElement;
             
-            // Sync Background dari URL
             if(urlParams.has('grad')) {
                 const colors = urlParams.get('grad').split(',');
                 root.style.setProperty('--bg-color', `linear-gradient(135deg, #${colors[0]}, #${colors[1]})`);
@@ -139,11 +147,15 @@ body {
                 root.style.setProperty('--bg-color', hexToRgba(urlParams.get('bg'), urlParams.get('opac') || '0.9'));
             }
 
-            // Sync Radius, Font, Colors dari URL
             if(urlParams.has('radius')) root.style.setProperty('--radius', urlParams.get('radius') + 'px');
             if(urlParams.has('font')) root.style.setProperty('--font-size', urlParams.get('font') + 'px');
             if(urlParams.has('ucolor')) root.style.setProperty('--user-color', '#' + urlParams.get('ucolor'));
             if(urlParams.has('tcolor')) root.style.setProperty('--chat-color', '#' + urlParams.get('tcolor'));
+            
+            // Sync Avatar Shape dari URL
+            if(urlParams.has('avt')) {
+                root.style.setProperty('--avt-radius', getAvtRadius(urlParams.get('avt')));
+            }
         }
 
         // --- 2. DASHBOARD REAL-TIME SYNC ---
@@ -159,6 +171,12 @@ body {
                 root.style.setProperty('--font-size', e.data.font + 'px');
                 root.style.setProperty('--user-color', e.data.uColor);
                 root.style.setProperty('--chat-color', e.data.tColor);
+                
+                // Real-time Avatar Shape
+                if (e.data.avtShape) {
+                    root.style.setProperty('--avt-radius', getAvtRadius(e.data.avtShape));
+                }
+
                 if (e.data.anim) selectedAnim = e.data.anim;
                 if (e.data.timer) showDuration = parseInt(e.data.timer);
             }
@@ -215,7 +233,6 @@ body {
             } else if (callback) callback();
         }
 
-        // JALANKAN SYNC URL PAS PERTAMA KALI LOAD
         applyUrlSettings();
         createIframe();
     </script>
