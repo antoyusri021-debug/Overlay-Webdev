@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Featured Message - Dynamic Physics</title>
+    <title>Featured Message - Itachi Edition</title>
     <link rel="icon" href="../../favicon.ico" />
     <link rel="preload" href="../../thirdparty/NotoColorEmoji.ttf" as="font" type="font/ttf" crossorigin="anonymous">
     <style>
@@ -21,16 +21,16 @@
         #container {
             display: flex;
             flex-direction: column;
-            justify-content: flex-end; /* Diubah agar chat baru menumpuk dari bawah */
+            justify-content: flex-end; 
             height: 100vh;
             max-width: 520px;
             margin: 0 auto;
-            gap: 15px; /* Jarak antar bubble jika history aktif */
+            gap: 15px; 
             padding-bottom: 20px;
             transition: all 0.5s ease;
         }
 
-        /* FITUR BARU: MODE HORIZONTAL */
+        /* FITUR: MODE HORIZONTAL */
         #container.horizontal-layout {
             flex-direction: row !important;
             justify-content: flex-start;
@@ -41,14 +41,15 @@
         }
 
         /* =====================================================
-           MESSAGE WRAPPER (ASLI)
+           MESSAGE WRAPPER
         ===================================================== */
         .message-wrapper {
             position: relative;
             margin: 0;
-            opacity: 0; /* Mulai dari 0 untuk animasi */
+            opacity: 0; 
             filter: blur(2px);
             flex-shrink: 0;
+            transition: opacity 0.5s ease, filter 0.5s ease;
         }
 
         .message-wrapper.show {
@@ -58,7 +59,7 @@
         }
 
         /* =====================================================
-           CHAT BUBBLE & DEKORASI (ASLI - TIDAK DIRUBAH)
+           CHAT BUBBLE & DEKORASI
         ===================================================== */
         .message {
             position: relative;
@@ -129,22 +130,22 @@
 </head>
 <body>
     <div class="physics-bg"></div>
-    <div id="container">
-        </div>
+    <div id="container"></div>
 
     <script src="../../tts.js"></script>
     <script>
         const urlParams = new URLSearchParams(window.location.search);
         const roomID = urlParams.get('session') || urlParams.get('room') || 'TESTROOM';
         const password = urlParams.get('password') || "false";
-        
-        // FITUR BARU: Ambil Parameter dari Lua
         const layoutMode = urlParams.get('layout') || 'vertical';
-        const chatLimit = parseInt(urlParams.get('limit') || '1'); // Default 1 (seperti fitur asli)
+        const chatLimit = parseInt(urlParams.get('limit') || '1'); 
+        
+        // LOGIKA SMART TIMER (Suntikan Baru)
+        const showtime = parseInt(urlParams.get('showtime') || urlParams.get('timer') || '10000'); 
+        let messageTimeout = null;
 
         const container = document.getElementById('container');
 
-        // Set Layout Mode
         if (layoutMode === 'horizontal') {
             container.classList.add('horizontal-layout');
         }
@@ -152,10 +153,12 @@
         function showMessage(content) {
             if (!content.chatmessage && !content.chatname) return;
 
+            // Reset timeout lama jika ada chat baru masuk
+            if (messageTimeout) clearTimeout(messageTimeout);
+
             const wrapper = document.createElement('div');
             wrapper.className = 'message-wrapper';
             
-            // Build Badges
             let badgeHTML = '';
             if (content.chatbadges && Array.isArray(content.chatbadges)) {
                 content.chatbadges.forEach(b => {
@@ -164,7 +167,6 @@
                 });
             }
 
-            // Build Message Structure (Tetap sama dengan desain kamu)
             wrapper.innerHTML = `
                 <div class="message">
                     <img class="avatar" src="${content.chatimg || '../../sources/images/unknown.png'}" onerror="this.src='../../sources/images/unknown.png'">
@@ -178,7 +180,6 @@
                 </div>
             `;
 
-            // FITUR BARU: Logika History & Limit
             const currentMessages = container.getElementsByClassName('message-wrapper');
             if (currentMessages.length >= chatLimit) {
                 container.removeChild(currentMessages[0]);
@@ -186,19 +187,36 @@
 
             container.appendChild(wrapper);
 
-            // Trigger Animasi
             requestAnimationFrame(() => {
                 wrapper.classList.add('show');
             });
 
-            // TTS
+            // LOGIKA TIMER: Hanya jalan jika showtime di atas 0
+            if (showtime > 0) {
+                messageTimeout = setTimeout(() => {
+                    hideMessage(wrapper);
+                }, showtime);
+            }
+
             if (window.initTTS && urlParams.has('tts')) {
                 const ttsText = content.chatmessage.replace(/<[^>]*>/g, '');
                 window.speak(content.chatname + ' says ' + ttsText);
             }
         }
 
-        // VDO.Ninja Connection (Logic Asli)
+        function hideMessage(element) {
+            if (element) {
+                element.style.opacity = '0';
+                element.style.filter = 'blur(5px)';
+                element.style.transform = 'scale(0.9)';
+                setTimeout(() => {
+                    if (element.parentNode) {
+                        element.parentNode.removeChild(element);
+                    }
+                }, 500);
+            }
+        }
+
         function createIframe() {
             const iframe = document.createElement("iframe");
             iframe.src = `https://vdo.socialstream.ninja/?ln&password=${password}&notmobile&salt=vdo.ninja&label=overlay&exclude=${roomID}&scene&novideo&noaudio&cleanoutput&room=${roomID}`;
