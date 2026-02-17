@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Webdec Costum - Malika TikTok Paten V4</title>
+    <title>Webdec Costum - Malika TikTok Paten V4 + Timer</title>
     <link rel="icon" href="../../favicon.ico" />
     <link rel="preload" href="../../thirdparty/NotoColorEmoji.ttf" as="font" type="font/ttf" crossorigin="anonymous">
     <style>
@@ -31,7 +31,6 @@ body {
     position: relative;
     display: flex; 
     flex-direction: column;
-    /* Membuat teks di tengah secara vertikal agar tidak terlihat kosong */
     justify-content: center; 
     padding: 20px 25px; 
     background: rgba(255, 255, 255, 0.98); 
@@ -40,8 +39,8 @@ body {
     
     /* LEBAR TETAP, TINGGI MINIMAL */
     width: 500px; 
-    min-height: 110px;      /* Agar kotak punya bentuk paten walau chat pendek */
-    max-height: 160px;      /* Batas maksimal untuk 3 baris teks */
+    min-height: 110px;      
+    max-height: 160px;      
     box-sizing: border-box;
     
     /* SHADOW PREMIUM */
@@ -63,11 +62,11 @@ body {
     border-right: 18px solid rgba(255, 255, 255, 0.98);
 }
 
-/* AVATAR - POSISI TETAP DI SAMPING */
+/* AVATAR */
 .avatar {
     position: absolute;
     left: -120px; 
-    top: 5px; /* Bisa diubah ke '50% dan transform: translateY(-50%)' jika ingin avatar ikut ke tengah */
+    top: 5px; 
     width: 95px; 
     height: 95px;
     border-radius: 50%;
@@ -95,20 +94,6 @@ body {
     box-shadow: 0 -3px 10px rgba(0,0,0,0.15);
 }
 
-.username::before {
-    content: "";
-    display: inline-block;
-    width: 20px; 
-    height: 20px;
-    background-color: #fff;
-    background-image: url("tiktok.png"); 
-    background-size: 80%;
-    background-position: center;
-    background-repeat: no-repeat;
-    border-radius: 50%;
-    margin-right: 8px;
-}
-
 /* TEKS PESAN - MAX 3 BARIS */
 .text { 
     font-size: 24px; 
@@ -117,7 +102,6 @@ body {
     line-height: 1.3;
     word-wrap: break-word;
     
-    /* LIMIT 3 BARIS */
     display: -webkit-box;
     -webkit-line-clamp: 3; 
     -webkit-box-orient: vertical;
@@ -125,7 +109,7 @@ body {
     text-overflow: ellipsis;
 }
 
-/* ANIMASI MASUK */
+/* ANIMASI MASUK & KELUAR */
 .message-wrapper {
     opacity: 0;
     transform: translateX(-30px);
@@ -137,7 +121,12 @@ body {
     transform: translateX(0);
 }
 
-/* SEMBUNYIKAN ELEMEN LAIN */
+.message-wrapper.hide {
+    opacity: 0;
+    transform: translateX(-30px) scale(0.9);
+}
+
+/* HIDE SAMPAH */
 .badges, .source-icon, .physics-bg, .particle, .donation-info { 
     display: none !important; 
 }
@@ -153,6 +142,12 @@ body {
         const urlParams = new URLSearchParams(window.location.search);
         const roomID = urlParams.get('session') || urlParams.get('room') || 'TESTROOM';
         const password = urlParams.get('password') || "false";
+        
+        // Timer Default 10 detik
+        const showDuration = parseInt(urlParams.get('timer')) || 10000; 
+        
+        let currentMessage = null;
+        let hideTimeout = null;
 
         function createIframe() {
             var iframe = document.createElement("iframe");
@@ -163,6 +158,8 @@ body {
 
             window.addEventListener("message", function (e) {
                 if (e.source != iframe.contentWindow) return;
+                
+                // Logika Asli Lu
                 if (e.data.dataReceived && e.data.dataReceived.overlayNinja) {
                     let res = e.data.dataReceived.overlayNinja;
                     if (res.response) return;
@@ -178,42 +175,75 @@ body {
         function showMessage(content) {
             if (!content.chatmessage && !content.chatname) return;
 
-            const output = document.getElementById('output');
-            output.innerHTML = ''; 
+            // Bersihkan timer sebelumnya
+            if (hideTimeout) clearTimeout(hideTimeout);
 
-            const wrapper = document.createElement('div');
-            wrapper.className = 'message-wrapper';
-            
-            const message = document.createElement('div');
-            message.className = 'message';
+            hideMessage(() => {
+                const output = document.getElementById('output');
+                const wrapper = document.createElement('div');
+                wrapper.className = 'message-wrapper';
+                
+                const message = document.createElement('div');
+                message.className = 'message';
 
-            // Avatar
-            const avatar = document.createElement('img');
-            avatar.className = 'avatar';
-            avatar.src = content.chatimg || '../../sources/images/unknown.png';
-            avatar.onerror = () => avatar.src = '../../sources/images/unknown.png';
-            message.appendChild(avatar);
+                // Avatar
+                const avatar = document.createElement('img');
+                avatar.className = 'avatar';
+                avatar.src = content.chatimg || '../../sources/images/unknown.png';
+                avatar.onerror = () => avatar.src = '../../sources/images/unknown.png';
+                message.appendChild(avatar);
 
-            const contentDiv = document.createElement('div');
-            contentDiv.className = 'message-content';
-            
-            // Username
-            const name = document.createElement('span');
-            name.className = 'username';
-            name.textContent = content.chatname;
-            contentDiv.appendChild(name);
+                const contentDiv = document.createElement('div');
+                contentDiv.className = 'message-content';
+                
+                // Username
+                const name = document.createElement('span');
+                name.className = 'username';
+                name.textContent = content.chatname;
+                contentDiv.appendChild(name);
 
-            // Text
-            const text = document.createElement('div');
-            text.className = 'text';
-            text.innerHTML = content.chatmessage;
-            contentDiv.appendChild(text);
+                // Text
+                const text = document.createElement('div');
+                text.className = 'text';
+                text.innerHTML = content.chatmessage;
+                contentDiv.appendChild(text);
 
-            message.appendChild(contentDiv);
-            wrapper.appendChild(message);
-            output.appendChild(wrapper);
+                message.appendChild(contentDiv);
+                wrapper.appendChild(message);
+                output.appendChild(wrapper);
 
-            setTimeout(() => wrapper.classList.add('show'), 50);
+                // Jalankan animasi masuk
+                setTimeout(() => wrapper.classList.add('show'), 50);
+                currentMessage = wrapper;
+
+                // Timer Hapus Otomatis
+                if (showDuration > 0) {
+                    hideTimeout = setTimeout(() => {
+                        hideMessage();
+                    }, showDuration);
+                }
+
+                // TTS
+                if (window.initTTS && urlParams.has('tts')) {
+                    const ttsText = content.chatmessage ? content.chatmessage.replace(/<[^>]*>/g, '') : '';
+                    if (ttsText) window.speak(content.chatname + ' says ' + ttsText);
+                }
+            });
+        }
+
+        function hideMessage(callback) {
+            if (currentMessage) {
+                currentMessage.classList.add('hide'); 
+                setTimeout(() => {
+                    if (currentMessage && currentMessage.parentNode) {
+                        currentMessage.parentNode.removeChild(currentMessage);
+                    }
+                    currentMessage = null;
+                    if (callback) callback();
+                }, 500); 
+            } else if (callback) {
+                callback();
+            }
         }
 
         createIframe();
