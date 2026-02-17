@@ -16,16 +16,40 @@
             height: 100vh; max-width: 600px; margin: 0 auto; padding: 0 20px;
         }
 
-        .message-wrapper {
-            opacity: 0; filter: blur(4px);
-            transform: scale(0.9) translateX(50px);
+        /* --- KUMPULAN ANIMASI TRANSISI --- */
+        
+        /* 1. Default (Fade & Slide Right) */
+        .anim-fade-in { 
+            opacity: 0; filter: blur(4px); transform: scale(0.9) translateX(50px); 
             transition: all 0.5s cubic-bezier(0.22, 1, 0.36, 1);
         }
+        .anim-fade-in.show { opacity: 1; filter: blur(0); transform: scale(1) translateX(0); }
 
-        .message-wrapper.show { opacity: 1; filter: blur(0); transform: scale(1) translateX(0); }
-        .message-wrapper.hide { opacity: 0; filter: blur(10px); transform: scale(0.8) translateY(20px); }
+        /* 2. Slide Left */
+        .anim-slide-left {
+            opacity: 0; transform: translateX(-100px);
+            transition: all 0.5s ease-out;
+        }
+        .anim-slide-left.show { opacity: 1; transform: translateX(0); }
 
-        /* Variabel CSS untuk dikontrol Dashboard */
+        /* 3. Slide Up */
+        .anim-slide-up {
+            opacity: 0; transform: translateY(50px);
+            transition: all 0.5s ease-out;
+        }
+        .anim-slide-up.show { opacity: 1; transform: translateY(0); }
+
+        /* 4. Bounce Pop */
+        .anim-bounce {
+            opacity: 0; transform: scale(0.3);
+            transition: all 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        }
+        .anim-bounce.show { opacity: 1; transform: scale(1); }
+
+        /* Out Animation (General) */
+        .message-wrapper.hide { opacity: 0; filter: blur(10px); transform: scale(0.8) translateY(20px); transition: all 0.6s ease; }
+
+        /* --- STYLING UTAMA --- */
         :root {
             --bg-color: rgba(20, 20, 20, 0.95);
             --radius: 100px;
@@ -84,19 +108,19 @@
         const roomID = urlParams.get('session') || 'TESTROOM';
         const password = urlParams.get('password') || "false";
         const showtime = parseInt(urlParams.get('showtime') || '8000');
+        
+        // Ambil jenis animasi dari URL (default ke fade-in)
+        let selectedAnim = urlParams.get('anim') || 'fade-in';
 
         let currentMessage = null;
         let messageTimeout = null;
 
-        // --- FUNGSI SYNC DENGAN DASHBOARD ---
         function applyStyles(data) {
             const root = document.documentElement;
             
-            // Handle Background (Solid/Gradient)
             if (data.mode === 'gradient') {
                 root.style.setProperty('--bg-color', `linear-gradient(135deg, ${data.g1}, ${data.g2})`);
             } else {
-                // Convert Hex to RGBA for Opacity
                 const hex = data.bg.replace('#', '');
                 const r = parseInt(hex.substring(0, 2), 16);
                 const g = parseInt(hex.substring(2, 4), 16);
@@ -108,23 +132,17 @@
             root.style.setProperty('--font-size', data.font + 'px');
             root.style.setProperty('--user-color', data.uColor);
             root.style.setProperty('--chat-color', data.tColor);
+            
+            // Update pilihan animasi jika berubah dari dashboard
+            if (data.anim) selectedAnim = data.anim;
         }
 
-        // Dengerin perintah dari Dashboard (Iframe PostMessage)
         window.addEventListener("message", (e) => {
             if (e.data.type === 'UPDATE_STYLE') {
                 applyStyles(e.data);
             }
-            if (e.data.type === 'TEST_CHAT') {
-                renderPill({
-                    chatname: e.data.user,
-                    chatmessage: e.data.message,
-                    chatimg: 'https://socialstream.ninja/images/unknown.png'
-                });
-            }
         });
 
-        // --- CORE NINJA LOGIC ---
         function initNinja() {
             const iframe = document.createElement("iframe");
             iframe.style.display = "none";
@@ -145,7 +163,10 @@
             hideActiveMessage(() => {
                 const output = document.getElementById('output');
                 const wrapper = document.createElement('div');
-                wrapper.className = 'message-wrapper';
+                
+                // Gunakan class animasi yang dipilih
+                wrapper.className = `message-wrapper anim-${selectedAnim}`;
+                
                 const avatarSrc = data.chatimg || 'https://socialstream.ninja/images/unknown.png';
                 
                 wrapper.innerHTML = `
@@ -160,7 +181,10 @@
 
                 output.appendChild(wrapper);
                 currentMessage = wrapper;
+
+                // Trigger munculnya animasi
                 setTimeout(() => wrapper.classList.add('show'), 50);
+
                 if (showtime > 0) {
                     messageTimeout = setTimeout(() => hideActiveMessage(), showtime);
                 }
