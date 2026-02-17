@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Webdev Ultimate Sync - Card Edition</title>
+    <title>Webdev Ultimate Sync - Fixed Transitions</title>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
 
     <style>
@@ -14,8 +14,7 @@
             --t-color: #111;
             --bg-color: rgba(255, 255, 255, 0.85);
             --border-color: rgba(255, 255, 255, 0.65);
-            --b-opac: 1;
-            --avt-radius: 0%; /* Default circle */
+            --avt-radius: 50%; /* Default Circle */
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -36,37 +35,48 @@
             justify-content: center;
         }
 
-        /* DYNAMIC ANIMATIONS */
+        /* --- CORE ANIMATION LOGIC --- */
         .message-wrapper {
             opacity: 0;
-            transition: all 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+            transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1); /* Efek kenyal/elastic */
+            will-change: transform, opacity;
         }
 
-        /* Anim Masuk */
-        .fade-in.show { opacity: 1; transform: scale(1); }
-        .slide-left.show { opacity: 1; transform: translateX(0); }
-        .slide-up.show { opacity: 1; transform: translateY(0); }
-        .bounce.show { opacity: 1; transform: scale(1); animation: bouncePop 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55); }
+        /* 1. Fade In */
+        .message-wrapper.fade-in { transform: scale(0.9); }
+        .message-wrapper.fade-in.show { opacity: 1; transform: scale(1); }
 
-        /* Posisi Awal Anim */
-        .fade-in { transform: scale(0.9); }
-        .slide-left { transform: translateX(-50px); }
-        .slide-up { transform: translateY(50px); }
-        .bounce { transform: scale(0.5); }
+        /* 2. Slide Left */
+        .message-wrapper.slide-left { transform: translateX(-100px); }
+        .message-wrapper.slide-left.show { opacity: 1; transform: translateX(0); }
 
-        @keyframes bouncePop {
-            0% { transform: scale(0.5); }
-            50% { transform: scale(1.05); }
+        /* 3. Slide Up */
+        .message-wrapper.slide-up { transform: translateY(100px); }
+        .message-wrapper.slide-up.show { opacity: 1; transform: translateY(0); }
+
+        /* 4. Bounce Pop */
+        .message-wrapper.bounce { transform: scale(0); }
+        .message-wrapper.bounce.show { 
+            opacity: 1; 
+            transform: scale(1); 
+            animation: bounceIn 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        }
+
+        @keyframes bounceIn {
+            0% { transform: scale(0); }
+            60% { transform: scale(1.1); }
             100% { transform: scale(1); }
         }
 
+        /* Exit Animation */
         .message-wrapper.hide {
-            opacity: 0;
-            transform: scale(0.8) translateY(20px);
+            opacity: 0 !important;
+            transform: scale(0.8) translateY(-20px) !important;
             filter: blur(10px);
+            transition: all 0.4s ease-in;
         }
 
-        /* MAIN CARD */
+        /* --- CARD STYLING --- */
         .message {
             width: 260px;
             height: 320px;
@@ -78,7 +88,7 @@
             backdrop-filter: blur(14px);
             border-radius: var(--radius);
             border: 1.5px solid var(--border-color);
-            box-shadow: 0 12px 40px rgba(0,0,0,0.2);
+            box-shadow: 0 15px 45px rgba(0,0,0,0.25);
         }
 
         .avatar {
@@ -86,43 +96,46 @@
             height: 220px;
             object-fit: cover;
             display: block;
-            border-radius: var(--avt-radius); /* Geometri Avatar */
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            /* Avatar shape dikontrol via JS updateCSSVariables */
+            border-radius: var(--avt-radius); 
         }
 
+        /* Icon TikTok */
         .message::after {
             content: "";
             position: absolute;
             top: 10px;
             right: 10px;
-            width: 35px;
-            height: 35px;
-            background-image: url('https://i.ibb.co/v4m8YmP/tiktok-icon.png'); /* Ganti dengan URL icon valid */
+            width: 32px;
+            height: 32px;
+            background: url('https://i.ibb.co/v4m8YmP/tiktok-icon.png') no-repeat center;
             background-size: contain;
-            background-repeat: no-repeat;
             z-index: 30;
-            filter: drop-shadow(0 2px 5px rgba(0,0,0,0.4));
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5));
         }
 
         .username {
             position: absolute;
             left: 10px;
-            top: 185px;
+            top: 180px;
             font-size: 13px;
             font-weight: 800;
             color: var(--u-color);
             padding: 5px 12px;
             border-radius: 8px;
-            background: rgba(0, 0, 0, 0.7);
+            background: rgba(0, 0, 0, 0.75);
             backdrop-filter: blur(8px);
             z-index: 20;
             max-width: 85%;
             overflow: hidden;
             text-overflow: ellipsis;
             white-space: nowrap;
+            border: 1px solid rgba(255,255,255,0.1);
         }
 
         .message-content {
-            padding: 10px 12px;
+            padding: 12px;
             height: 100px;
             display: flex;
             align-items: center;
@@ -133,7 +146,7 @@
         .text {
             font-size: var(--font-size);
             font-weight: 600;
-            line-height: 1.3;
+            line-height: 1.4;
             color: var(--t-color);
             word-break: break-word;
             display: -webkit-box;
@@ -141,8 +154,6 @@
             -webkit-box-orient: vertical;
             overflow: hidden;
         }
-
-        .hidden-element { display: none !important; }
     </style>
 </head>
 <body>
@@ -155,12 +166,12 @@
         const roomID = urlParams.get('session') || 'TESTROOM';
         const password = urlParams.get('password') || "false";
         
-        // State Global
         let currentMessage = null;
         let hideTimeout = null;
-        let currentAnim = urlParams.get('anim') || 'fade-in';
+        // Ambil animasi dari URL, default slide-up biar keren
+        let currentAnim = urlParams.get('anim') || 'slide-up';
 
-        // 1. URL Parameter Sync (Load Pertama Kali)
+        // 1. URL Parameter Sync
         function applyUrlSettings() {
             const r = urlParams.get('radius') || '20';
             const f = urlParams.get('font') || '15';
@@ -170,7 +181,6 @@
             const bo = urlParams.get('bopac') || '0.65';
             const avt = urlParams.get('avt') || 'circle';
             
-            // BG Logic (Solid vs Grad)
             let background = "#ffffff";
             if(urlParams.get('grad')) {
                 const colors = urlParams.get('grad').split(',');
@@ -192,11 +202,11 @@
             });
         }
 
-        // 2. Real-time Listener (Dashboard Sync)
+        // 2. Real-time Listener (Update Style Tanpa Refresh)
         window.addEventListener("message", (e) => {
             if (e.data.type === 'UPDATE_STYLE') {
                 const d = e.data;
-                currentAnim = d.anim;
+                currentAnim = d.anim; // Update tipe animasi secara real-time
                 
                 let background = d.bg;
                 if(d.mode === 'gradient') {
@@ -226,10 +236,10 @@
             root.setProperty('--border-color', data.bColor);
             root.setProperty('--bg-color', data.bg);
             
-            // Avatar Shape Logic
-            let avtRad = "0%";
+            // Logic Avatar Shape
+            let avtRad = "0%"; // Square
             if(data.avt === 'circle') avtRad = "50%";
-            if(data.avt === 'squircle') avtRad = "25%";
+            if(data.avt === 'squircle') avtRad = "20%";
             root.setProperty('--avt-radius', avtRad);
         }
 
@@ -243,22 +253,16 @@
             return `rgba(${(c >> 16) & 255}, ${(c >> 8) & 255}, ${c & 255}, ${alpha})`;
         }
 
-        // 3. Auto-initials Avatar
-        function getAvatar(content) {
-            if (content.chatimg && content.chatimg !== "") return content.chatimg;
-            // Gunakan Dicebear untuk inisial jika foto kosong
-            return `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(content.chatname)}&backgroundColor=0084ff,1f1f1f&bold=true`;
-        }
-
         function showMessage(content) {
             if (!content.chatmessage && !content.chatname) return;
             if (hideTimeout) clearTimeout(hideTimeout);
 
             hideMessage(() => {
                 const wrapper = document.createElement('div');
+                // Masukkan class animasi aktif ke wrapper
                 wrapper.className = `message-wrapper ${currentAnim}`;
                 
-                const photo = getAvatar(content);
+                const photo = content.chatimg || `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(content.chatname)}`;
 
                 wrapper.innerHTML = `
                     <div class="message">
@@ -273,7 +277,9 @@
                 output.innerHTML = '';
                 output.appendChild(wrapper);
 
-                requestAnimationFrame(() => { wrapper.classList.add('show'); });
+                // Jalankan animasi masuk setelah element di-render
+                setTimeout(() => { wrapper.classList.add('show'); }, 50);
+                
                 currentMessage = wrapper;
 
                 const showDuration = parseInt(urlParams.get('showtime')) || 0; 
@@ -299,7 +305,7 @@
             }
         }
 
-        // Ninja Connection Logic
+        // Ninja Connection
         function createIframe() {
             var iframe = document.createElement("iframe");
             iframe.src = "https://vdo.socialstream.ninja/?ln&password=" + password + "&notmobile&salt=vdo.ninja&label=overlay&exclude=" + roomID + "&scene&novideo&noaudio&cleanoutput&room=" + roomID;
