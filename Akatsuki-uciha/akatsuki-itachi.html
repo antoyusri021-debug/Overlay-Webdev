@@ -3,85 +3,83 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Featured Message - Itachi Edition Pro Max</title>
-    <link rel="icon" href="../../favicon.ico" />
+    <title>Featured Message - Itachi Edition (Pill Position Fix)</title>
     <style>
         /* =====================================================
-           VARIABLES (UNTUK DITARGET SLIDER EDITOR)
+           SETUP DASAR (MENIRU LOGIKA PILL STYLE)
         ===================================================== */
         :root {
             --custom-radius: 40px;
             --custom-font-size: 19px;
         }
 
-        html, body {
-            width: 100%; 
-            height: 100%;
-            overflow: hidden !important;
+        body { 
             margin: 0; 
-            padding: 0;
-            background: transparent;
+            padding: 0; 
+            overflow: hidden; 
+            background-color: transparent; 
+            font-family: 'Arial', sans-serif;
         }
 
-        /* FIX POSISI: Dipaksa ke tengah layar, bukan nempel bawah */
+        /* CONTAINER INI KUNCINYA AGAR DI TENGAH */
         #container {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
             display: flex;
             flex-direction: column;
-            justify-content: center; 
-            align-items: center;
-            width: 100%;
-            max-width: 550px;
-            gap: 20px; 
-            transition: all 0.5s ease;
-            z-index: 999;
+            justify-content: center; /* Menjaga konten tetap di tengah vertikal */
+            align-items: center;     /* Menjaga konten tetap di tengah horizontal */
+            height: 100vh;           /* Mengambil tinggi penuh layar */
+            max-width: 650px;
+            margin: 0 auto;
+            padding: 0 20px;
         }
 
+        /* ===== WRAPPER ANIMASI (MENIRU PILL STYLE) ===== */
         .message-wrapper {
             position: relative;
-            margin: 0;
-            opacity: 0; 
-            filter: blur(2px);
-            flex-shrink: 0;
-            width: 90%;
-            transition: all 0.5s ease;
+            opacity: 0;
+            filter: blur(4px);
+            transform: scale(0.9) translateY(30px); /* Muncul dari bawah sedikit */
+            transition: all 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+            width: 100%;
+            display: flex;
+            justify-content: center;
         }
 
         .message-wrapper.show {
             opacity: 1;
             filter: blur(0);
-            animation: pillIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+            transform: scale(1) translateY(0);
         }
 
         .message-wrapper.hide {
             opacity: 0;
-            transform: scale(0.8) translateY(30px);
             filter: blur(10px);
+            transform: scale(0.8) translateY(-20px); /* Hilang ke atas */
         }
 
+        /* ===== BUBBLE CHAT ITACHI ===== */
         .message {
             position: relative;
             display: flex;
             align-items: center;
             gap: 15px;
-            padding: 18px 24px;
+            padding: 15px 25px;
+            background: #ffffff; /* Putih Solid */
             border-radius: var(--custom-radius);
-            background: none;
-            overflow: visible;
+            border: 2px solid rgba(0, 0, 0, 0.05);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3);
+            min-width: 300px;
             z-index: 10;
         }
 
-        /* DEKORASI ITACHI */
+        /* DEKORASI ITACHI (NANGKRING DI ATAS) */
         .message::before {
             content: "";
             position: absolute;
-            width: 170px; 
-            height: 170px;
+            width: 150px; 
+            height: 150px;
             left: -10px;
-            top: -110px;
+            top: -105px;
             background-image: url("itachi.png");
             background-repeat: no-repeat;
             background-size: contain;
@@ -90,12 +88,12 @@
             pointer-events: none;
         }
 
-        /* MATA SHARINGAN DI POJOK */
+        /* MATA SHARINGAN (POSISI SEPERTI ICON TIKTOK DI PILL STYLE) */
         .message-wrapper::after {
             content: "";
             position: absolute;
-            top: -10px; 
-            right: 20px;
+            top: -8px; 
+            right: 40px; /* Menyesuaikan agar nangkring di kanan atas */
             width: 28px; 
             height: 28px;
             background-image: url("mata.png");
@@ -104,152 +102,138 @@
             background-size: contain;
             background-color: #000;
             border-radius: 50%;
-            border: 2px solid #da0303;
-            padding: 2px;
-            z-index: 30;
-            box-shadow: 0 0 15px rgba(218, 3, 3, 0.7);
+            border: 2px solid #fff;
+            z-index: 20;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.5);
         }
 
-        /* BACKGROUND PUTIH PILL */
-        .message::after {
-            content: "";
-            position: absolute;
-            inset: 0;
-            background: #ffffff;
-            border-radius: var(--custom-radius);
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
-            z-index: 1;
-        }
-
-        .avatar { 
-            position: relative; 
-            z-index: 20; 
-            width: 65px; 
-            height: 65px; 
-            border-radius: 50%; 
-            object-fit: cover; 
+        .avatar {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            object-fit: cover;
+            flex-shrink: 0;
             border: 3px solid #da0303;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+            position: relative;
+            z-index: 11;
         }
 
-        .message-content { 
-            position: relative; 
-            z-index: 20; 
-            display: flex; 
-            flex-direction: column; 
-            gap: 4px; 
+        .message-content {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+            position: relative;
+            z-index: 11;
         }
 
-        .username { 
-            background: linear-gradient(90deg, #da0303, #800000);
-            padding: 4px 16px; 
-            border-radius: 999px; 
-            font-size: 1rem; 
-            font-weight: 900; 
-            color: #fff; 
-            font-family: 'Arial Black', sans-serif !important; 
-            line-height: 1.2;
+        .username {
+            background: #da0303;
+            color: white;
+            padding: 2px 12px;
+            border-radius: 50px;
+            font-size: 0.9rem;
+            font-weight: 800;
             width: fit-content;
         }
-        
-        .text { 
-            font-size: var(--custom-font-size); 
-            font-weight: 800; 
-            line-height: 1.35; 
-            color: #111; 
-            word-break: break-word; 
-            font-family: 'Plus Jakarta Sans', Arial, sans-serif !important; 
-        }
 
-        /* ANIMASI MASUK LEBIH DYNAMIC */
-        @keyframes pillIn {
-            0% { opacity: 0; transform: translateY(50px) scale(0.5); }
-            100% { opacity: 1; transform: translateY(0) scale(1); }
+        .text {
+            color: #111111;
+            font-size: var(--custom-font-size);
+            font-weight: 700;
+            line-height: 1.3;
+            word-break: break-word;
         }
     </style>
 </head>
 <body>
-    <div id="container"></div>
 
-    <script src="../../tts.js"></script>
+    <div id="container">
+        <div id="output"></div>
+    </div>
+
     <script>
-        // SYNC DENGAN EDITOR WADAH
         const urlParams = new URLSearchParams(window.location.search);
         
-        function applyStyles(radius, font) {
+        // Ambil Param dari Web Wadah
+        const roomID = urlParams.get('session') || urlParams.get('room') || 'TESTROOM';
+        const password = urlParams.get('password') || "false";
+        const showtime = parseInt(urlParams.get('timer') || urlParams.get('showtime') || '8000');
+        
+        // Update Style Live
+        function updateStyles(radius, font) {
             if(radius) document.documentElement.style.setProperty('--custom-radius', radius + 'px');
             if(font) document.documentElement.style.setProperty('--custom-font-size', font + 'px');
         }
+        updateStyles(urlParams.get('radius'), urlParams.get('font'));
 
-        // Apply awal
-        applyStyles(urlParams.get('radius'), urlParams.get('font'));
-
-        // Listen live update
         window.addEventListener('message', (e) => {
-            if (e.data.radius || e.data.font) applyStyles(e.data.radius, e.data.font);
+            if (e.data.radius || e.data.font) updateStyles(e.data.radius, e.data.font);
         });
 
-        // LOGIKA CHAT
-        const roomID = urlParams.get('session') || 'TESTROOM';
-        const password = urlParams.get('password') || "false";
-        const chatLimit = parseInt(urlParams.get('limit') || '1'); 
-        const showtime = parseInt(urlParams.get('showtime') || urlParams.get('timer') || '10000'); 
-        const container = document.getElementById('container');
+        let messageTimeout = null;
+        let currentMessage = null;
 
-        function showMessage(content) {
-            if (!content.chatmessage) return;
-
-            const wrapper = document.createElement('div');
-            wrapper.className = 'message-wrapper';
-            
-            wrapper.innerHTML = `
-                <div class="message">
-                    <img class="avatar" src="${content.chatimg || '../../sources/images/unknown.png'}" onerror="this.src='../../sources/images/unknown.png'">
-                    <div class="message-content">
-                        <div class="header">
-                            <span class="username">${content.chatname}</span>
-                        </div>
-                        <div class="text">${content.chatmessage}</div>
-                    </div>
-                </div>
-            `;
-
-            if (container.children.length >= chatLimit) {
-                container.removeChild(container.children[0]);
-            }
-
-            container.appendChild(wrapper);
-
-            setTimeout(() => wrapper.classList.add('show'), 50);
-
-            if (showtime > 0) {
-                setTimeout(() => {
-                    wrapper.classList.add('hide');
-                    setTimeout(() => wrapper.remove(), 600);
-                }, showtime);
-            }
-
-            // TTS Support
-            if (window.initTTS && urlParams.has('tts')) {
-                window.speak(content.chatname + ' berkata ' + content.chatmessage.replace(/<[^>]*>/g, ''));
-            }
-        }
-
-        // KONEKSI KE SOCIAL STREAM NINJA
-        function connect() {
+        function initNinja() {
             const iframe = document.createElement("iframe");
-            iframe.src = `https://vdo.socialstream.ninja/?ln&password=${password}&notmobile&salt=vdo.ninja&label=overlay&exclude=${roomID}&scene&novideo&noaudio&cleanoutput&room=${roomID}`;
             iframe.style.display = "none";
+            iframe.src = `https://vdo.socialstream.ninja/?ln&password=${password}&salt=vdo.ninja&label=overlay&exclude=${roomID}&scene&novideo&noaudio&cleanoutput&room=${roomID}`;
             document.body.appendChild(iframe);
 
             window.addEventListener("message", (e) => {
                 if (e.source !== iframe.contentWindow) return;
-                const data = e.data.dataReceived?.overlayNinja;
-                if (data?.chatmessage) showMessage(data);
+                const received = e.data?.dataReceived?.overlayNinja;
+                if (received) {
+                    const content = received.contents || received;
+                    if (content && content.chatmessage) renderItachi(content);
+                }
             });
         }
 
-        connect();
+        function renderItachi(data) {
+            hideActiveMessage(() => {
+                const output = document.getElementById('output');
+                const wrapper = document.createElement('div');
+                wrapper.className = 'message-wrapper';
+
+                const avatarSrc = data.chatimg || 'https://socialstream.ninja/images/unknown.png';
+                
+                wrapper.innerHTML = `
+                    <div class="message">
+                        <img class="avatar" src="${avatarSrc}" onerror="this.src='https://socialstream.ninja/images/unknown.png'">
+                        <div class="message-content">
+                            <div class="username">${data.chatname || 'Uchiha Member'}</div>
+                            <div class="text">${data.chatmessage}</div>
+                        </div>
+                    </div>
+                `;
+
+                output.appendChild(wrapper);
+                currentMessage = wrapper;
+
+                setTimeout(() => wrapper.classList.add('show'), 50);
+
+                // Timer Logic
+                if (showtime > 0) {
+                    messageTimeout = setTimeout(() => hideActiveMessage(), showtime);
+                }
+            });
+        }
+
+        function hideActiveMessage(callback) {
+            if (messageTimeout) clearTimeout(messageTimeout);
+            if (currentMessage) {
+                currentMessage.classList.add('hide');
+                setTimeout(() => {
+                    if (currentMessage?.parentNode) currentMessage.parentNode.removeChild(currentMessage);
+                    currentMessage = null;
+                    if (callback) callback();
+                }, 600);
+            } else if (callback) {
+                callback();
+            }
+        }
+
+        initNinja();
     </script>
 </body>
 </html>
