@@ -3,117 +3,73 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Featured Message - Pill Style Fix</title>
+    <title>Featured Message - Pill Style Atmosphere Sync</title>
     <style>
-        /* ===== SETUP DASAR ===== */
         body { 
-            margin: 0; 
-            padding: 0; 
-            overflow: hidden; 
+            margin: 0; padding: 0; overflow: hidden; 
             background-color: transparent; 
             font-family: 'Arial', sans-serif;
         }
 
         #container {
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            height: 100vh;
-            max-width: 600px;
-            margin: 0 auto;
-            padding: 0 20px;
+            display: flex; flex-direction: column; justify-content: center;
+            height: 100vh; max-width: 600px; margin: 0 auto; padding: 0 20px;
         }
 
-        /* ===== WRAPPER ANIMASI ===== */
         .message-wrapper {
-            opacity: 0;
-            filter: blur(4px);
+            opacity: 0; filter: blur(4px);
             transform: scale(0.9) translateX(50px);
             transition: all 0.5s cubic-bezier(0.22, 1, 0.36, 1);
         }
 
-        .message-wrapper.show {
-            opacity: 1;
-            filter: blur(0);
-            transform: scale(1) translateX(0);
+        .message-wrapper.show { opacity: 1; filter: blur(0); transform: scale(1) translateX(0); }
+        .message-wrapper.hide { opacity: 0; filter: blur(10px); transform: scale(0.8) translateY(20px); }
+
+        /* Variabel CSS untuk dikontrol Dashboard */
+        :root {
+            --bg-color: rgba(20, 20, 20, 0.95);
+            --radius: 100px;
+            --font-size: 16px;
+            --user-color: #ffffff;
+            --chat-color: #eeeeee;
         }
 
-        .message-wrapper.hide {
-            opacity: 0;
-            filter: blur(10px);
-            transform: scale(0.8) translateY(20px);
-        }
-
-        /* ===== BUBBLE CHAT PILL ===== */
         .message {
-            position: relative;
-            display: flex;
-            align-items: center;
-            gap: 15px;
+            position: relative; display: flex; align-items: center; gap: 15px;
             padding: 15px 25px;
-            background: rgba(20, 20, 20, 0.95); /* Hitam Solid Premium */
+            background: var(--bg-color);
             backdrop-filter: blur(12px);
-            border-radius: 100px;
+            border-radius: var(--radius);
             border: 2px solid rgba(255, 255, 255, 0.15);
             box-shadow: 0 15px 40px rgba(0, 0, 0, 0.6);
         }
 
-        /* AVATAR */
         .avatar {
-            width: 60px;
-            height: 60px;
-            border-radius: 50%;
-            object-fit: cover;
-            flex-shrink: 0;
+            width: 60px; height: 60px; border-radius: 50%;
+            object-fit: cover; flex-shrink: 0;
             border: 2px solid rgba(255, 255, 255, 0.2);
         }
 
-        /* CONTENT */
-        .message-content {
-            display: flex;
-            flex-direction: column;
-            gap: 2px;
-            overflow: hidden;
+        .message-content { display: flex; flex-direction: column; gap: 2px; overflow: hidden; }
+
+        .username { 
+            font-size: 1rem; font-weight: 800; 
+            color: var(--user-color) !important; 
         }
 
-        .username {
-            font-size: 1rem;
-            font-weight: 800;
-            color: #ffffff;
+        .text { 
+            color: var(--chat-color) !important; 
+            font-size: var(--font-size); 
+            font-weight: 600; line-height: 1.3; word-break: break-word; 
         }
 
-        .text {
-            color: #eeeeee;
-            font-size: 16px;
-            font-weight: 600;
-            line-height: 1.3;
-            word-break: break-word;
-        }
-
-        /* ===== TIKTOK ICON (MENGGUNAKAN FILE tiktok.png) ===== */
         .message::after {
-            content: "" !important;
-            display: block !important;
-            position: absolute;
-            
-            /* Posisi nangkring di kanan atas pill */
-            top: -6px;
-            right: 30px;
-            
-            width: 28px;
-            height: 28px;
-            
-            /* Memanggil file lokal kamu */
-            background-image: url("tiktok.png") !important;
-            background-repeat: no-repeat;
-            background-position: center;
-            background-size: contain; /* Biar gambar menyesuaikan ukuran kotak */
-
-            background-color: #000; /* Background hitam lingkaran */
-            border-radius: 50%;
-            border: 2px solid #fff; /* Ring putih */
-            z-index: 9999;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+            content: ""; display: block; position: absolute;
+            top: -6px; right: 30px; width: 28px; height: 28px;
+            background-image: url("tiktok.png");
+            background-repeat: no-repeat; background-position: center;
+            background-size: contain; background-color: #000;
+            border-radius: 50%; border: 2px solid #fff; z-index: 9999;
         }
     </style>
 </head>
@@ -125,13 +81,50 @@
 
     <script>
         const urlParams = new URLSearchParams(window.location.search);
-        const roomID = urlParams.get('session') || urlParams.get('room') || 'TESTROOM';
+        const roomID = urlParams.get('session') || 'TESTROOM';
         const password = urlParams.get('password') || "false";
-        const showtime = parseInt(urlParams.get('showtime') || urlParams.get('timer') || '8000');
+        const showtime = parseInt(urlParams.get('showtime') || '8000');
 
-        let messageTimeout = null;
         let currentMessage = null;
+        let messageTimeout = null;
 
+        // --- FUNGSI SYNC DENGAN DASHBOARD ---
+        function applyStyles(data) {
+            const root = document.documentElement;
+            
+            // Handle Background (Solid/Gradient)
+            if (data.mode === 'gradient') {
+                root.style.setProperty('--bg-color', `linear-gradient(135deg, ${data.g1}, ${data.g2})`);
+            } else {
+                // Convert Hex to RGBA for Opacity
+                const hex = data.bg.replace('#', '');
+                const r = parseInt(hex.substring(0, 2), 16);
+                const g = parseInt(hex.substring(2, 4), 16);
+                const b = parseInt(hex.substring(4, 6), 16);
+                root.style.setProperty('--bg-color', `rgba(${r}, ${g}, ${b}, ${data.opac})`);
+            }
+
+            root.style.setProperty('--radius', data.radius + 'px');
+            root.style.setProperty('--font-size', data.font + 'px');
+            root.style.setProperty('--user-color', data.uColor);
+            root.style.setProperty('--chat-color', data.tColor);
+        }
+
+        // Dengerin perintah dari Dashboard (Iframe PostMessage)
+        window.addEventListener("message", (e) => {
+            if (e.data.type === 'UPDATE_STYLE') {
+                applyStyles(e.data);
+            }
+            if (e.data.type === 'TEST_CHAT') {
+                renderPill({
+                    chatname: e.data.user,
+                    chatmessage: e.data.message,
+                    chatimg: 'https://socialstream.ninja/images/unknown.png'
+                });
+            }
+        });
+
+        // --- CORE NINJA LOGIC ---
         function initNinja() {
             const iframe = document.createElement("iframe");
             iframe.style.display = "none";
@@ -153,7 +146,6 @@
                 const output = document.getElementById('output');
                 const wrapper = document.createElement('div');
                 wrapper.className = 'message-wrapper';
-
                 const avatarSrc = data.chatimg || 'https://socialstream.ninja/images/unknown.png';
                 
                 wrapper.innerHTML = `
@@ -168,9 +160,7 @@
 
                 output.appendChild(wrapper);
                 currentMessage = wrapper;
-
                 setTimeout(() => wrapper.classList.add('show'), 50);
-
                 if (showtime > 0) {
                     messageTimeout = setTimeout(() => hideActiveMessage(), showtime);
                 }
@@ -186,9 +176,7 @@
                     currentMessage = null;
                     if (callback) callback();
                 }, 600);
-            } else if (callback) {
-                callback();
-            }
+            } else if (callback) { callback(); }
         }
 
         initNinja();
