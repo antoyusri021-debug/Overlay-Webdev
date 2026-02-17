@@ -3,13 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Featured Message - Dynamic Physics</title>
+    <title>Featured Message - Clean White Fixed</title>
     <link rel="icon" href="../../favicon.ico" />
     <link rel="preload" href="../../thirdparty/NotoColorEmoji.ttf" as="font" type="font/ttf" crossorigin="anonymous">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
 
     <style>
-        @font-face {
+@font-face {
     font-family: NotoColorEmojiLimited;
     unicode-range: U+1F1E6-1F1FF;
     src: url(../../thirdparty/NotoColorEmoji.ttf);
@@ -28,13 +28,8 @@ body {
     width: 100vw;
     height: 100vh;
     -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-    text-rendering: optimizeLegibility;
 }
 
-/* ===============================
-CONTAINER
-=============================== */
 #container {
     position: absolute;
     inset: 0;
@@ -45,18 +40,18 @@ CONTAINER
 }
 
 /* ===============================
-MESSAGE WRAPPER
+   ANIMASI
 =============================== */
 .message-wrapper {
     opacity: 0;
     transform: scale(0.8);
-    transition: opacity 0.4s ease, transform 0.4s ease;
-    margin: 20px 0;
+    transition: all 0.4s cubic-bezier(.22,1,.36,1);
 }
 
 .message-wrapper.show {
     opacity: 1;
     transform: scale(1);
+    filter: drop-shadow(0 10px 25px rgba(0,0,0,0.15));
 }
 
 .message-wrapper.hide {
@@ -65,449 +60,158 @@ MESSAGE WRAPPER
 }
 
 /* ===============================
-MESSAGE BOX
+   MESSAGE CARD (WHITE FIXED)
 =============================== */
 .message {
     position: relative;
     width: 260px;
+    height: 320px; /* TINGGI PATEN */
     background: #ffffff;
-    border-radius: 14px;
-    border: 1.5px solid #333;   /* border tipis */
-    box-shadow: 3px 3px 0 #aaa; /* shadow lebih subtle */
+    border-radius: 20px;
+    border: 1.5px solid #e0e0e0;
     overflow: hidden;
     display: flex;
     flex-direction: column;
 }
 
-/* ===============================
-AVATAR
-=============================== */
-.message .avatar {
-    height: 220px; 
-    object-fit: cover;
-    border-top-left-radius: 14px;
-    border-top-right-radius: 14px;
+/* AVATAR */
+.avatar {
     width: 100%;
+    height: 190px; /* Sedikit lebih pendek untuk ruang username di bawah */
+    object-fit: cover;
+    display: block;
 }
 
-/* ===============================
-MESSAGE CONTENT
-=============================== */
+/* CONTENT AREA (USERNAME DI BAWAH) */
 .message-content {
+    flex-grow: 1;
     display: flex;
-    flex-direction: column;
+    flex-direction: column-reverse; /* Username di paling bawah */
     align-items: center;
+    justify-content: center;
     padding: 10px;
+    background: #fff;
+    gap: 6px;
 }
 
-/* ===============================
-TEXT MESSAGE
-=============================== */
+/* TEXT CHAT */
 .text {
     font-weight: 700;
-    font-size: clamp(14px, 3.6vw, 18px);
-    line-height: 1.35;
+    font-size: 15px;
+    line-height: 1.3;
     text-align: center;
+    color: #333;
     word-break: break-word;
-    margin-bottom: 6px; /* jarak ke username */
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
 }
 
-/* Emoji & inline image */
-.text img,
-.text svg {
-    max-width: 1.6em;
-    max-height: 1.6em;
-    vertical-align: middle;
-}
-
-/* ===============================
-USERNAME DI BAWAH CHAT
-=============================== */
+/* USERNAME (PILL STYLE) */
 .username {
     font-weight: 800;
-    font-size: clamp(13px, 3vw, 16px);
-    line-height: 1.2;
-    text-align: center;
-    color: #111;
-    padding: 2px 6px;
-    border-radius: 6px;
-    text-shadow: 0 1px 1px rgba(0,0,0,0.15);
-}
-
-/* ===============================
-GIF / STICKER
-=============================== */
-.content-image {
-    width: 100%;
-    max-height: 240px;
-    object-fit: contain;
-    display: block;
-    margin: 10px auto 14px;
-}
-
-.text img {
-    max-width: 100%;
-    max-height: 220px;
-    display: block;
-    margin: 8px auto;
-}
-
-/* ===============================
-DONATION (OPTIONAL)
-=============================== */
-.donation-info {
-    margin: 10px auto 14px;
-    padding: 8px 18px;
-    border-radius: 999px;
-    background: linear-gradient(45deg, #ff006e, #ffbe0b);
+    font-size: 12px;
     color: #fff;
-    font-weight: 700;
-    font-size: 14px;
-    box-shadow: 0 6px 20px rgba(0,0,0,0.25);
+    padding: 3px 12px;
+    border-radius: 20px;
+    background: linear-gradient(45deg, #333, #000);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
 }
 
-/* ===============================
-HIDE UNUSED ELEMENTS
-=============================== */
-.badges,
-.source-icon,
-.physics-bg,
-.particle {
+/* TikTok Icon */
+.message::after {
+    content: "";
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    width: 30px;
+    height: 30px;
+    background-image: url('tiktok.png'); 
+    background-size: contain;
+    background-repeat: no-repeat;
+    z-index: 10;
+}
+
+.badges, .source-icon, .physics-bg, .particle {
     display: none !important;
 }
-
-/* ===============================
-INTERACTION SAFETY (OBS)
-=============================== */
-.message,
-.message * {
-    pointer-events: none;
-}
-
-/* ===============================
-RESPONSIVE (VERTICAL STREAM)
-=============================== */
-@media (max-width: 768px) {
-    .message {
-        width: 92vw;
-    }
-
-    .text {
-        font-size: 16px;
-    }
-
-    .username {
-        font-size: 16px;
-    }
-}
-
-@media (max-width: 480px) {
-    .text {
-        padding: 10px 8px;
-    }
-
-    .username {
-        padding: 3px 6px;
-    }
-}
-/* Pindahin username ke bawah isi chat via flex column-reverse */
-.message-content {
-    display: flex;
-    flex-direction: column-reverse;  /* <-- ini buat username di bawah text */
-    align-items: center;
-    padding: 10px;
-}
-.username {
-    font-weight: 800;
-    font-size: clamp(13px, 3vw, 16px);
-    line-height: 1.2;
-    text-align: center;
-    color: #fff;
-    padding: 4px 10px;
-    border-radius: 8px;
-    background: linear-gradient(45deg, #333333, #0c0c0c); /* gradient */
-    text-shadow: 0 1px 1px rgba(0,0,0,0.25);
-}
-
     </style>
 </head>
 <body>
-    <div class="physics-bg"></div>
     <div id="container">
         <div id="output"></div>
     </div>
 
     <script src="../../tts.js"></script>
     <script>
-        // Configuration auto hide dan mematikan ada dibawa aja
         const urlParams = new URLSearchParams(window.location.search);
-        const roomID = urlParams.get('session') || urlParams.get('room') || urlParams.get('roomid') || 'TESTROOM';
-        const style = urlParams.get('style') || 'elastic'; // elastic, spring, pendulum, gravity, magnetic
-        const password = urlParams.get('password') || urlParams.get('pass') || urlParams.get('pw') || "false";
-        const showtime = parseInt(urlParams.get('showtime') || urlParams.get('timer') || '30000');
+        const roomID = urlParams.get('session') || urlParams.get('room') || 'TESTROOM';
+        const password = urlParams.get('password') || "false";
         
-        // Apply selected style
-        document.body.className = `style-${style}`;
+        // Timer otomatis (30 detik default)
+        const showDuration = parseInt(urlParams.get('timer')) || 30000; 
 
-        // Create physics particles
-        const bgContainer = document.querySelector('.physics-bg');
-        for (let i = 0; i < 10; i++) {
-            const particle = document.createElement('div');
-            particle.className = 'particle';
-            particle.style.left = Math.random() * 100 + '%';
-            particle.style.animationDelay = Math.random() * 3 + 's';
-            particle.style.animationDuration = (Math.random() * 2 + 2) + 's';
-            particle.style.backgroundColor = `hsl(${Math.random() * 360}, 70%, 60%)`;
-            bgContainer.appendChild(particle);
-        }
-
-        // State
-        let messageTimeout = null;
         let currentMessage = null;
+        let hideTimeout = null;
 
-        // Create VDO.Ninja iframe for receiving messages
         function createIframe() {
             var iframe = document.createElement("iframe");
-            
             iframe.src = "https://vdo.socialstream.ninja/?ln&password=" + password + "&notmobile&salt=vdo.ninja&label=overlay&exclude=" + roomID + "&scene&novideo&noaudio&cleanoutput&room=" + roomID;
-            
-            iframe.style.width = "0px";
-            iframe.style.height = "0px";
-            iframe.style.position = "fixed";
-            iframe.style.left = "-100px";
-            iframe.style.top = "-100px";
-            iframe.id = "frame1";
-            iframe.allow = "microphone";
+            iframe.style.width = "0px"; iframe.style.height = "0px"; iframe.style.position = "fixed";
             document.body.appendChild(iframe);
 
-            var eventMethod = window.addEventListener ? "addEventListener" : "attachEvent";
-            var eventer = window[eventMethod];
-            var messageEvent = eventMethod === "attachEvent" ? "onmessage" : "message";
-
-            eventer(messageEvent, function (e) {
+            window.addEventListener("message", function (e) {
                 if (e.source != iframe.contentWindow) return;
-                
-                if ("dataReceived" in e.data) {
-                    if ("overlayNinja" in e.data.dataReceived) {
-                        if (e.data.dataReceived.overlayNinja && "response" in e.data.dataReceived.overlayNinja) {
-                            // pass
-                        } else {
-                            processData({ contents: e.data.dataReceived.overlayNinja });
-                        }
-                    }
+                if (e.data.dataReceived && e.data.dataReceived.overlayNinja) {
+                    processData({ contents: e.data.dataReceived.overlayNinja });
                 }
             });
         }
 
-        // Process incoming messages
         function processData(data) {
-            // Handle clear command
-            if (!data || data === false) {
-                hideMessage();
-                return;
-            }
-            
-            // Handle different data formats
-            if (data.contents === false) {
-                hideMessage();
-                return;
-            }
-            
-            // If data has contents property, use it
-            if (data && data.contents) {
-                showMessage(data.contents);
-            } 
-            // If data has content property (from dock)
-            else if (data && "content" in data) {
-                if (data.content) {
-                    processData({ contents: data.content });
-                } else {
-                    hideMessage();
-                }
-            }
-            // If data has action property
-            else if (data.action && "value" in data && data.action == "content") {
-                if (data.value) {
-                    try {
-                        const parsed = JSON.parse(data.value);
-                        if (parsed && "chatmessage" in parsed) {
-                            showMessage(parsed);
-                        }
-                    } catch (e) {
-                        console.error("Error parsing value:", e);
-                    }
-                } else {
-                    hideMessage();
-                }
-            }
-            // Direct message format
-            else if (data && "chatmessage" in data) {
-                showMessage(data);
-            }
+            if (!data || data.contents === false) { hideMessage(); return; }
+            if (data.contents) showMessage(data.contents);
         }
 
-        // Display message
         function showMessage(content) {
             if (!content.chatmessage && !content.chatname) return;
+            if (hideTimeout) clearTimeout(hideTimeout);
 
             hideMessage(() => {
                 const wrapper = document.createElement('div');
                 wrapper.className = 'message-wrapper';
-                
-                // Add special classes for donations/memberships
-                if (content.hasDonation) {
-                    wrapper.classList.add('has-donation');
-                }
-                if (content.membership) {
-                    wrapper.classList.add('has-membership');
-                }
-                
-                const message = document.createElement('div');
-                message.className = 'message';
+                const photo = content.chatimg || '../../sources/images/unknown.png';
 
-                // Avatar
-                if (content.chatimg) {
-                    const avatar = document.createElement('img');
-                    avatar.className = 'avatar';
-                    avatar.src = content.chatimg;
-                    avatar.onerror = () => {
-                        avatar.src = '../../sources/images/unknown.png';
-                    };
-                    message.appendChild(avatar);
-                }
-
-                // Content wrapper
-                const contentDiv = document.createElement('div');
-                contentDiv.className = 'message-content';
-
-                // Header
-                const header = document.createElement('div');
-                header.className = 'header';
-                
-                // Username with animated letters
-                if (content.chatname) {
-                    const name = document.createElement('span');
-                    name.className = 'username';
-                    
-                    // Decode HTML entities before splitting
-                    const tempDiv = document.createElement('div');
-                    tempDiv.innerHTML = content.chatname;
-                    const decodedName = tempDiv.textContent || tempDiv.innerText || '';
-                    
-                    // Split username into individual letters for wave animation
-                    decodedName.split('').forEach((letter, index) => {
-                        const span = document.createElement('span');
-                        span.textContent = letter;
-                        span.style.setProperty('--i', index);
-                        name.appendChild(span);
-                    });
-                    
-                    header.appendChild(name);
-                }
-
-                // Badges
-                if (content.chatbadges && Array.isArray(content.chatbadges)) {
-                    const badges = document.createElement('div');
-                    badges.className = 'badges';
-                    content.chatbadges.forEach(badge => {
-                        if (typeof badge === 'string') {
-                            const img = document.createElement('img');
-                            img.className = 'badge';
-                            img.src = badge;
-                            badges.appendChild(img);
-                        } else if (badge.src) {
-                            const img = document.createElement('img');
-                            img.className = 'badge';
-                            img.src = badge.src;
-                            badges.appendChild(img);
-                        }
-                    });
-                    header.appendChild(badges);
-                }
-
-                // Source icon
-                if (content.type) {
-                    const sourceIcon = document.createElement('img');
-                    sourceIcon.className = 'source-icon';
-                    sourceIcon.src = `../../sources/images/${content.type}.png`;
-                    sourceIcon.onerror = () => { sourceIcon.style.display = 'none'; };
-                    header.appendChild(sourceIcon);
-                }
-
-                contentDiv.appendChild(header);
-
-                // Message text
-                if (content.chatmessage) {
-                    const text = document.createElement('div');
-                    text.className = 'text';
-                    text.innerHTML = content.chatmessage;
-                    contentDiv.appendChild(text);
-                }
-
-                // Donation/Membership info
-                if (content.hasDonation || content.membership) {
-                    const donationDiv = document.createElement('div');
-                    donationDiv.className = 'donation-info';
-                    
-                    if (content.hasDonation) {
-                        const amount = content.hasDonation;
-                        const title = content.title || 'Donation';
-                        donationDiv.innerHTML = `💰 ${title}: ${amount}`;
-                    } else if (content.membership) {
-                        const memberInfo = typeof content.membership === 'string' ? 
-                            content.membership : 'New Member';
-                        donationDiv.innerHTML = `⭐ ${memberInfo}`;
-                    }
-                    
-                    contentDiv.appendChild(donationDiv);
-                }
-
-                // Content image (stickers, etc)
-                if (content.contentimg) {
-                    const img = document.createElement('img');
-                    img.className = 'content-image';
-                    img.src = content.contentimg;
-                    contentDiv.appendChild(img);
-                }
-
-                message.appendChild(contentDiv);
-                wrapper.appendChild(message);
+                wrapper.innerHTML = `
+                    <div class="message">
+                        <img src="${photo}" class="avatar" onerror="this.src='../../sources/images/unknown.png'">
+                        <div class="message-content">
+                            <div class="username">${content.chatname}</div>
+                            <div class="text">${content.chatmessage}</div>
+                        </div>
+                    </div>`;
                 
                 const output = document.getElementById('output');
                 output.innerHTML = '';
                 output.appendChild(wrapper);
 
-                // Trigger animation
-                requestAnimationFrame(() => {
-                    wrapper.classList.add('show');
-                });
-
+                requestAnimationFrame(() => { wrapper.classList.add('show'); });
                 currentMessage = wrapper;
 
-                // TTS support
-                if (window.initTTS && urlParams.has('tts')) {
-                    const ttsText = content.chatmessage ? 
-                        content.chatmessage.replace(/<[^>]*>/g, '') : '';
-                    if (ttsText) {
-                        window.speak(content.chatname + ' says ' + ttsText);
-                    }
+                if (showDuration > 0) {
+                    hideTimeout = setTimeout(() => { hideMessage(); }, showDuration);
                 }
 
-                // Auto-hide after showtime
-                //if (messageTimeout) clearTimeout(messageTimeout);
-                //messageTimeout = setTimeout(() => {
-                //    hideMessage();
-                //}, showtime); === DISBALED AUTO HIDE 
+                if (window.initTTS && urlParams.has('tts')) {
+                    const ttsText = content.chatmessage ? content.chatmessage.replace(/<[^>]*>/g, '') : '';
+                    if (ttsText) window.speak(content.chatname + ' says ' + ttsText);
+                }
             });
         }
 
-        // Hide current message
         function hideMessage(callback) {
-            if (messageTimeout) {
-                clearTimeout(messageTimeout);
-                messageTimeout = null;
-            }
-
             if (currentMessage) {
                 currentMessage.classList.remove('show');
                 currentMessage.classList.add('hide');
@@ -517,23 +221,12 @@ RESPONSIVE (VERTICAL STREAM)
                     }
                     currentMessage = null;
                     if (callback) callback();
-                }, 800); // Match animation duration
+                }, 400);
             } else if (callback) {
                 callback();
             }
         }
 
-        // Initialize TTS if requested
-        if (urlParams.has('tts') && window.initTTS) {
-            window.initTTS({
-                lang: urlParams.get('tts') || urlParams.get('lang') || 'en-US',
-                pitch: parseFloat(urlParams.get('pitch') || '1'),
-                rate: parseFloat(urlParams.get('rate') || '1'),
-                voice: urlParams.get('voice') || null
-            });
-        }
-
-        // Initialize iframe connection
         createIframe();
     </script>
 </body>
