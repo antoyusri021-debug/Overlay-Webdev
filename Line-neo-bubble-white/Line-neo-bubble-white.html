@@ -3,13 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Webdev Costum Line</title>
-    <link rel="icon" href="../../favicon.ico" />
-    <link rel="preload" href="../../thirdparty/NotoColorEmoji.ttf" as="font" type="font/ttf" crossorigin="anonymous">
+    <title>Webdev Custom Line - White Fixed</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
 
     <style>
-    /* --- custom line style by me --- */
     * {
         margin: 0;
         padding: 0;
@@ -30,7 +27,7 @@
         justify-content: center;
     }
 
-    /* animasi muncul */
+    /* Animasi muncul */
     .message-wrapper {
         opacity: 0;
         transform: translateX(-15px);
@@ -42,15 +39,15 @@
         transform: translateX(0);
     }
 
-    /* setup grid chat */
+    /* SETUP FIXED GRID */
     .message {
         display: grid;
-        grid-template-columns: 55px auto;
+        grid-template-columns: 55px 300px; /* Lebar teks dikunci 300px */
         grid-template-areas: 
             "ava user"
             "ava kontent";
         gap: 0 12px;
-        width: 320px;
+        width: 370px; /* Total lebar fixed */
         align-items: start;
         position: relative;
     }
@@ -61,7 +58,7 @@
         height: 53px;
         border-radius: 50%;
         object-fit: cover;
-        margin-left: -8px; /* biar agak mepet kiri */
+        margin-left: -8px; 
         border: 1px solid rgba(255,255,255,0.2);
         box-shadow: 0 3px 10px rgba(0,0,0,0.25);
     }
@@ -73,20 +70,27 @@
         font-weight: 700;
         padding-bottom: 3px;
         padding-left: 2px;
+        /* Potong nama jika kepanjangan */
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
     }
 
+    /* BOX CHAT FIXED */
     .message-content {
         grid-area: kontent;
         background: #ffffff; 
         padding: 9px 13px;
-        border-radius: 0 12px 12px 12px; /* pojok kiri atas lurus buat ekor */
+        border-radius: 0 12px 12px 12px; 
         position: relative;
         filter: drop-shadow(0 2px 3px rgba(0,0,0,0.15));
-        display: inline-block;
-        max-width: fit-content;
+        width: 100%; 
+        height: 65px; /* Tinggi kotak chat dikunci */
+        display: flex;
+        align-items: center;
     }
 
-    /* ekor manual */
+    /* Ekor Putih */
     .message-content::before {
         content: "";
         position: absolute;
@@ -97,27 +101,27 @@
         border-color: transparent #ffffff transparent transparent;
     }
 
+    /* LOGIKA TITIK-TITIK (ELLIPSIS) */
     .text {
         color: #000000;
         font-size: 14.5px;
-        line-height: 1.3;
+        line-height: 1.25;
         font-weight: 500;
+        display: -webkit-box;
+        -webkit-line-clamp: 2; /* Maksimal 2 baris */
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        word-break: break-word;
     }
 
-    .content-image {
-        max-width: 100%;
-        border-radius: 6px;
-        margin-top: 6px;
-    }
-
-    /* hide sampah */
+    /* Hide element yang tidak perlu */
     .badges, .source-icon, .physics-bg, .particle, .header {
         display: none !important;
     }
     </style>
 </head>
 <body>
-    <div class="physics-bg"></div>
     <div id="container">
         <div id="output"></div>
     </div>
@@ -125,88 +129,50 @@
     <script src="../../tts.js"></script>
     <script>
         const urlParams = new URLSearchParams(window.location.search);
-        const roomID = urlParams.get('session') || urlParams.get('room') || urlParams.get('roomid') || 'TESTROOM';
-        const password = urlParams.get('password') || urlParams.get('pass') || urlParams.get('pw') || "false";
+        const roomID = urlParams.get('session') || urlParams.get('room') || 'TESTROOM';
+        const password = urlParams.get('password') || "false";
         
-        function createIframe() {
-            var iframe = document.createElement("iframe");
-            iframe.src = "https://vdo.socialstream.ninja/?ln&password=" + password + "&notmobile&salt=vdo.ninja&label=overlay&exclude=" + roomID + "&scene&novideo&noaudio&cleanoutput&room=" + roomID;
-            iframe.style.width = "0px"; iframe.style.height = "0px"; iframe.style.position = "fixed";
-            iframe.id = "frame1";
-            document.body.appendChild(iframe);
-
-            window.addEventListener("message", function (e) {
-                if (e.source != iframe.contentWindow) return;
-                if (e.data.dataReceived && e.data.dataReceived.overlayNinja) {
-                    processData({ contents: e.data.dataReceived.overlayNinja });
-                }
-            });
-        }
-
-        function processData(data) {
-            if (!data || data.contents === false) { hideMessage(); return; }
-            if (data.contents) showMessage(data.contents);
-        }
-
+        // Timer default 10 detik (10000ms), bisa diubah via URL &timer=5000
+        const showDuration = parseInt(urlParams.get('timer')) || 10000; 
+        
         let currentMessage = null;
+        let hideTimeout = null;
 
         function showMessage(content) {
             if (!content.chatmessage && !content.chatname) return;
+
+            // Reset timer jika ada chat baru masuk
+            if (hideTimeout) clearTimeout(hideTimeout);
 
             hideMessage(() => {
                 const wrapper = document.createElement('div');
                 wrapper.className = 'message-wrapper';
                 
-                const message = document.createElement('div');
-                message.className = 'message';
+                const photo = content.chatimg || `https://api.dicebear.com/7.x/initials/svg?seed=${content.chatname}`;
 
-                // 1. Avatar (Foto Utama)
-                if (content.chatimg) {
-                    const avatar = document.createElement('img');
-                    avatar.className = 'avatar';
-                    avatar.src = content.chatimg;
-                    avatar.onerror = () => { avatar.src = '../../sources/images/unknown.png'; };
-                    message.appendChild(avatar);
-                }
+                wrapper.innerHTML = `
+                    <div class="message">
+                        <img src="${photo}" class="avatar" onerror="this.src='../../sources/images/unknown.png'">
+                        <div class="username">${content.chatname}</div>
+                        <div class="message-content">
+                            <div class="text">${content.chatmessage}</div>
+                        </div>
+                    </div>
+                `;
 
-                // 2. Username (Ditempel di atas Avatar)
-                if (content.chatname) {
-                    const name = document.createElement('div');
-                    name.className = 'username';
-                    // Decode HTML entities
-                    const tempDiv = document.createElement('div');
-                    tempDiv.innerHTML = content.chatname;
-                    name.textContent = tempDiv.textContent || tempDiv.innerText || '';
-                    message.appendChild(name);
-                }
-
-                // 3. Content Chat (Di bawah foto)
-                const contentDiv = document.createElement('div');
-                contentDiv.className = 'message-content';
-
-                if (content.chatmessage) {
-                    const text = document.createElement('div');
-                    text.className = 'text';
-                    text.innerHTML = content.chatmessage;
-                    contentDiv.appendChild(text);
-                }
-
-                if (content.contentimg) {
-                    const img = document.createElement('img');
-                    img.className = 'content-image';
-                    img.src = content.contentimg;
-                    contentDiv.appendChild(img);
-                }
-
-                message.appendChild(contentDiv);
-                wrapper.appendChild(message);
-                
                 const output = document.getElementById('output');
                 output.innerHTML = '';
                 output.appendChild(wrapper);
 
                 requestAnimationFrame(() => { wrapper.classList.add('show'); });
                 currentMessage = wrapper;
+
+                // Jalankan Timer Otomatis
+                if (showDuration > 0) {
+                    hideTimeout = setTimeout(() => {
+                        hideMessage();
+                    }, showDuration);
+                }
 
                 // TTS
                 if (window.initTTS && urlParams.has('tts')) {
@@ -231,11 +197,24 @@
             }
         }
 
-        if (urlParams.has('tts') && window.initTTS) {
-            window.initTTS({
-                lang: urlParams.get('tts') || 'en-US',
-                pitch: parseFloat(urlParams.get('pitch') || '1'),
-                rate: parseFloat(urlParams.get('rate') || '1')
+        function createIframe() {
+            var iframe = document.createElement("iframe");
+            iframe.src = "https://vdo.socialstream.ninja/?ln&password=" + password + "&notmobile&salt=vdo.ninja&label=overlay&exclude=" + roomID + "&scene&novideo&noaudio&cleanoutput&room=" + roomID;
+            iframe.style.width = "0px"; iframe.style.height = "0px"; iframe.style.position = "fixed";
+            document.body.appendChild(iframe);
+
+            window.addEventListener("message", function (e) {
+                if (e.source != iframe.contentWindow) return;
+                
+                // LOGIKA ASLI LU (Dijamin Muncul)
+                if (e.data.dataReceived && e.data.dataReceived.overlayNinja) {
+                    var data = e.data.dataReceived.overlayNinja;
+                    if (data.contents) {
+                        showMessage(data.contents);
+                    } else {
+                        showMessage(data);
+                    }
+                }
             });
         }
 
