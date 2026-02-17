@@ -236,6 +236,25 @@
         iframe.src = `https://vdo.socialstream.ninja/?ln&password=${password}&notmobile&salt=vdo.ninja&label=overlay&exclude=${roomID}&scene&novideo&noaudio&cleanoutput&room=${roomID}`;
         iframe.style.display = "none";
         document.body.appendChild(iframe);
+
+        // KIRIM DEFAULT SETTINGS KE WADAH SAAT LOAD
+        window.onload = () => {
+            if (window.parent !== window) {
+                window.parent.postMessage({
+                    type: 'THEME_DEFAULT_SETTINGS',
+                    settings: {
+                        radius: 15,         // Sesuai desain asli Barista
+                        font: 15,           // Sesuai desain asli Barista
+                        uColor: '#ffecb3',  // Warna coklat krem khas barista
+                        tColor: '#ffffff',  // Warna putih kapur
+                        bg: '#1a1a1a',      // Warna papan tulis
+                        opac: 1.0,
+                        mode: 'solid'
+                    }
+                }, '*');
+            }
+        };
     </script>
 </body>
 </html>
+
