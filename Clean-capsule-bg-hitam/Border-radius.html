@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Featured Message - Pill Style Atmosphere Sync</title>
+    <title>Featured Message - TikTok Style Sync V3.3</title>
     <style>
         body { 
             margin: 0; padding: 0; overflow: hidden; 
@@ -19,6 +19,7 @@
         /* --- ANIMASI --- */
         .message-wrapper { transition: all 0.5s ease; }
         
+        /* Entrance Animations */
         .anim-fade-in { opacity: 0; filter: blur(4px); transform: scale(0.9) translateX(50px); transition: all 0.5s cubic-bezier(0.22, 1, 0.36, 1); }
         .anim-fade-in.show { opacity: 1; filter: blur(0); transform: scale(1) translateX(0); }
 
@@ -40,6 +41,7 @@
             --font-size: 16px;
             --user-color: #ffffff;
             --chat-color: #eeeeee;
+            --border-color: rgba(255, 255, 255, 0.15); /* Default Border */
         }
 
         .message {
@@ -48,8 +50,9 @@
             background: var(--bg-color);
             backdrop-filter: blur(12px);
             border-radius: var(--radius);
-            border: 2px solid rgba(255, 255, 255, 0.15);
+            border: 2px solid var(--border-color); /* Updated to Variable */
             box-shadow: 0 15px 40px rgba(0, 0, 0, 0.6);
+            transition: all 0.3s ease;
         }
 
         .avatar {
@@ -71,6 +74,7 @@
             font-weight: 600; line-height: 1.3; word-break: break-word; 
         }
 
+        /* Ikon TikTok Tetap Eksis */
         .message::after {
             content: ""; display: block; position: absolute;
             top: -6px; right: 30px; width: 28px; height: 28px;
@@ -97,7 +101,7 @@
         let currentMessage = null;
         let messageTimeout = null;
 
-        // --- 1. SYNC LOGIC (FOR OBS) ---
+        // --- 1. SYNC LOGIC ---
         function hexToRgba(hex, alpha) {
             if (!hex) return `rgba(20, 20, 20, ${alpha})`;
             hex = hex.replace('#', '');
@@ -110,12 +114,16 @@
         function applyInitialStyles() {
             const root = document.documentElement;
             
-            // Background
+            // Background & Border Sync
             if(urlParams.has('grad')) {
                 const colors = urlParams.get('grad').split(',');
                 root.style.setProperty('--bg-color', `linear-gradient(135deg, #${colors[0]}, #${colors[1]})`);
             } else if(urlParams.has('bg')) {
                 root.style.setProperty('--bg-color', hexToRgba(urlParams.get('bg'), urlParams.get('opac') || '0.95'));
+            }
+
+            if(urlParams.has('bcolor')) {
+                root.style.setProperty('--border-color', hexToRgba(urlParams.get('bcolor'), urlParams.get('bopac') || '1'));
             }
 
             // Other Variables
@@ -125,20 +133,39 @@
             if(urlParams.has('tcolor')) root.style.setProperty('--chat-color', '#' + urlParams.get('tcolor'));
         }
 
-        // --- 2. DASHBOARD REAL-TIME UPDATE (FOR PREVIEW) ---
+        // --- 2. DASHBOARD REAL-TIME UPDATE ---
         window.addEventListener("message", (e) => {
             if (e.data.type === 'UPDATE_STYLE') {
                 const root = document.documentElement;
+                
+                // Update Background Mode
                 if (e.data.mode === 'gradient') {
                     root.style.setProperty('--bg-color', `linear-gradient(135deg, ${e.data.g1}, ${e.data.g2})`);
                 } else {
                     root.style.setProperty('--bg-color', hexToRgba(e.data.bg, e.data.opac));
                 }
+
+                // Update Border
+                if (e.data.bColor) {
+                    root.style.setProperty('--border-color', hexToRgba(e.data.bColor, e.data.bOpac));
+                }
+
                 root.style.setProperty('--radius', e.data.radius + 'px');
                 root.style.setProperty('--font-size', e.data.font + 'px');
                 root.style.setProperty('--user-color', e.data.uColor);
                 root.style.setProperty('--chat-color', e.data.tColor);
+                
                 if (e.data.anim) selectedAnim = e.data.anim;
+                if (e.data.timer) showtime = parseInt(e.data.timer);
+            }
+
+            // Support Manual Test Chat from Wadah
+            if (e.data.type === 'TEST_CHAT') {
+                renderPill({
+                    chatname: e.data.name,
+                    chatmessage: e.data.message,
+                    chatimg: 'https://api.dicebear.com/7.x/bottts/svg?seed=TIKTOK'
+                });
             }
         });
 
@@ -149,7 +176,7 @@
                 const wrapper = document.createElement('div');
                 wrapper.className = `message-wrapper anim-${selectedAnim}`;
                 
-                const avatarSrc = data.chatimg || 'https://socialstream.ninja/images/unknown.png';
+                const avatarSrc = data.chatimg || 'https://api.dicebear.com/7.x/initials/svg?seed=' + data.chatname;
                 
                 wrapper.innerHTML = `
                     <div class="message">
@@ -200,7 +227,6 @@
             });
         }
 
-        // Jalankan sinkronisasi awal
         applyInitialStyles();
         initNinja();
     </script>
