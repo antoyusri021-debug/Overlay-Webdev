@@ -3,16 +3,22 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Webdec Costum - Malika TikTok Dark Paten</title>
-    <link rel="icon" href="../../favicon.ico" />
-    <link rel="preload" href="../../thirdparty/NotoColorEmoji.ttf" as="font" type="font/ttf" crossorigin="anonymous">
+    <title>Webdec Custom - Malika TikTok Sync V3.3</title>
     <style>
 /* ===============================
    THEME: MALIKA STUDIO REPLICA (DARK EDITION)
-   KONDISI: PATEN 3 BARIS & VERTICAL CENTER
+   SYNCED TO ATMOSPHERE V3.3
 ================================ */
+:root {
+    --bg-color: rgba(0, 0, 0, 0.9);
+    --user-color: #ffffff;
+    --chat-color: #ffffff;
+    --font-size: 24px;
+    --radius: 22px;
+}
+
 body { 
-    background: transparent; 
+    background: transparent !important; 
     font-family: 'Inter', Arial, sans-serif; 
     margin: 0;
     overflow: hidden;
@@ -26,28 +32,22 @@ body {
     padding-left: 140px; 
 }
 
-/* BUBBLE CHAT - WARNA HITAM SESUAI ASLI */
+/* BUBBLE CHAT */
 .message {
     position: relative;
     display: flex; 
     flex-direction: column;
-    justify-content: center; /* AGAR CHAT PENDEK DI TENGAH */
+    justify-content: center;
     padding: 20px 25px; 
-    background: rgba(0, 0, 0, 0.9); 
+    background: var(--bg-color); 
     backdrop-filter: blur(10px);
-    border-radius: 0px 22px 22px 22px;
-    
-    /* UKURAN PATEN */
+    border-radius: 0px var(--radius) var(--radius) var(--radius);
     width: 500px; 
     height: 145px;      
     box-sizing: border-box;
-    
-    /* SHADOW */
-    box-shadow: 
-        0 15px 35px rgba(0, 0, 0, 0.5),   
-        inset 0 0 10px rgba(255, 255, 255, 0.1); 
-    
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5), inset 0 0 10px rgba(255, 255, 255, 0.1); 
     margin-top: 20px;
+    transition: all 0.3s ease;
 }
 
 /* EKOR CHAT */
@@ -58,7 +58,7 @@ body {
     width: 0; height: 0;
     border-top: 12px solid transparent;
     border-bottom: 12px solid transparent;
-    border-right: 18px solid rgba(0, 0, 0, 0.9);
+    border-right: 18px solid var(--bg-color); /* Ikut warna background */
 }
 
 /* AVATAR */
@@ -85,21 +85,20 @@ body {
     background: linear-gradient(90deg, #ff0050 0%, #00f2ea 100%);
     padding: 6px 18px;
     border-radius: 12px 12px 0 0;
-    color: #ffffff !important;
+    color: var(--user-color) !important; /* Sync User Color */
     font-size: 15px;
     font-weight: 800;
     white-space: nowrap;
     z-index: 20;
 }
 
-/* TEKS PESAN - MAX 3 BARIS */
+/* TEKS PESAN */
 .text { 
-    font-size: 24px; 
+    font-size: var(--font-size); 
     font-weight: 600; 
-    color: #ffffff !important; 
+    color: var(--chat-color) !important; /* Sync Chat Color */
     line-height: 1.25;
     word-wrap: break-word;
-    
     display: -webkit-box;
     -webkit-line-clamp: 3; 
     -webkit-box-orient: vertical;
@@ -107,27 +106,23 @@ body {
     text-overflow: ellipsis;
 }
 
-/* ANIMASI MASUK & KELUAR */
-.message-wrapper {
-    opacity: 0;
-    transform: translateX(-30px);
-    transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-}
+/* --- DYNAMIC ANIMATIONS --- */
+.message-wrapper { opacity: 0; transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
 
-.message-wrapper.show {
-    opacity: 1;
-    transform: translateX(0);
-}
+.anim-fade-in.show { opacity: 1; transform: translateX(0); }
+.anim-fade-in { transform: translateX(-30px); }
 
-.message-wrapper.hide {
-    opacity: 0;
-    transform: translateX(-30px) scale(0.9);
-}
+.anim-slide-left.show { opacity: 1; transform: translateX(0); }
+.anim-slide-left { transform: translateX(-100px); }
 
-/* SEMBUNYIKAN ELEMEN LAIN */
-.badges, .source-icon, .physics-bg, .particle, .donation-info { 
-    display: none !important; 
-}
+.anim-slide-up.show { opacity: 1; transform: translateY(0); }
+.anim-slide-up { transform: translateY(50px); }
+
+.anim-bounce.show { opacity: 1; transform: scale(1); }
+.anim-bounce { transform: scale(0.5); }
+
+.message-wrapper.hide { opacity: 0; transform: translateX(-30px) scale(0.9); }
+
     </style>
 </head>
 <body>
@@ -135,17 +130,45 @@ body {
         <div id="output"></div>
     </div>
 
-    <script src="../../tts.js"></script>
     <script>
         const urlParams = new URLSearchParams(window.location.search);
-        const roomID = urlParams.get('session') || urlParams.get('room') || 'TESTROOM';
+        const roomID = urlParams.get('session') || 'TESTROOM';
         const password = urlParams.get('password') || "false";
-        
-        // Timer Default 10 detik (10000ms), ganti via URL &timer=5000
-        const showDuration = parseInt(urlParams.get('timer')) || 10000; 
-        
+        let showDuration = parseInt(urlParams.get('showtime') || urlParams.get('timer') || '10000'); 
+        let selectedAnim = urlParams.get('anim') || 'fade-in';
+
         let currentMessage = null;
         let hideTimeout = null;
+
+        function hexToRgba(hex, alpha) {
+            if (!hex) return `rgba(0, 0, 0, ${alpha})`;
+            hex = hex.replace('#', '');
+            let r = parseInt(hex.substring(0, 2), 16);
+            let g = parseInt(hex.substring(2, 4), 16);
+            let b = parseInt(hex.substring(4, 6), 16);
+            return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+        }
+
+        // --- DASHBOARD SYNC ---
+        window.addEventListener("message", (e) => {
+            if (e.data.type === 'UPDATE_STYLE') {
+                const root = document.documentElement;
+                if (e.data.mode === 'gradient') {
+                    root.style.setProperty('--bg-color', `linear-gradient(135deg, ${e.data.g1}, ${e.data.g2})`);
+                } else {
+                    root.style.setProperty('--bg-color', hexToRgba(e.data.bg, e.data.opac));
+                }
+                root.style.setProperty('--radius', e.data.radius + 'px');
+                root.style.setProperty('--font-size', e.data.font + 'px');
+                root.style.setProperty('--user-color', e.data.uColor);
+                root.style.setProperty('--chat-color', e.data.tColor);
+                if (e.data.anim) selectedAnim = e.data.anim;
+                if (e.data.timer) showDuration = parseInt(e.data.timer);
+            }
+            if (e.data.type === 'TEST_CHAT') {
+                showMessage({ chatname: e.data.name, chatmessage: e.data.message });
+            }
+        });
 
         function createIframe() {
             var iframe = document.createElement("iframe");
@@ -158,84 +181,49 @@ body {
                 if (e.source != iframe.contentWindow) return;
                 if (e.data.dataReceived && e.data.dataReceived.overlayNinja) {
                     let res = e.data.dataReceived.overlayNinja;
-                    if (res.response) return;
-                    processData({ contents: res });
+                    if (res.chatmessage) showMessage(res);
                 }
             });
         }
 
-        function processData(data) {
-            if (data && data.contents) showMessage(data.contents);
-        }
-
         function showMessage(content) {
-            if (!content.chatmessage && !content.chatname) return;
-
-            // Bersihkan timer lama jika chat baru masuk mendahului
             if (hideTimeout) clearTimeout(hideTimeout);
 
             hideMessage(() => {
                 const output = document.getElementById('output');
                 const wrapper = document.createElement('div');
-                wrapper.className = 'message-wrapper';
+                wrapper.className = `message-wrapper anim-${selectedAnim}`;
                 
-                const message = document.createElement('div');
-                message.className = 'message';
+                const avatarImg = content.chatimg || `https://api.dicebear.com/7.x/initials/svg?seed=${content.chatname}`;
 
-                // Avatar
-                const avatar = document.createElement('img');
-                avatar.className = 'avatar';
-                avatar.src = content.chatimg || '../../sources/images/unknown.png';
-                avatar.onerror = () => avatar.src = '../../sources/images/unknown.png';
-                message.appendChild(avatar);
+                wrapper.innerHTML = `
+                    <div class="message">
+                        <img class="avatar" src="${avatarImg}">
+                        <div>
+                            <span class="username">${content.chatname}</span>
+                            <div class="text">${content.chatmessage}</div>
+                        </div>
+                    </div>
+                `;
 
-                const contentDiv = document.createElement('div');
-                
-                // Username
-                const name = document.createElement('span');
-                name.className = 'username';
-                name.textContent = content.chatname;
-                contentDiv.appendChild(name);
-
-                // Text
-                const text = document.createElement('div');
-                text.className = 'text';
-                text.innerHTML = content.chatmessage;
-                contentDiv.appendChild(text);
-
-                message.appendChild(contentDiv);
-                wrapper.appendChild(message);
                 output.appendChild(wrapper);
-
-                // Tampilkan
                 setTimeout(() => wrapper.classList.add('show'), 50);
                 currentMessage = wrapper;
 
-                // Set Timer Hapus Otomatis
                 if (showDuration > 0) {
-                    hideTimeout = setTimeout(() => {
-                        hideMessage();
-                    }, showDuration);
-                }
-
-                // TTS (Jika ada parameter tts di URL)
-                if (window.initTTS && urlParams.has('tts')) {
-                    const ttsText = content.chatmessage ? content.chatmessage.replace(/<[^>]*>/g, '') : '';
-                    if (ttsText) window.speak(content.chatname + ' says ' + ttsText);
+                    hideTimeout = setTimeout(() => hideMessage(), showDuration);
                 }
             });
         }
 
         function hideMessage(callback) {
             if (currentMessage) {
-                currentMessage.classList.add('hide'); // Tambah animasi keluar
+                currentMessage.classList.add('hide');
                 setTimeout(() => {
-                    if (currentMessage && currentMessage.parentNode) {
-                        currentMessage.parentNode.removeChild(currentMessage);
-                    }
+                    if (currentMessage?.parentNode) currentMessage.parentNode.removeChild(currentMessage);
                     currentMessage = null;
                     if (callback) callback();
-                }, 500); // Harus sama dengan durasi transition CSS
+                }, 500);
             } else if (callback) {
                 callback();
             }
