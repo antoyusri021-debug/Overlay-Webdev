@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Theme: The Ninja Bone</title>
+    <title>Theme: The Ninja Bone - Updated</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         
@@ -113,7 +113,10 @@
         const urlParams = new URLSearchParams(window.location.search);
         const roomID = urlParams.get('session') || urlParams.get('room') || 'TESTROOM';
         const password = urlParams.get('password') || "false";
+        const showDuration = parseInt(urlParams.get('timer')) || 15000; // Default 15 detik
+
         let currentMessage = null;
+        let hideTimeout = null;
 
         function createIframe() {
             const iframe = document.createElement("iframe");
@@ -134,9 +137,16 @@
 
         function renderChat(data) {
             const output = document.getElementById('output');
+            
+            // Bersihkan timer lama jika ada chat baru masuk
+            if (hideTimeout) clearTimeout(hideTimeout);
+
             if (currentMessage) {
                 currentMessage.classList.add('hide');
-                setTimeout(() => { output.innerHTML = ''; generateNew(data); }, 450);
+                setTimeout(() => { 
+                    output.innerHTML = ''; 
+                    generateNew(data); 
+                }, 450);
             } else {
                 generateNew(data);
             }
@@ -153,13 +163,25 @@
                         <span class="username">${data.chatname}</span>
                         <div class="chat-text">${data.chatmessage}</div>
                     </div>
-                    <img src="${img}" class="avatar">
+                    <img src="${img}" class="avatar" onerror="this.src='https://api.dicebear.com/7.x/initials/svg?seed=User'">
                 </div>`;
 
             document.getElementById('output').appendChild(wrapper);
             currentMessage = wrapper;
 
+            // Trigger animasi muncul
             setTimeout(() => wrapper.classList.add('show'), 50);
+
+            // Auto-hide timer
+            if (showDuration > 0) {
+                hideTimeout = setTimeout(() => {
+                    wrapper.classList.add('hide');
+                    setTimeout(() => {
+                        if (wrapper.parentNode) wrapper.parentNode.removeChild(wrapper);
+                        if (currentMessage === wrapper) currentMessage = null;
+                    }, 450);
+                }, showDuration);
+            }
         }
 
         createIframe();
