@@ -33,16 +33,16 @@ body {
     flex-direction: column;
     justify-content: center; /* AGAR CHAT PENDEK DI TENGAH */
     padding: 20px 25px; 
-    background: rgba(0, 0, 0, 0.9); /* WARNA ASLI KAMU */
+    background: rgba(0, 0, 0, 0.9); 
     backdrop-filter: blur(10px);
     border-radius: 0px 22px 22px 22px;
     
-    /* UKURAN PATEN (Sesuai rombakan kita) */
+    /* UKURAN PATEN */
     width: 500px; 
     height: 145px;      
     box-sizing: border-box;
     
-    /* SHADOW (Disesuaikan untuk warna gelap) */
+    /* SHADOW */
     box-shadow: 
         0 15px 35px rgba(0, 0, 0, 0.5),   
         inset 0 0 10px rgba(255, 255, 255, 0.1); 
@@ -92,29 +92,14 @@ body {
     z-index: 20;
 }
 
-.username::before {
-    content: "";
-    display: inline-block;
-    width: 18px; 
-    height: 18px;
-    background-color: #fff;
-    background-image: url("tiktok.png"); 
-    background-size: 80%;
-    background-position: center;
-    background-repeat: no-repeat;
-    border-radius: 50%;
-    margin-right: 8px;
-}
-
-/* TEKS PESAN - MAX 3 BARIS & WARNA PUTIH */
+/* TEKS PESAN - MAX 3 BARIS */
 .text { 
     font-size: 24px; 
     font-weight: 600; 
-    color: #ffffff !important; /* WARNA ASLI KAMU */
+    color: #ffffff !important; 
     line-height: 1.25;
     word-wrap: break-word;
     
-    /* LIMIT 3 BARIS */
     display: -webkit-box;
     -webkit-line-clamp: 3; 
     -webkit-box-orient: vertical;
@@ -122,7 +107,7 @@ body {
     text-overflow: ellipsis;
 }
 
-/* ANIMASI MASUK */
+/* ANIMASI MASUK & KELUAR */
 .message-wrapper {
     opacity: 0;
     transform: translateX(-30px);
@@ -132,6 +117,11 @@ body {
 .message-wrapper.show {
     opacity: 1;
     transform: translateX(0);
+}
+
+.message-wrapper.hide {
+    opacity: 0;
+    transform: translateX(-30px) scale(0.9);
 }
 
 /* SEMBUNYIKAN ELEMEN LAIN */
@@ -150,6 +140,12 @@ body {
         const urlParams = new URLSearchParams(window.location.search);
         const roomID = urlParams.get('session') || urlParams.get('room') || 'TESTROOM';
         const password = urlParams.get('password') || "false";
+        
+        // Timer Default 10 detik (10000ms), ganti via URL &timer=5000
+        const showDuration = parseInt(urlParams.get('timer')) || 10000; 
+        
+        let currentMessage = null;
+        let hideTimeout = null;
 
         function createIframe() {
             var iframe = document.createElement("iframe");
@@ -175,41 +171,74 @@ body {
         function showMessage(content) {
             if (!content.chatmessage && !content.chatname) return;
 
-            const output = document.getElementById('output');
-            output.innerHTML = ''; 
+            // Bersihkan timer lama jika chat baru masuk mendahului
+            if (hideTimeout) clearTimeout(hideTimeout);
 
-            const wrapper = document.createElement('div');
-            wrapper.className = 'message-wrapper';
-            
-            const message = document.createElement('div');
-            message.className = 'message';
+            hideMessage(() => {
+                const output = document.getElementById('output');
+                const wrapper = document.createElement('div');
+                wrapper.className = 'message-wrapper';
+                
+                const message = document.createElement('div');
+                message.className = 'message';
 
-            // Avatar
-            const avatar = document.createElement('img');
-            avatar.className = 'avatar';
-            avatar.src = content.chatimg || '../../sources/images/unknown.png';
-            avatar.onerror = () => avatar.src = '../../sources/images/unknown.png';
-            message.appendChild(avatar);
+                // Avatar
+                const avatar = document.createElement('img');
+                avatar.className = 'avatar';
+                avatar.src = content.chatimg || '../../sources/images/unknown.png';
+                avatar.onerror = () => avatar.src = '../../sources/images/unknown.png';
+                message.appendChild(avatar);
 
-            const contentDiv = document.createElement('div');
-            
-            // Username
-            const name = document.createElement('span');
-            name.className = 'username';
-            name.textContent = content.chatname;
-            contentDiv.appendChild(name);
+                const contentDiv = document.createElement('div');
+                
+                // Username
+                const name = document.createElement('span');
+                name.className = 'username';
+                name.textContent = content.chatname;
+                contentDiv.appendChild(name);
 
-            // Text
-            const text = document.createElement('div');
-            text.className = 'text';
-            text.innerHTML = content.chatmessage;
-            contentDiv.appendChild(text);
+                // Text
+                const text = document.createElement('div');
+                text.className = 'text';
+                text.innerHTML = content.chatmessage;
+                contentDiv.appendChild(text);
 
-            message.appendChild(contentDiv);
-            wrapper.appendChild(message);
-            output.appendChild(wrapper);
+                message.appendChild(contentDiv);
+                wrapper.appendChild(message);
+                output.appendChild(wrapper);
 
-            setTimeout(() => wrapper.classList.add('show'), 50);
+                // Tampilkan
+                setTimeout(() => wrapper.classList.add('show'), 50);
+                currentMessage = wrapper;
+
+                // Set Timer Hapus Otomatis
+                if (showDuration > 0) {
+                    hideTimeout = setTimeout(() => {
+                        hideMessage();
+                    }, showDuration);
+                }
+
+                // TTS (Jika ada parameter tts di URL)
+                if (window.initTTS && urlParams.has('tts')) {
+                    const ttsText = content.chatmessage ? content.chatmessage.replace(/<[^>]*>/g, '') : '';
+                    if (ttsText) window.speak(content.chatname + ' says ' + ttsText);
+                }
+            });
+        }
+
+        function hideMessage(callback) {
+            if (currentMessage) {
+                currentMessage.classList.add('hide'); // Tambah animasi keluar
+                setTimeout(() => {
+                    if (currentMessage && currentMessage.parentNode) {
+                        currentMessage.parentNode.removeChild(currentMessage);
+                    }
+                    currentMessage = null;
+                    if (callback) callback();
+                }, 500); // Harus sama dengan durasi transition CSS
+            } else if (callback) {
+                callback();
+            }
         }
 
         createIframe();
