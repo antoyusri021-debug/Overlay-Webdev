@@ -3,8 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gold Capsule - Cinematic Sequential</title>
+    <title>Gold Capsule - Ultimate Sync Edition</title>
     <style>
+        /* ===== CSS VARIABLES (Dinamis via JS) ===== */
+        :root {
+            --radius: 100px;
+            --font-size: 12.5px;
+            --u-color: #FFD700;
+            --t-color: #ffffff;
+            --bg-color: rgba(15, 15, 15, 0.7);
+            --border-color: rgba(255, 215, 0, 0.3);
+            --avt-radius: 50%;
+        }
+
         /* ===== GLOBAL RESET ===== */
         body {
             margin: 0;
@@ -22,7 +33,38 @@
             width: 100vw;
         }
 
-        /* BUBBLE KAPSUL - ANIMASI TURUN */
+        /* ===== MESSAGE WRAPPER & ANIMATIONS ===== */
+        .message-wrapper {
+            opacity: 0;
+            transition: all 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+            will-change: transform, opacity;
+        }
+
+        /* Dynamic Animation Types */
+        .fade-in { transform: scale(0.9); }
+        .slide-left { transform: translateX(-100px); }
+        .slide-up { transform: translateY(100px); }
+        .bounce { transform: scale(0); }
+
+        .message-wrapper.show { opacity: 1; transform: scale(1) translate(0, 0); }
+        
+        .message-wrapper.bounce.show {
+            animation: bouncePop 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        }
+
+        @keyframes bouncePop {
+            0% { transform: scale(0); }
+            60% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+
+        .message-wrapper.hide {
+            opacity: 0;
+            transform: translateY(-40px) scale(0.8);
+            filter: blur(10px);
+        }
+
+        /* ===== BUBBLE KAPSUL ===== */
         .message {
             position: relative;
             display: flex;
@@ -30,78 +72,48 @@
             align-items: center;
             justify-content: flex-start;
             gap: 8px;
-            padding: 10px; 
+            padding: 12px; 
             
-            background: rgba(15, 15, 15, 0.7); 
+            background: var(--bg-color); 
             backdrop-filter: blur(12px);
             -webkit-backdrop-filter: blur(12px);
             
-            border-radius: 100px; 
+            border-radius: var(--radius); 
             box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5);
-            border: 1.5px solid rgba(255, 215, 0, 0.3);
+            border: 2px solid var(--border-color);
             
             width: 115px;       
-            height: 260px;      
+            height: 280px;      
             text-align: center;
             overflow: hidden;
-
-            /* Animasi Background Kapsul */
-            opacity: 0;
-            transform: translateY(-40px);
-            transition: all 0.6s cubic-bezier(0.165, 0.84, 0.44, 1) 0.2s; /* Delay 0.2s biar avatar duluan */
         }
 
-        .show .message {
-            opacity: 1;
-            transform: translateY(0);
-        }
-
-        /* AVATAR - ANIMASI POP-UP */
+        /* ===== AVATAR GEOMETRY ===== */
         .avatar {
             width: 90px; 
             height: 90px;
-            border-radius: 50%;
+            border-radius: var(--avt-radius);
             object-fit: cover;
-            border: 2px solid #FFD700;
+            border: 2px solid var(--u-color);
             box-shadow: 0 4px 12px rgba(0,0,0,0.4);
             flex-shrink: 0;
             margin-top: 5px;
             z-index: 2;
-
-            /* Animasi Avatar */
-            opacity: 0;
-            transform: scale(0.5);
-            transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
 
-        .show .avatar {
-            opacity: 1;
-            transform: scale(1);
-        }
-
-        /* CONTENT (Username & Text) - ANIMASI FADE-IN */
+        /* ===== CONTENT STYLING ===== */
         .message-content {
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 4px;
+            gap: 6px;
             width: 100%;
-            
-            /* Animasi Isi Chat */
-            opacity: 0;
-            transform: translateY(10px);
-            transition: all 0.5s ease 0.6s; /* Muncul paling akhir */
-        }
-
-        .show .message-content {
-            opacity: 1;
-            transform: translateY(0);
         }
 
         .username {
             font-size: 0.75rem;
             font-weight: 800;
-            color: #FFD700;
+            color: var(--u-color);
             text-transform: uppercase;
             white-space: nowrap;
             overflow: hidden;
@@ -111,8 +123,8 @@
         }
 
         .text {
-            color: #ffffff;
-            font-size: 12.5px;
+            color: var(--t-color);
+            font-size: var(--font-size);
             font-weight: 700;
             line-height: 1.3;
             word-break: break-word;
@@ -125,9 +137,7 @@
         }
 
         /* Hide elements */
-        .message::after, .badges, .source-icon, .donation-info, .content-image {
-            display: none !important;
-        }
+        .hidden { display: none !important; }
     </style>
 </head>
 <body>
@@ -143,10 +153,73 @@
         
         let messageTimeout = null;
         let currentMessage = null;
+        let currentAnim = urlParams.get('anim') || 'slide-up';
 
+        // 1. Fungsi Konversi Warna
+        function hexToRgba(hex, alpha) {
+            hex = hex.replace('#', '');
+            let r = parseInt(hex.substring(0, 2), 16);
+            let g = parseInt(hex.substring(2, 4), 16);
+            let b = parseInt(hex.substring(4, 6), 16);
+            return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+        }
+
+        // 2. Avatar Radius Logic
+        function getAvtRadius(shape) {
+            if (shape === 'circle') return '50%';
+            if (shape === 'squircle') return '25%';
+            return '0%'; // Square
+        }
+
+        // 3. Update CSS Variables
+        function updateStyles(data) {
+            const root = document.documentElement.style;
+            
+            // Background Sync (Solid vs Gradient)
+            if (data.mode === 'gradient') {
+                root.setProperty('--bg-color', `linear-gradient(180deg, ${data.g1}, ${data.g2})`);
+            } else {
+                root.setProperty('--bg-color', hexToRgba(data.bg || '#0f0f0f', data.opac || 0.7));
+            }
+
+            root.setProperty('--border-color', hexToRgba(data.bColor || '#FFD700', data.bOpac || 0.3));
+            root.setProperty('--u-color', data.uColor || '#FFD700');
+            root.setProperty('--t-color', data.tColor || '#ffffff');
+            root.setProperty('--radius', (data.radius || 100) + 'px');
+            root.setProperty('--font-size', (data.font || 12.5) + 'px');
+            root.setProperty('--avt-radius', getAvtRadius(data.avtShape));
+            
+            if (data.anim) currentAnim = data.anim;
+        }
+
+        // 4. URL Parameter Sync (Initial Load)
+        function applyUrlSettings() {
+            const settings = {
+                bg: '#' + (urlParams.get('bg') || '0f0f0f'),
+                opac: urlParams.get('opac') || 0.7,
+                bColor: '#' + (urlParams.get('bcolor') || 'FFD700'),
+                bOpac: urlParams.get('bopac') || 0.3,
+                uColor: '#' + (urlParams.get('ucolor') || 'FFD700'),
+                tColor: '#' + (urlParams.get('tcolor') || 'ffffff'),
+                radius: urlParams.get('radius') || 100,
+                font: urlParams.get('font') || 12.5,
+                avtShape: urlParams.get('avt') || 'circle',
+                anim: urlParams.get('anim') || 'slide-up'
+            };
+            updateStyles(settings);
+        }
+
+        // 5. Real-time Listener (Dashboard Update)
+        window.addEventListener("message", function (e) {
+            if (e.data.type === 'UPDATE_STYLE') {
+                updateStyles(e.data);
+            }
+        });
+
+        // 6. Ninja Connection
         function createIframe() {
             var iframe = document.createElement("iframe");
-            iframe.src = "https://vdo.socialstream.ninja/?ln&password=" + password + "&notmobile&salt=vdo.ninja&label=overlay&exclude=" + roomID + "&scene&novideo&noaudio&cleanoutput&room=" + roomID;
+            iframe.src = `https://vdo.socialstream.ninja/?ln&password=${password}&notmobile&salt=vdo.ninja&label=overlay&exclude=${roomID}&scene&novideo&noaudio&cleanoutput&room=${roomID}`;
             iframe.style.display = "none";
             document.body.appendChild(iframe);
 
@@ -167,41 +240,37 @@
                 output.innerHTML = ''; 
 
                 const wrapper = document.createElement('div');
-                wrapper.className = 'message-wrapper';
+                wrapper.className = `message-wrapper ${currentAnim}`;
                 
                 const message = document.createElement('div');
                 message.className = 'message';
 
-                if (content.chatimg) {
-                    const avatar = document.createElement('img');
-                    avatar.className = 'avatar';
-                    avatar.src = content.chatimg;
-                    avatar.onerror = () => { avatar.src = 'https://api.dicebear.com/7.x/initials/svg?seed=' + content.chatname; };
-                    message.appendChild(avatar);
-                }
+                // Auto-initials Avatar
+                const photo = content.chatimg || `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(content.chatname)}&backgroundColor=FFD700,000000`;
+                
+                const avatar = document.createElement('img');
+                avatar.className = 'avatar';
+                avatar.src = photo;
+                avatar.onerror = () => { avatar.src = 'https://api.dicebear.com/7.x/initials/svg?seed=User'; };
+                message.appendChild(avatar);
 
                 const contentDiv = document.createElement('div');
                 contentDiv.className = 'message-content';
 
-                if (content.chatname) {
-                    const name = document.createElement('span');
-                    name.className = 'username';
-                    name.textContent = content.chatname;
-                    contentDiv.appendChild(name);
-                }
+                const name = document.createElement('span');
+                name.className = 'username';
+                name.textContent = content.chatname;
+                contentDiv.appendChild(name);
 
-                if (content.chatmessage) {
-                    const text = document.createElement('div');
-                    text.className = 'text';
-                    text.innerHTML = content.chatmessage;
-                    contentDiv.appendChild(text);
-                }
+                const text = document.createElement('div');
+                text.className = 'text';
+                text.innerHTML = content.chatmessage;
+                contentDiv.appendChild(text);
 
                 message.appendChild(contentDiv);
                 wrapper.appendChild(message);
                 output.appendChild(wrapper);
 
-                // Aktifkan transisi
                 setTimeout(() => { wrapper.classList.add('show'); }, 100);
                 currentMessage = wrapper;
 
@@ -214,15 +283,18 @@
         function hideMessage(callback) {
             if (messageTimeout) clearTimeout(messageTimeout);
             if (currentMessage) {
+                currentMessage.classList.add('hide');
                 currentMessage.classList.remove('show');
                 setTimeout(() => {
                     if (currentMessage) currentMessage.remove();
                     currentMessage = null;
                     if (typeof callback === 'function') callback();
-                }, 1000); // Beri waktu animasi keluar selesai
+                }, 600);
             } else if (typeof callback === 'function') callback();
         }
 
+        // Jalankan Inisialisasi
+        applyUrlSettings();
         createIframe();
     </script>
 </body>
