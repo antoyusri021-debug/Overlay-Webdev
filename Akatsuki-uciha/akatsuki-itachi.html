@@ -3,16 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Featured Message - Itachi Edition</title>
+    <title>Featured Message - Itachi Edition Fixed</title>
     <link rel="icon" href="../../favicon.ico" />
-    <link rel="preload" href="../../thirdparty/NotoColorEmoji.ttf" as="font" type="font/ttf" crossorigin="anonymous">
     <style>
         /* =====================================================
            CHAT CONTAINER
         ===================================================== */
         html, body {
-            width: 100%;
-            height: 100%;
+            width: 100%; height: 100%;
             overflow: hidden !important;
             margin: 0; padding: 0;
             background: transparent;
@@ -30,18 +28,8 @@
             transition: all 0.5s ease;
         }
 
-        /* FITUR: MODE HORIZONTAL */
-        #container.horizontal-layout {
-            flex-direction: row !important;
-            justify-content: flex-start;
-            align-items: center;
-            max-width: 100vw;
-            overflow-x: hidden;
-            padding: 0 40px;
-        }
-
         /* =====================================================
-           MESSAGE WRAPPER
+           MESSAGE WRAPPER & ANIMATION
         ===================================================== */
         .message-wrapper {
             position: relative;
@@ -49,7 +37,7 @@
             opacity: 0; 
             filter: blur(2px);
             flex-shrink: 0;
-            transition: opacity 0.5s ease, filter 0.5s ease;
+            transition: all 0.5s ease;
         }
 
         .message-wrapper.show {
@@ -58,9 +46,13 @@
             animation: pillIn 0.35s cubic-bezier(0.22, 1, 0.36, 1) forwards;
         }
 
-        /* =====================================================
-           CHAT BUBBLE & DEKORASI
-        ===================================================== */
+        /* Class untuk animasi keluar */
+        .message-wrapper.hide {
+            opacity: 0;
+            transform: translateX(-50px) scale(0.9);
+            filter: blur(5px);
+        }
+
         .message {
             position: relative;
             display: flex;
@@ -129,7 +121,6 @@
     </style>
 </head>
 <body>
-    <div class="physics-bg"></div>
     <div id="container"></div>
 
     <script src="../../tts.js"></script>
@@ -137,24 +128,15 @@
         const urlParams = new URLSearchParams(window.location.search);
         const roomID = urlParams.get('session') || urlParams.get('room') || 'TESTROOM';
         const password = urlParams.get('password') || "false";
-        const layoutMode = urlParams.get('layout') || 'vertical';
         const chatLimit = parseInt(urlParams.get('limit') || '1'); 
         
-        // LOGIKA SMART TIMER (Suntikan Baru)
+        // LOGIKA TIMER
         const showtime = parseInt(urlParams.get('showtime') || urlParams.get('timer') || '10000'); 
-        let messageTimeout = null;
 
         const container = document.getElementById('container');
 
-        if (layoutMode === 'horizontal') {
-            container.classList.add('horizontal-layout');
-        }
-
         function showMessage(content) {
             if (!content.chatmessage && !content.chatname) return;
-
-            // Reset timeout lama jika ada chat baru masuk
-            if (messageTimeout) clearTimeout(messageTimeout);
 
             const wrapper = document.createElement('div');
             wrapper.className = 'message-wrapper';
@@ -180,6 +162,7 @@
                 </div>
             `;
 
+            // Batasi jumlah pesan sesuai Limit
             const currentMessages = container.getElementsByClassName('message-wrapper');
             if (currentMessages.length >= chatLimit) {
                 container.removeChild(currentMessages[0]);
@@ -187,33 +170,27 @@
 
             container.appendChild(wrapper);
 
+            // Munculkan dengan animasi
             requestAnimationFrame(() => {
                 wrapper.classList.add('show');
             });
 
-            // LOGIKA TIMER: Hanya jalan jika showtime di atas 0
+            // LOGIKA AUTO-HIDE: Jika showtime > 0, hapus pesan ini setelah waktu tertentu
             if (showtime > 0) {
-                messageTimeout = setTimeout(() => {
-                    hideMessage(wrapper);
+                setTimeout(() => {
+                    wrapper.classList.add('hide'); // Tambah class animasi keluar
+                    setTimeout(() => {
+                        if (wrapper.parentNode) {
+                            wrapper.parentNode.removeChild(wrapper);
+                        }
+                    }, 500); // Tunggu animasi transisi selesai
                 }, showtime);
             }
 
+            // TTS Logic
             if (window.initTTS && urlParams.has('tts')) {
                 const ttsText = content.chatmessage.replace(/<[^>]*>/g, '');
                 window.speak(content.chatname + ' says ' + ttsText);
-            }
-        }
-
-        function hideMessage(element) {
-            if (element) {
-                element.style.opacity = '0';
-                element.style.filter = 'blur(5px)';
-                element.style.transform = 'scale(0.9)';
-                setTimeout(() => {
-                    if (element.parentNode) {
-                        element.parentNode.removeChild(element);
-                    }
-                }, 500);
             }
         }
 
