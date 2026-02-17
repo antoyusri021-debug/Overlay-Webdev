@@ -3,11 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Webdec Custom - Malika TikTok Sync V3.3</title>
+    <title>Webdec Custom - Malika TikTok Sync V3.3.1</title>
     <style>
 /* ===============================
    THEME: MALIKA STUDIO REPLICA (DARK EDITION)
-   SYNCED TO ATMOSPHERE V3.3
+   FIXED: URL PARAMETER SYNC
 ================================ */
 :root {
     --bg-color: rgba(0, 0, 0, 0.9);
@@ -32,7 +32,6 @@ body {
     padding-left: 140px; 
 }
 
-/* BUBBLE CHAT */
 .message {
     position: relative;
     display: flex; 
@@ -47,10 +46,8 @@ body {
     box-sizing: border-box;
     box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5), inset 0 0 10px rgba(255, 255, 255, 0.1); 
     margin-top: 20px;
-    transition: all 0.3s ease;
 }
 
-/* EKOR CHAT */
 .message::before {
     content: "";
     position: absolute;
@@ -58,77 +55,58 @@ body {
     width: 0; height: 0;
     border-top: 12px solid transparent;
     border-bottom: 12px solid transparent;
-    border-right: 18px solid var(--bg-color); /* Ikut warna background */
+    border-right: 18px solid var(--bg-color);
 }
 
-/* AVATAR */
 .avatar {
     position: absolute;
-    left: -120px; 
-    top: 0px;
-    width: 95px; 
-    height: 95px;
+    left: -120px; top: 0px;
+    width: 95px; height: 95px;
     border-radius: 50%;
     border: 4px solid #ffffff;
     object-fit: cover;
     z-index: 10;
-    box-shadow: 0 5px 20px rgba(0,0,0,0.4);
 }
 
-/* USERNAME TIKTOK STYLE */
 .username {
     position: absolute;
-    top: -28px;
-    left: 0px;
+    top: -28px; left: 0px;
     display: flex !important;
     align-items: center;
     background: linear-gradient(90deg, #ff0050 0%, #00f2ea 100%);
     padding: 6px 18px;
     border-radius: 12px 12px 0 0;
-    color: var(--user-color) !important; /* Sync User Color */
-    font-size: 15px;
-    font-weight: 800;
-    white-space: nowrap;
+    color: var(--user-color) !important;
+    font-size: 15px; font-weight: 800;
     z-index: 20;
 }
 
-/* TEKS PESAN */
 .text { 
     font-size: var(--font-size); 
     font-weight: 600; 
-    color: var(--chat-color) !important; /* Sync Chat Color */
+    color: var(--chat-color) !important;
     line-height: 1.25;
-    word-wrap: break-word;
     display: -webkit-box;
     -webkit-line-clamp: 3; 
     -webkit-box-orient: vertical;
     overflow: hidden;
-    text-overflow: ellipsis;
 }
 
-/* --- DYNAMIC ANIMATIONS --- */
+/* --- ANIMATIONS --- */
 .message-wrapper { opacity: 0; transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
-
 .anim-fade-in.show { opacity: 1; transform: translateX(0); }
 .anim-fade-in { transform: translateX(-30px); }
-
 .anim-slide-left.show { opacity: 1; transform: translateX(0); }
 .anim-slide-left { transform: translateX(-100px); }
-
 .anim-slide-up.show { opacity: 1; transform: translateY(0); }
 .anim-slide-up { transform: translateY(50px); }
-
 .anim-bounce.show { opacity: 1; transform: scale(1); }
 .anim-bounce { transform: scale(0.5); }
-
 .message-wrapper.hide { opacity: 0; transform: translateX(-30px) scale(0.9); }
-
     </style>
 </head>
 <body>
-    <div id="container">
-        <div id="output"></div>
-    </div>
+    <div id="container"><div id="output"></div></div>
 
     <script>
         const urlParams = new URLSearchParams(window.location.search);
@@ -142,14 +120,33 @@ body {
 
         function hexToRgba(hex, alpha) {
             if (!hex) return `rgba(0, 0, 0, ${alpha})`;
-            hex = hex.replace('#', '');
-            let r = parseInt(hex.substring(0, 2), 16);
-            let g = parseInt(hex.substring(2, 4), 16);
-            let b = parseInt(hex.substring(4, 6), 16);
+            if (!hex.startsWith('#')) hex = '#' + hex;
+            let r = parseInt(hex.slice(1, 3), 16),
+                g = parseInt(hex.slice(3, 5), 16),
+                b = parseInt(hex.slice(5, 7), 16);
             return `rgba(${r}, ${g}, ${b}, ${alpha})`;
         }
 
-        // --- DASHBOARD SYNC ---
+        // --- 1. FUNGSI LOAD AWAL (PENTING BIAR LINK COPY-PASTE JALAN) ---
+        function applyUrlSettings() {
+            const root = document.documentElement;
+            
+            // Sync Background dari URL
+            if(urlParams.has('grad')) {
+                const colors = urlParams.get('grad').split(',');
+                root.style.setProperty('--bg-color', `linear-gradient(135deg, #${colors[0]}, #${colors[1]})`);
+            } else if(urlParams.has('bg')) {
+                root.style.setProperty('--bg-color', hexToRgba(urlParams.get('bg'), urlParams.get('opac') || '0.9'));
+            }
+
+            // Sync Radius, Font, Colors dari URL
+            if(urlParams.has('radius')) root.style.setProperty('--radius', urlParams.get('radius') + 'px');
+            if(urlParams.has('font')) root.style.setProperty('--font-size', urlParams.get('font') + 'px');
+            if(urlParams.has('ucolor')) root.style.setProperty('--user-color', '#' + urlParams.get('ucolor'));
+            if(urlParams.has('tcolor')) root.style.setProperty('--chat-color', '#' + urlParams.get('tcolor'));
+        }
+
+        // --- 2. DASHBOARD REAL-TIME SYNC ---
         window.addEventListener("message", (e) => {
             if (e.data.type === 'UPDATE_STYLE') {
                 const root = document.documentElement;
@@ -172,9 +169,8 @@ body {
 
         function createIframe() {
             var iframe = document.createElement("iframe");
-            iframe.src = "https://vdo.socialstream.ninja/?ln&password=" + password + "&notmobile&salt=vdo.ninja&label=overlay&exclude=" + roomID + "&scene&novideo&noaudio&cleanoutput&room=" + roomID;
-            iframe.style.width = "0px"; iframe.style.height = "0px";
-            iframe.style.position = "fixed"; iframe.style.left = "-100px";
+            iframe.src = `https://vdo.socialstream.ninja/?ln&password=${password}&notmobile&salt=vdo.ninja&label=overlay&exclude=${roomID}&scene&novideo&noaudio&cleanoutput&room=${roomID}`;
+            iframe.style.display = "none";
             document.body.appendChild(iframe);
 
             window.addEventListener("message", function (e) {
@@ -188,14 +184,11 @@ body {
 
         function showMessage(content) {
             if (hideTimeout) clearTimeout(hideTimeout);
-
             hideMessage(() => {
                 const output = document.getElementById('output');
                 const wrapper = document.createElement('div');
                 wrapper.className = `message-wrapper anim-${selectedAnim}`;
-                
                 const avatarImg = content.chatimg || `https://api.dicebear.com/7.x/initials/svg?seed=${content.chatname}`;
-
                 wrapper.innerHTML = `
                     <div class="message">
                         <img class="avatar" src="${avatarImg}">
@@ -203,16 +196,11 @@ body {
                             <span class="username">${content.chatname}</span>
                             <div class="text">${content.chatmessage}</div>
                         </div>
-                    </div>
-                `;
-
+                    </div>`;
                 output.appendChild(wrapper);
                 setTimeout(() => wrapper.classList.add('show'), 50);
                 currentMessage = wrapper;
-
-                if (showDuration > 0) {
-                    hideTimeout = setTimeout(() => hideMessage(), showDuration);
-                }
+                if (showDuration > 0) hideTimeout = setTimeout(() => hideMessage(), showDuration);
             });
         }
 
@@ -224,11 +212,11 @@ body {
                     currentMessage = null;
                     if (callback) callback();
                 }, 500);
-            } else if (callback) {
-                callback();
-            }
+            } else if (callback) callback();
         }
 
+        // JALANKAN SYNC URL PAS PERTAMA KALI LOAD
+        applyUrlSettings();
         createIframe();
     </script>
 </body>
