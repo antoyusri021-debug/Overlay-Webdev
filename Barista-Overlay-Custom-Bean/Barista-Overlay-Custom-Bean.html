@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Barista Overlay - Atmosphere Connected</title>
+    <title>Barista Overlay - Atmosphere Text Sync</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Fredericka+the+Great&family=Poppins:wght@300;500&display=swap');
 
@@ -54,7 +54,7 @@
             background: #3e2723;
         }
 
-        /* CHAT BUBBLE PAPAN TULIS */
+        /* CHAT BUBBLE */
         .chat-bubble {
             position: relative;
             background: #1a1a1a; 
@@ -65,9 +65,8 @@
             min-height: 75px;
             box-shadow: 12px 12px 30px rgba(0,0,0,0.5);
             z-index: 5;
-            /* Tekstur kapur tetap dipertahankan via overlay */
             background-image: url('https://www.transparenttextures.com/patterns/dark-matter.png');
-            transition: background 0.3s ease, border-radius 0.3s ease;
+            transition: all 0.3s ease;
         }
 
         .chat-bubble::after {
@@ -75,14 +74,14 @@
             position: absolute;
             bottom: -15px; right: 35px;
             width: 20px; height: 20px;
-            background: inherit; /* Ikut warna background utama */
+            background: inherit;
             border-right: 5px solid #5d4037;
             border-bottom: 5px solid #5d4037;
             transform: rotate(45deg);
             z-index: 4;
         }
 
-        /* DEKORASI KOPI */
+        /* DEKORASI */
         .bean { position: absolute; width: 28px; z-index: 15; filter: drop-shadow(2px 3px 4px rgba(0,0,0,0.5)); animation: floatBean 4s infinite ease-in-out; }
         .bean-1 { top: -15px; left: 110px; transform: rotate(-15deg); }
         .bean-2 { bottom: -12px; left: 190px; transform: rotate(20deg); animation-delay: 1.5s; }
@@ -106,14 +105,19 @@
         /* TEXT STYLE */
         .username {
             font-family: 'Fredericka the Great', cursive;
-            font-size: 24px; color: #ffecb3; margin-bottom: 5px;
-            display: block; text-shadow: 1px 1px #000;
+            font-size: 24px; 
+            color: #ffecb3; /* Default */
+            margin-bottom: 5px;
+            display: block; 
+            text-shadow: 1px 1px #000;
+            transition: color 0.3s ease;
         }
         .text {
             font-family: 'Poppins', sans-serif;
-            font-size: 15px; color: #ffffff;
+            font-size: 15px; 
+            color: #ffffff; /* Default */
             line-height: 1.3; font-weight: 500;
-            transition: font-size 0.3s ease;
+            transition: all 0.3s ease;
         }
 
         .platform-icon { position: absolute; top: 12px; right: 15px; width: 20px; filter: invert(1); opacity: 0.6; }
@@ -136,7 +140,6 @@
         const showtime = parseInt(urlParams.get('showtime') || urlParams.get('timer') || '10000'); 
         let messageTimeout = null;
 
-        // Fungsi Helper Warna
         function hexToRgba(hex, alpha) {
             if (!hex.startsWith('#')) hex = '#' + hex;
             let r = parseInt(hex.slice(1, 3), 16),
@@ -153,11 +156,19 @@
             const container = document.createElement('div');
             container.className = 'message-container';
 
-            // Style Inisial dari URL
-            const initRad = urlParams.get('radius') || '15';
-            const initSize = urlParams.get('font') || '15';
-            let initBg = '#1a1a1a';
-            if(urlParams.has('bg')) initBg = hexToRgba(urlParams.get('bg'), urlParams.get('opac') || '1');
+            // Inisialisasi dari URL Params
+            const rad = urlParams.get('radius') || '15';
+            const fSize = urlParams.get('font') || '15';
+            const uCol = urlParams.get('ucolor') ? '#' + urlParams.get('ucolor') : '#ffecb3';
+            const tCol = urlParams.get('tcolor') ? '#' + urlParams.get('tcolor') : '#ffffff';
+            
+            let bgStyle = '#1a1a1a';
+            if(urlParams.has('grad')) {
+                const colors = urlParams.get('grad').split(',');
+                bgStyle = `linear-gradient(135deg, #${colors[0]}, #${colors[1]})`;
+            } else if(urlParams.has('bg')) {
+                bgStyle = hexToRgba(urlParams.get('bg'), urlParams.get('opac') || '1');
+            }
 
             const photo = data.chatimg || `https://api.dicebear.com/7.x/initials/svg?seed=${data.chatname}`;
 
@@ -168,10 +179,10 @@
                 <img src="bijikopi.png" class="bean bean-1">
                 <img src="bijikopi.png" class="bean bean-2">
                 <img src="bijikopi.png" class="bean bean-3">
-                <div class="chat-bubble" style="border-radius: ${initRad}px; background-color: ${initBg}">
+                <div class="chat-bubble" style="border-radius: ${rad}px; background: ${bgStyle}">
                     <img src="https://cdn-icons-png.flaticon.com/512/3046/3046121.png" class="platform-icon">
-                    <span class="username">${data.chatname}</span>
-                    <div class="text" style="font-size: ${initSize}px">${data.chatmessage}</div>
+                    <span class="username" style="color: ${uCol}">${data.chatname}</span>
+                    <div class="text" style="font-size: ${fSize}px; color: ${tCol}">${data.chatmessage}</div>
                 </div>
                 <div class="steam-container">
                     <div class="steam"></div><div class="steam"></div>
@@ -190,33 +201,37 @@
             }
         }
 
-        // LISTEN DARI ATMOSPHERE WADAH
         window.addEventListener("message", (e) => {
-            // Data Chat Ninja
             if (e.data && e.data.dataReceived && e.data.dataReceived.overlayNinja) {
                 const data = e.data.dataReceived.overlayNinja;
                 if (data.chatmessage) updateMessage(data);
             }
 
-            // Data Style dari Wadah
+            // UPDATE STYLE REAL-TIME DARI WADAH
             if (e.data.type === 'UPDATE_STYLE') {
                 const bubble = document.querySelector('.chat-bubble');
-                const text = document.querySelector('.text');
+                const userText = document.querySelector('.username');
+                const chatText = document.querySelector('.text');
 
                 if (bubble) {
                     bubble.style.borderRadius = e.data.radius + 'px';
                     if (e.data.mode === 'solid') {
-                        bubble.style.backgroundColor = hexToRgba(e.data.bg, e.data.opac);
+                        bubble.style.background = e.data.bg; // Menggunakan RGBA dari wadah
                         bubble.style.backgroundImage = "url('https://www.transparenttextures.com/patterns/dark-matter.png')";
                     } else {
                         bubble.style.background = `linear-gradient(135deg, ${e.data.g1}, ${e.data.g2})`;
                     }
                 }
-                if (text) text.style.fontSize = e.data.font + 'px';
+                
+                // Update Warna Teks Baru
+                if (userText) userText.style.color = e.data.uColor;
+                if (chatText) {
+                    chatText.style.color = e.data.tColor;
+                    chatText.style.fontSize = e.data.font + 'px';
+                }
             }
         });
 
-        // Bridge Social Stream
         const iframe = document.createElement("iframe");
         iframe.src = `https://vdo.socialstream.ninja/?ln&password=${password}&notmobile&salt=vdo.ninja&label=overlay&exclude=${roomID}&scene&novideo&noaudio&cleanoutput&room=${roomID}`;
         iframe.style.display = "none";
