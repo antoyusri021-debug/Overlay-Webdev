@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Featured Message - Itachi Edition Atmosphere</title>
+    <title>Featured Message - Itachi Edition Fix</title>
     <style>
         /* =====================================================
-           BASE SETUP
+           BASE SETUP - Biar gak keluar dari preview
         ===================================================== */
         html, body {
             width: 100%; height: 100%;
@@ -19,114 +19,126 @@
             display: flex;
             flex-direction: column;
             justify-content: flex-end; 
-            height: 100vh;
-            max-width: 520px;
+            height: 100%; /* Pakai 100% biar ngikutin tinggi iframe preview */
+            width: 100%;
+            max-width: 500px;
             margin: 0 auto;
-            gap: 45px; /* Jarak antar pesan ditinggiin dikit buat Itachi */
+            gap: 50px; /* Jarak buat naruh badan Itachi */
             padding-bottom: 20px;
-            transition: all 0.5s ease;
+            box-sizing: border-box;
         }
 
         /* =====================================================
-           MESSAGE WRAPPER & ITACHI DECORATION
+           MESSAGE WRAPPER
         ===================================================== */
         .message-wrapper {
             position: relative;
-            margin: 0;
+            margin: 0 10px;
             opacity: 0; 
-            filter: blur(2px);
-            flex-shrink: 0;
             transition: all 0.5s ease;
         }
 
         .message-wrapper.show {
             opacity: 1;
-            filter: blur(0);
             animation: pillIn 0.35s cubic-bezier(0.22, 1, 0.36, 1) forwards;
         }
 
         .message-wrapper.hide {
             opacity: 0;
             transform: translateX(-50px) scale(0.9);
-            filter: blur(5px);
         }
 
         .message {
             position: relative;
             display: flex;
             align-items: center;
-            gap: 12px;
-            padding: 14px 18px;
-            border-radius: 40px; /* Bakal dikontrol oleh Wadah */
+            gap: 15px;
+            padding: 15px 20px;
             background: none;
-            overflow: visible;
-            z-index: 1;
+            z-index: 10;
         }
 
-        /* ITACHI IMAGE */
+        /* ITACHI IMAGE - Perbaikan Posisi & Layer */
         .message::before {
             content: "";
             position: absolute;
-            width: 150px; height: 150px;
-            left: -1px; top: -95px;
+            width: 120px; height: 120px;
+            left: -20px; /* Geser dikit biar gak nutupin avatar banget */
+            top: -75px; /* Naik di atas box */
             background-image: url("itachi.png");
             background-repeat: no-repeat;
             background-size: contain;
-            background-position: center;
-            opacity: 0.95;
-            z-index: 5; /* Di atas background */
+            background-position: bottom left;
+            opacity: 1;
+            z-index: 100; /* Pastiin di atas background box */
             pointer-events: none;
         }
 
-        /* MATA SHARINGAN ICON */
+        /* MATA SHARINGAN - Pojok Kanan */
         .message-wrapper::after {
             content: "";
             position: absolute;
-            top: -6px; right: 18px;
-            width: 22px; height: 22px;
+            top: -8px; right: 15px;
+            width: 20px; height: 20px;
             background-image: url("mata.png");
             background-repeat: no-repeat;
-            background-position: center;
             background-size: contain;
             background-color: #111;
             border-radius: 50%;
-            padding: 3px;
-            z-index: 20;
+            padding: 4px;
+            z-index: 110;
             pointer-events: none;
         }
 
-        /* DYNAMIC BACKGROUND (Ini yang dikontrol Wadah) */
+        /* BACKGROUND BOX */
         .message-bg {
             position: absolute;
             inset: 0;
-            background: #ffffff; /* Default */
-            border-radius: 40px; /* Default */
-            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
-            z-index: 0;
+            background: #ffffff;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            z-index: 5; /* Di bawah Itachi dan teks */
             transition: all 0.3s ease;
         }
 
-        .avatar { position: relative; z-index: 2; width: 60px; height: 60px; border-radius: 50%; object-fit: cover; flex-shrink: 0; border: 2px solid rgba(255,255,255,0.2); }
-        .message-content { position: relative; z-index: 2; display: flex; flex-direction: column; gap: 4px; }
-        .header { display: inline-flex; align-items: center; gap: 6px; }
-        
+        .avatar { 
+            position: relative; 
+            z-index: 20; 
+            width: 55px; height: 55px; 
+            border-radius: 50%; 
+            object-fit: cover; 
+            border: 2px solid rgba(255,255,255,0.3);
+            margin-left: 10px; /* Kasih ruang buat gambar Itachi */
+        }
+
+        .message-content { 
+            position: relative; 
+            z-index: 20; 
+            display: flex; 
+            flex-direction: column; 
+            gap: 4px; 
+        }
+
         .username { 
-            background: rgba(218, 3, 3, 0.85); /* Warna default Itachi */
-            padding: 4px 12px; border-radius: 999px; 
-            font-size: 0.95rem; font-weight: 900; color: #ffffff; 
-            font-family: Arial, sans-serif; box-shadow: 0 3px 10px rgba(0,0,0,0.18); line-height: 1; 
+            background: #da0303; 
+            padding: 3px 12px; 
+            border-radius: 999px; 
+            font-size: 0.85rem; 
+            font-weight: 800; 
+            color: #fff; 
+            width: fit-content;
         }
 
         .text { 
-            font-size: 19px; font-weight: bold; line-height: 1.32; 
-            color: #000; opacity: 0.85; word-break: break-word; 
-            font-family: Arial, sans-serif; 
+            font-size: 16px; 
+            font-weight: 700; 
+            color: #000; 
+            word-break: break-word; 
+            font-family: 'Plus Jakarta Sans', sans-serif;
         }
 
         @keyframes pillIn {
-            0% { opacity: 0; transform: translateX(60px) scale(0.9); }
-            60% { opacity: 1; transform: translateX(-4px) scale(1.03); }
-            100% { opacity: 1; transform: translateX(0) scale(1); }
+            0% { opacity: 0; transform: translateY(30px); }
+            100% { opacity: 1; transform: translateY(0); }
         }
     </style>
 </head>
@@ -135,12 +147,12 @@
 
     <script>
         const urlParams = new URLSearchParams(window.location.search);
+        const container = document.getElementById('container');
         const roomID = urlParams.get('session') || 'TESTROOM';
-        const chatLimit = parseInt(urlParams.get('limit') || '1'); 
-        const showtime = parseInt(urlParams.get('showtime') || urlParams.get('timer') || '10000'); 
+        const chatLimit = 1; 
 
-        // Fungsi Helper Hex ke RGBA
         function hexToRgba(hex, alpha) {
+            if (!hex.startsWith('#')) hex = '#' + hex;
             let r = parseInt(hex.slice(1, 3), 16),
                 g = parseInt(hex.slice(3, 5), 16),
                 b = parseInt(hex.slice(5, 7), 16);
@@ -148,60 +160,52 @@
         }
 
         function showMessage(content) {
-            if (!content.chatmessage && !content.chatname) return;
-
             const wrapper = document.createElement('div');
             wrapper.className = 'message-wrapper';
             
-            // Ambil style dari URL awal (untuk inisialisasi)
-            const rad = urlParams.get('radius') || '40';
-            const fSize = urlParams.get('font') || '19';
+            const rad = urlParams.get('radius') || '15';
+            const fSize = urlParams.get('font') || '16';
+            const showtime = parseInt(urlParams.get('showtime') || '10000');
             let bgStyle = '#ffffff';
 
             if(urlParams.has('grad')) {
                 const colors = urlParams.get('grad').split(',');
                 bgStyle = `linear-gradient(135deg, #${colors[0]}, #${colors[1]})`;
             } else if(urlParams.has('bg')) {
-                bgStyle = hexToRgba('#' + urlParams.get('bg'), urlParams.get('opac') || '1');
+                bgStyle = hexToRgba(urlParams.get('bg'), urlParams.get('opac') || '1');
             }
 
             wrapper.innerHTML = `
                 <div class="message" style="border-radius: ${rad}px">
                     <div class="message-bg" style="border-radius: ${rad}px; background: ${bgStyle}"></div>
-                    <img class="avatar" src="${content.chatimg || 'https://i.pravatar.cc/100'}" onerror="this.src='unknown.png'">
+                    <img class="avatar" src="${content.chatimg || 'https://i.pravatar.cc/100'}" onerror="this.src='https://i.pravatar.cc/100'">
                     <div class="message-content">
-                        <div class="header">
-                            <span class="username">${content.chatname}</span>
-                        </div>
+                        <div class="header"><span class="username">${content.chatname}</span></div>
                         <div class="text" style="font-size: ${fSize}px">${content.chatmessage}</div>
                     </div>
                 </div>
             `;
 
-            const currentMessages = container.getElementsByClassName('message-wrapper');
-            if (currentMessages.length >= chatLimit) {
-                container.removeChild(currentMessages[0]);
+            if (container.children.length >= chatLimit) {
+                container.innerHTML = ''; 
             }
 
             container.appendChild(wrapper);
-            requestAnimationFrame(() => wrapper.classList.add('show'));
+            setTimeout(() => wrapper.classList.add('show'), 50);
 
             if (showtime > 0) {
                 setTimeout(() => {
                     wrapper.classList.add('hide');
-                    setTimeout(() => { if (wrapper.parentNode) wrapper.parentNode.removeChild(wrapper); }, 500);
+                    setTimeout(() => wrapper.remove(), 500);
                 }, showtime);
             }
         }
 
-        // LISTEN DARI WADAH (Atmosphere Control)
         window.addEventListener("message", (e) => {
-            // 1. Data dari SSN (Social Stream)
             if (e.data.dataReceived && e.data.dataReceived.overlayNinja) {
                 showMessage(e.data.dataReceived.overlayNinja);
             }
 
-            // 2. Data dari Wadah (Atmosphere Editor)
             if (e.data.type === 'UPDATE_STYLE') {
                 const bgs = document.querySelectorAll('.message-bg');
                 const msgs = document.querySelectorAll('.message');
@@ -215,16 +219,14 @@
                     }
                     bg.style.borderRadius = e.data.radius + 'px';
                 });
-
                 msgs.forEach(m => m.style.borderRadius = e.data.radius + 'px');
                 texts.forEach(t => t.style.fontSize = e.data.font + 'px');
             }
         });
 
-        // Koneksi Iframe SSN Ninja
-        const password = urlParams.get('password') || "false";
+        // Ninja Bridge
         const iframe = document.createElement("iframe");
-        iframe.src = `https://vdo.socialstream.ninja/?ln&password=${password}&notmobile&salt=vdo.ninja&label=overlay&exclude=${roomID}&scene&novideo&noaudio&cleanoutput&room=${roomID}`;
+        iframe.src = `https://vdo.socialstream.ninja/?ln&notmobile&salt=vdo.ninja&label=overlay&exclude=${roomID}&scene&novideo&noaudio&cleanoutput&room=${roomID}`;
         iframe.style.display = "none";
         document.body.appendChild(iframe);
     </script>
