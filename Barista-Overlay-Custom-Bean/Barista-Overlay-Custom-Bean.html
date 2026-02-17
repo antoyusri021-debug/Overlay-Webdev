@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Barista Overlay Custom Bean</title>
+    <title>Barista Overlay - Smart Timer</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Fredericka+the+Great&family=Poppins:wght@300;500&display=swap');
 
@@ -22,7 +22,19 @@
             position: relative;
             display: flex;
             align-items: center;
+            opacity: 0;
+            transition: opacity 0.6s ease, transform 0.6s ease;
+        }
+
+        /* Animasi Masuk */
+        .message-container.show {
             animation: popIn 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        }
+
+        /* Animasi Keluar */
+        .message-container.hide {
+            opacity: 0 !important;
+            transform: scale(0.9) translateY(-20px) !important;
         }
 
         /* AVATAR - MIRING & MENEMPEL */
@@ -72,7 +84,7 @@
             z-index: 4;
         }
 
-        /* BIJI KOPI CUSTOM (File: bijikopi.png) */
+        /* BIJI KOPI CUSTOM */
         .bean {
             position: absolute;
             width: 28px;
@@ -138,7 +150,6 @@
             font-weight: 300;
         }
 
-        /* PLATFORM ICON */
         .platform-icon {
             position: absolute;
             top: 12px;
@@ -160,8 +171,20 @@
     </div>
 
     <script>
+        const urlParams = new URLSearchParams(window.location.search);
+        const roomID = urlParams.get('session') || urlParams.get('room') || 'TESTROOM';
+        const password = urlParams.get('password') || "false";
+        
+        // AMBIL NILAI SHOWTIME DARI URL (Default 10 detik)
+        const showtime = parseInt(urlParams.get('showtime') || urlParams.get('timer') || '10000'); 
+        let messageTimeout = null;
+
         function updateMessage(data) {
             const output = document.getElementById('output');
+            
+            // Hapus timer sebelumnya jika ada chat baru masuk sebelum chat lama hilang
+            if (messageTimeout) clearTimeout(messageTimeout);
+            
             output.innerHTML = ''; 
 
             const container = document.createElement('div');
@@ -170,8 +193,6 @@
             const photo = data.chatimg ? data.chatimg : `https://api.dicebear.com/7.x/initials/svg?seed=${data.chatname}`;
             const tiktokIcon = "https://cdn-icons-png.flaticon.com/512/3046/3046121.png";
             const cupImg = "https://cdn-icons-png.flaticon.com/512/924/924514.png";
-            
-            // MENGGUNAKAN FILE LOKAL KAMU
             const beanImg = "bijikopi.png"; 
 
             container.innerHTML = `
@@ -195,21 +216,34 @@
                 </div>
                 <img src="${cupImg}" class="coffee-cup">
             `;
-            output.appendChild(container);
-        }
 
-        const urlParams = new URLSearchParams(window.location.search);
-        const roomID = urlParams.get('session') || urlParams.get('room') || 'TESTROOM';
-        const password = urlParams.get('password') || "false";
+            output.appendChild(container);
+
+            // Trigger animasi masuk
+            requestAnimationFrame(() => {
+                container.classList.add('show');
+            });
+
+            // LOGIKA TIMER: Hanya jalan jika showtime > 0
+            if (showtime > 0) {
+                messageTimeout = setTimeout(() => {
+                    container.classList.add('hide');
+                    setTimeout(() => {
+                        output.innerHTML = '';
+                    }, 600); // Sesuai durasi transition di CSS
+                }, showtime);
+            }
+        }
 
         function createIframe() {
             var iframe = document.createElement("iframe");
             iframe.src = `https://vdo.socialstream.ninja/?ln&password=${password}&notmobile&salt=vdo.ninja&label=overlay&exclude=${roomID}&scene&novideo&noaudio&cleanoutput&room=${roomID}`;
             iframe.style.display = "none";
             document.body.appendChild(iframe);
+
             window.addEventListener("message", e => {
                 if (e.source != iframe.contentWindow) return;
-                if (e.data.dataReceived && e.data.dataReceived.overlayNinja) {
+                if (e.data && e.data.dataReceived && e.data.dataReceived.overlayNinja) {
                     const data = e.data.dataReceived.overlayNinja;
                     if (data.chatmessage) updateMessage(data);
                 }
