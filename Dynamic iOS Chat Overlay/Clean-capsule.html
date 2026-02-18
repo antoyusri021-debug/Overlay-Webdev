@@ -3,19 +3,20 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Flexible Slim iOS Overlay - Sync Version</title>
+    <title>Flexible Slim iOS Overlay - Ultimate Sync</title>
     <style>
-        /* --- SYSTEM VARIABLES (Sesuai Wadah) --- */
+        /* --- 1. JANTUNG SINKRONISASI (CSS VARIABLES) --- */
         :root {
-            --main-radius: 18px;
-            --main-font: 13px;
-            --main-bg: rgba(0, 0, 0, 0.7);
-            --main-opac: 0.7;
-            --user-color: #ffffff;
-            --chat-color: #d1d1d1;
-            --border-color: rgba(255, 255, 255, 0.1);
-            --border-opac: 0.1;
-            --avt-radius: 4px; /* Default iOS Icon Shape */
+            --radius: 18px;
+            --font-size: 13px;
+            --bg-base: #000000;
+            --bg-opac: 0.7;
+            --u-color: #ffffff;
+            --t-color: #d1d1d1;
+            --b-color: #ffffff;
+            --b-opac: 0.1;
+            --avt-radius: 4px;
+            --anim-name: slideIn; /* Default */
         }
 
         body {
@@ -23,90 +24,79 @@
             margin: 0;
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
             overflow: hidden;
-            height: 100vh;
-            width: 100vw;
+            height: 100vh; width: 100vw;
         }
 
-        #container {
-            display: flex;
-            padding: 20px;
-            gap: 12px;
-        }
-
+        #container { display: flex; padding: 20px; gap: 12px; }
         .layout-vertical { flex-direction: column; align-items: flex-start; }
         .layout-horizontal { flex-direction: row; align-items: flex-start; }
 
-        /* BOX UTAMA - SEKARANG DINAMIS */
+        /* --- 2. BOX CHAT DENGAN DUKUNGAN GRADIENT & TRANSPARANSI --- */
         .notification-card {
             width: 360px;
             min-height: 70px; 
             max-width: 360px;
-            background: var(--main-bg); 
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border-radius: var(--main-radius);
+            /* Support Solid & Gradient */
+            background: var(--bg-base);
+            border-radius: var(--radius);
             padding: 12px 16px;
             box-shadow: 0 4px 25px rgba(0, 0, 0, 0.4);
-            animation: slideIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
-            border: 1px solid var(--border-color);
+            
+            /* Border Sync (Warna + Opacity) */
+            border: 1px solid var(--b-color);
+            border-color: var(--b-color); 
+            
+            /* Animasi Dinamis */
+            animation: var(--anim-name) 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+            
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
             box-sizing: border-box; 
             flex-shrink: 0;
             display: flex;
             flex-direction: column;
             justify-content: center;
             margin-bottom: 10px;
-            transition: all 0.3s ease; /* Biar transisi smooth pas diubah di wadah */
         }
 
-        .notif-header {
-            display: flex;
-            align-items: center;
-            margin-bottom: 4px;
-        }
+        .notif-header { display: flex; align-items: center; margin-bottom: 4px; }
 
         .app-icon-bg {
-            width: 16px;
-            height: 16px;
+            width: 16px; height: 16px;
             background-color: #ffffff;
-            border-radius: var(--avt-radius); /* Ikut setting Avatar Geometry */
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            border-radius: var(--avt-radius);
+            display: flex; align-items: center; justify-content: center;
             margin-right: 8px;
-            overflow: hidden;
         }
 
         .app-icon { width: 10px; height: 10px; }
-
-        .app-name {
-            font-size: 9px;
-            font-weight: 600;
-            color: rgba(255, 255, 255, 0.4);
-            text-transform: uppercase;
-            letter-spacing: 0.8px;
-            flex-grow: 1;
-        }
-
+        .app-name { font-size: 9px; font-weight: 600; color: rgba(255, 255, 255, 0.4); text-transform: uppercase; flex-grow: 1; }
         .notif-time { font-size: 9px; color: rgba(255, 255, 255, 0.3); }
 
+        /* --- 3. TEKS SYNC --- */
         .username {
-            font-size: var(--main-font);
+            font-size: var(--font-size);
             font-weight: 700;
-            color: var(--user-color);
+            color: var(--u-color);
             margin-bottom: 2px;
         }
 
         .message-text {
-            font-size: var(--main-font);
-            color: var(--chat-color);
+            font-size: var(--font-size);
+            color: var(--t-color);
             line-height: 1.4;
             word-break: break-word; 
-            overflow: visible;
         }
 
-        @keyframes slideIn {
-            0% { opacity: 0; transform: translateX(-20px); }
-            100% { opacity: 1; transform: translateX(0); }
+        /* --- 4. DAFTAR ANIMASI --- */
+        @keyframes slideIn { 0% { opacity: 0; transform: translateX(-20px); } 100% { opacity: 1; transform: translateX(0); } }
+        @keyframes fade-in { 0% { opacity: 0; } 100% { opacity: 1; } }
+        @keyframes slide-left { 0% { opacity: 0; transform: translateX(50px); } 100% { opacity: 1; transform: translateX(0); } }
+        @keyframes slide-up { 0% { opacity: 0; transform: translateY(30px); } 100% { opacity: 1; transform: translateY(0); } }
+        @keyframes bounce { 
+            0% { opacity: 0; transform: scale(0.3); } 
+            50% { transform: scale(1.05); }
+            100% { opacity: 1; transform: scale(1); } 
         }
     </style>
 </head>
@@ -116,78 +106,92 @@
 
     <script>
         const urlParams = new URLSearchParams(window.location.search);
-        
-        // --- DATA AWAL DARI URL ---
-        const ownerName = urlParams.get('name') || "Webdev Broadcast";
-        const roomID = urlParams.get('session') || 'TESTROOM';
-        const password = urlParams.get('password') || "false";
         let layoutMode = urlParams.get('layout') || 'vertical'; 
         let chatLimit = parseInt(urlParams.get('limit')) || 1;
 
         const container = document.getElementById('container');
-        container.className = (layoutMode === 'horizontal') ? 'layout-horizontal' : 'layout-vertical';
 
-        // --- FUNGSI UPDATE STYLE (SINYAL DARI WADAH) ---
+        // --- FUNGSI SAKTI PENANGKAP SINYAL WADAH ---
         function applyStyles(data) {
             const root = document.documentElement;
-            if(data.radius) root.style.setProperty('--main-radius', data.radius + 'px');
-            if(data.font) root.style.setProperty('--main-font', data.font + 'px');
-            if(data.bg) root.style.setProperty('--main-bg', data.bg);
-            if(data.opac) root.style.setProperty('--main-opac', data.opac);
-            if(data.uColor) root.style.setProperty('--user-color', data.uColor);
-            if(data.tColor) root.style.setProperty('--chat-color', data.tColor);
-            if(data.bColor) root.style.setProperty('--border-color', data.bColor);
             
-            // Avatar Shape Mapping
+            // 1. Handle Opacity Border & Warna
+            if(data.bColor && data.bOpac) {
+                // Konversi Hex ke RGBA untuk border
+                let hex = data.bColor.replace('#','');
+                let r = parseInt(hex.substring(0,2), 16);
+                let g = parseInt(hex.substring(2,4), 16);
+                let b = parseInt(hex.substring(4,6), 16);
+                root.style.setProperty('--b-color', `rgba(${r},${g},${b},${data.bOpac})`);
+            }
+
+            // 2. Handle Background (Solid / Gradient / Transparan)
+            if(data.mode === 'gradient') {
+                root.style.setProperty('--bg-base', `linear-gradient(135deg, ${hexToRgba(data.g1, data.opac)}, ${hexToRgba(data.g2, data.opac)})`);
+            } else if(data.bg) {
+                root.style.setProperty('--bg-base', hexToRgba(data.bg, data.opac));
+            }
+
+            // 3. Handle Animasi
+            if(data.anim) root.style.setProperty('--anim-name', data.anim);
+
+            // 4. Handle Geometry & Font
+            if(data.radius) root.style.setProperty('--radius', data.radius + 'px');
+            if(data.font) root.style.setProperty('--font-size', data.font + 'px');
+            if(data.uColor) root.style.setProperty('--u-color', data.uColor);
+            if(data.tColor) root.style.setProperty('--t-color', data.tColor);
+            
             if(data.avtShape) {
-                let r = "4px"; // default ios
-                if(data.avtShape === 'circle') r = "50%";
-                if(data.avtShape === 'squircle') r = "25%";
-                if(data.avtShape === 'square') r = "0%";
+                let r = data.avtShape === 'circle' ? '50%' : (data.avtShape === 'squircle' ? '25%' : '0%');
                 root.style.setProperty('--avt-radius', r);
             }
 
-            // Layout Update
+            // 5. Layout Sync
             if(data.layout) {
                 layoutMode = data.layout;
                 container.className = (data.layout === 'horizontal') ? 'layout-horizontal' : 'layout-vertical';
             }
-            if(data.limit) chatLimit = parseInt(data.limit);
         }
 
-        // Jalankan style awal dari URL jika ada
-        const initialStyle = {
+        // Helper konversi Hex ke RGBA
+        function hexToRgba(hex, alpha) {
+            hex = hex.replace('#','');
+            let r = parseInt(hex.substring(0,2), 16);
+            let g = parseInt(hex.substring(2,4), 16);
+            let b = parseInt(hex.substring(4,6), 16);
+            return `rgba(${r},${g},${b},${alpha})`;
+        }
+
+        // Jalankan sinkronisasi awal
+        const initData = {
             radius: urlParams.get('radius'),
             font: urlParams.get('font'),
-            bg: urlParams.get('bg') ? '#' + urlParams.get('bg') : null,
-            uColor: urlParams.get('ucolor') ? '#' + urlParams.get('ucolor') : null,
-            tColor: urlParams.get('tcolor') ? '#' + urlParams.get('tcolor') : null,
-            bColor: urlParams.get('bcolor') ? '#' + urlParams.get('bcolor') : null,
-            avtShape: urlParams.get('avt')
+            bg: urlParams.get('bg') ? '#' + urlParams.get('bg') : '#000000',
+            g1: urlParams.get('grad') ? '#' + urlParams.get('grad').split(',')[0] : null,
+            g2: urlParams.get('grad') ? '#' + urlParams.get('grad').split(',')[1] : null,
+            mode: urlParams.get('grad') ? 'gradient' : 'solid',
+            opac: urlParams.get('opac') || 0.7,
+            uColor: urlParams.get('ucolor') ? '#' + urlParams.get('ucolor') : '#ffffff',
+            tColor: urlParams.get('tcolor') ? '#' + urlParams.get('tcolor') : '#d1d1d1',
+            bColor: urlParams.get('bcolor') ? '#' + urlParams.get('bcolor') : '#ffffff',
+            bOpac: urlParams.get('bopac') || 0.1,
+            anim: urlParams.get('anim') || 'slideIn',
+            avtShape: urlParams.get('avt'),
+            layout: urlParams.get('layout')
         };
-        applyStyles(initialStyle);
+        applyStyles(initData);
 
-        // --- LISTENER POSTMESSAGE (REAL-TIME SYNC) ---
+        // LISTENER REAL-TIME (Dengerin Slider Wadah)
         window.addEventListener('message', function(e) {
-            if (e.data.type === 'UPDATE_STYLE') {
-                applyStyles(e.data);
-            }
+            if (e.data.type === 'UPDATE_STYLE') applyStyles(e.data);
         });
 
-        // --- CORE LOGIC SOCIAL STREAM ---
-        function playGoogleTTS(text) {
-            const audio = document.getElementById('tts-audio');
-            audio.src = `https://translate.google.com/translate_tts?ie=UTF-8&q=${encodeURIComponent(text)}&tl=id&client=tw-ob`;
-            audio.playbackRate = 1.25;
-            audio.play().catch(e => console.log("OBS Interaction Required"));
-        }
-
+        // --- SOSIAL STREAM CORE ---
         function createIframe() {
             var iframe = document.createElement("iframe");
-            iframe.src = `https://vdo.socialstream.ninja/?ln&password=${password}&notmobile&salt=vdo.ninja&label=overlay&exclude=${roomID}&scene&novideo&noaudio&cleanoutput&room=${roomID}`;
+            iframe.src = `https://vdo.socialstream.ninja/?ln&password=${urlParams.get('password') || "false"}&notmobile&salt=vdo.ninja&label=overlay&exclude=${urlParams.get('session') || 'TESTROOM'}&scene&novideo&noaudio&cleanoutput&room=${urlParams.get('session') || 'TESTROOM'}`;
             iframe.style.display = "none";
             document.body.appendChild(iframe);
-
             window.addEventListener("message", function (e) {
                 if (e.source != iframe.contentWindow) return;
                 if (e.data.dataReceived && e.data.dataReceived.overlayNinja) {
@@ -200,27 +204,19 @@
         function updateMessage(data) {
             const card = document.createElement('div');
             card.className = 'notification-card';
-            const tiktokIcon = "https://cdn-icons-png.flaticon.com/512/3046/3046121.png"; 
-
             card.innerHTML = `
                 <div class="notif-header">
-                    <div class="app-icon-bg"><img src="${tiktokIcon}" class="app-icon"></div>
-                    <span class="app-name">MESSAGES</span>
-                    <span class="notif-time">NOW</span>
+                    <div class="app-icon-bg"><img src="https://cdn-icons-png.flaticon.com/512/3046/3046121.png" class="app-icon"></div>
+                    <span class="app-name">MESSAGES</span><span class="notif-time">NOW</span>
                 </div>
                 <div class="content">
                     <div class="username">${data.chatname}</div>
                     <div class="message-text">${data.chatmessage}</div>
                 </div>
             `;
-
             container.appendChild(card);
-            playGoogleTTS(`Pesan baru untuk ${ownerName}. Dari ${data.chatname}. Pesannya adalah: ${data.chatmessage}`);
-
             if (container.children.length > chatLimit) container.removeChild(container.children[0]);
-            if (layoutMode === 'horizontal') container.scrollLeft = container.scrollWidth;
         }
-
         createIframe();
     </script>
 </body>
