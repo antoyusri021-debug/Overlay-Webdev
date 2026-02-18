@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Flexible Slim iOS Overlay - Ultimate Sync</title>
+    <title>Flexible Slim iOS Overlay - Fixed Sync</title>
     <style>
         :root {
             --radius: 18px;
@@ -17,7 +17,7 @@
         body {
             background: transparent !important;
             margin: 0;
-            font-family: -apple-system, BlinkMacSystemFont, "Plus Jakarta Sans", sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, "Plus Jakarta Sans", "Segoe UI", Roboto, sans-serif;
             overflow: hidden;
             height: 100vh;
             width: 100vw;
@@ -30,10 +30,14 @@
             height: 100%;
             width: 100%;
             box-sizing: border-box;
+            /* Pastikan kontainer bisa scroll otomatis kalau horizontal */
+            overflow-x: auto;
+            overflow-y: hidden;
         }
 
         .layout-vertical { flex-direction: column; align-items: flex-start; }
-        .layout-horizontal { flex-direction: row; align-items: flex-start; flex-wrap: wrap; }
+        /* Fix horizontal: supaya chat baru nambah ke samping kanan */
+        .layout-horizontal { flex-direction: row; align-items: flex-start; flex-wrap: nowrap; }
 
         .notification-card {
             width: 360px;
@@ -49,6 +53,7 @@
             display: flex;
             flex-direction: column;
             animation: slideIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+            flex-shrink: 0; /* Penting biar gak gepeng di mode horizontal */
         }
 
         .notif-header {
@@ -68,7 +73,6 @@
             overflow: hidden;
         }
         
-        /* Avatar Shape Logic */
         .shape-circle { border-radius: 50%; }
         .shape-squircle { border-radius: 35%; }
         .shape-square { border-radius: 4px; }
@@ -101,7 +105,7 @@
         }
 
         @keyframes slideIn {
-            0% { opacity: 0; transform: translateY(10px); }
+            0% { opacity: 0; transform: translateY(15px); }
             100% { opacity: 1; transform: translateY(0); }
         }
 
@@ -116,22 +120,22 @@
     <script>
         const urlParams = new URLSearchParams(window.location.search);
         
-        // Settings from URL
         let settings = {
             owner: urlParams.get('name') || "User",
-            session: urlParams.get('session') || 'TEST',
+            session: urlParams.get('session') || 'ROOT',
             layout: urlParams.get('layout') || 'vertical',
             limit: parseInt(urlParams.get('limit')) || 5,
             radius: urlParams.get('radius') || '18',
             font: urlParams.get('font') || '13',
             avt: urlParams.get('avt') || 'circle',
-            showtime: parseInt(urlParams.get('showtime')) || 0
+            showtime: parseInt(urlParams.get('showtime')) || 0,
+            password: urlParams.get('password') || "false"
         };
 
         const container = document.getElementById('container');
         container.className = `layout-${settings.layout}`;
 
-        // Listen to Real-time Style Updates from Dashboard
+        // REAL-TIME SYNC FROM DASHBOARD
         window.addEventListener("message", function(e) {
             if (e.data.type === 'UPDATE_STYLE') {
                 const d = e.data;
@@ -141,32 +145,28 @@
                 if(d.font) root.style.setProperty('--font-size', d.font + 'px');
                 if(d.uColor) root.style.setProperty('--user-color', d.uColor);
                 if(d.tColor) root.style.setProperty('--msg-color', d.tColor);
-                if(d.bColor) {
-                    const opac = d.bOpac || 1;
-                    root.style.setProperty('--border-color', d.bColor + (Math.round(opac * 255).toString(16).padStart(2, '0')));
-                }
                 
-                // Background Mode (Solid / Gradient)
                 if(d.mode === 'gradient') {
                     root.style.setProperty('--bg-color', `linear-gradient(135deg, ${d.g1}, ${d.g2})`);
-                } else {
+                } else if (d.bg) {
                     root.style.setProperty('--bg-color', d.bg);
                 }
 
-                settings.avt = d.avtShape || settings.avt;
-                settings.limit = d.limit || settings.limit;
+                if(d.avtShape) settings.avt = d.avtShape;
+                if(d.limit) settings.limit = parseInt(d.limit);
             }
         });
 
         function playGoogleTTS(text) {
             const audio = document.getElementById('tts-audio');
             audio.src = `https://translate.google.com/translate_tts?ie=UTF-8&q=${encodeURIComponent(text)}&tl=id&client=tw-ob`;
-            audio.play().catch(() => {});
+            audio.play().catch(err => console.log("TTS Audio Blocked or Failed"));
         }
 
         function createIframe() {
             var iframe = document.createElement("iframe");
-            iframe.src = `https://vdo.socialstream.ninja/?ln&notmobile&salt=vdo.ninja&label=overlay&exclude=${settings.session}&scene&novideo&noaudio&cleanoutput&room=${settings.session}`;
+            // Ditambahkan parameter &cleanoutput dan &password untuk stabilitas ninja
+            iframe.src = `https://vdo.socialstream.ninja/?ln&password=${settings.password}&notmobile&salt=vdo.ninja&label=overlay&exclude=${settings.session}&scene&novideo&noaudio&cleanoutput&room=${settings.session}`;
             iframe.style.display = "none";
             document.body.appendChild(iframe);
 
@@ -183,7 +183,6 @@
             const card = document.createElement('div');
             card.className = 'notification-card';
             
-            // Get Avatar / Social Icon
             const avatarUrl = data.chatimg || "https://cdn-icons-png.flaticon.com/512/3046/3046121.png";
 
             card.innerHTML = `
@@ -202,30 +201,30 @@
 
             container.appendChild(card);
 
-            // TTS Logic
-            if(urlParams.get('tts') === 'true') {
-                playGoogleTTS(`${data.chatname} bilang ${data.chatmessage}`);
+            // Auto-scroll ke chat terbaru jika mode horizontal
+            if (settings.layout === 'horizontal') {
+                container.scrollTo({
+                    left: container.scrollWidth,
+                    behavior: 'smooth'
+                });
             }
 
-            // Chat Limit Logic
-            if (container.children.length > settings.limit) {
+            // Limit Chat Logic
+            while (container.children.length > settings.limit) {
                 container.removeChild(container.children[0]);
             }
 
-            // Auto Hide Logic (Timer)
+            // Timer Hapus Otomatis
             if (settings.showtime > 0) {
                 setTimeout(() => {
-                    card.style.animation = "slideIn 0.5s reverse forwards";
+                    card.style.opacity = '0';
+                    card.style.transition = '0.5s';
                     setTimeout(() => card.remove(), 500);
                 }, settings.showtime);
             }
-
-            // Horizontal Scroll Adjustment
-            if (settings.layout === 'horizontal') {
-                container.scrollLeft = container.scrollWidth;
-            }
         }
 
+        // Jalankan sistem
         createIframe();
     </script>
 </body>
