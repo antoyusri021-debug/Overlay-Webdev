@@ -3,21 +3,23 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>iOS Overlay - GitHub Sync</title>
+    <title>Flexible Slim iOS Overlay - Sync Version</title>
     <style>
+        /* Variabel CSS untuk Kustomisasi Otomatis */
         :root {
-            --radius: 22px;
-            --bg-color: rgba(0, 0, 0, 0.9);
+            --bg-color: rgba(0, 0, 0, 0.7);
+            --radius: 18px;
+            --font-size: 13px;
             --user-color: #ffffff;
-            --msg-color: #ffffff;
-            --font-size: 24px;
-            --border-color: rgba(255, 255, 255, 1);
+            --text-color: #d1d1d1;
+            --border-color: rgba(255, 255, 255, 0.1);
+            --border-opac: 1;
         }
 
         body {
             background: transparent !important;
             margin: 0;
-            font-family: 'Plus Jakarta Sans', -apple-system, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
             overflow: hidden;
             height: 100vh;
             width: 100vw;
@@ -28,18 +30,15 @@
             padding: 20px;
             gap: 12px;
             height: 100%;
-            width: 100%;
-            box-sizing: border-box;
-            overflow: hidden;
         }
 
-        /* Support Layout Dashboard */
         .layout-vertical { flex-direction: column; align-items: flex-start; }
-        .layout-horizontal { flex-direction: row; align-items: flex-start; overflow-x: auto; }
+        .layout-horizontal { flex-direction: row; align-items: flex-start; }
 
         .notification-card {
             width: 360px;
             min-height: 70px; 
+            max-width: 360px;
             background: var(--bg-color); 
             backdrop-filter: blur(20px);
             -webkit-backdrop-filter: blur(20px);
@@ -48,102 +47,144 @@
             box-shadow: 0 4px 25px rgba(0, 0, 0, 0.4);
             border: 1px solid var(--border-color);
             box-sizing: border-box; 
+            flex-shrink: 0;
             display: flex;
             flex-direction: column;
-            flex-shrink: 0;
+            justify-content: center;
             margin-bottom: 10px;
-            animation: slideIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+            transition: all 0.3s ease; /* Biar smooth pas ganti warna */
         }
 
-        .notif-header { display: flex; align-items: center; margin-bottom: 6px; }
+        .notif-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 4px;
+        }
 
         .app-icon-bg {
-            width: 20px; height: 20px; background: #fff;
-            margin-right: 8px; display: flex; align-items: center; justify-content: center;
-            overflow: hidden;
+            width: 16px;
+            height: 16px;
+            background-color: #ffffff;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 8px;
         }
-        
-        /* Support Avatar Shape Dashboard */
-        .shape-circle { border-radius: 50%; }
-        .shape-squircle { border-radius: 35%; }
-        .shape-square { border-radius: 4px; }
 
-        .app-icon { width: 100%; height: 100%; object-fit: cover; }
-        .app-name { font-size: 9px; font-weight: 800; color: rgba(255, 255, 255, 0.5); text-transform: uppercase; flex-grow: 1; }
+        .app-icon { width: 10px; height: 10px; }
+
+        .app-name {
+            font-size: 9px;
+            font-weight: 600;
+            color: rgba(255, 255, 255, 0.4);
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            flex-grow: 1;
+        }
+
         .notif-time { font-size: 9px; color: rgba(255, 255, 255, 0.3); }
 
         .username {
-            font-size: calc(var(--font-size) - 2px);
-            font-weight: 800; color: var(--user-color); margin-bottom: 2px;
+            font-size: var(--font-size);
+            font-weight: 700;
+            color: var(--user-color);
+            margin-bottom: 2px;
         }
 
-        .message-text { font-size: var(--font-size); color: var(--msg-color); line-height: 1.4; word-break: break-word; }
-
-        @keyframes slideIn {
-            0% { opacity: 0; transform: translateY(15px); }
-            100% { opacity: 1; transform: translateY(0); }
+        .message-text {
+            font-size: var(--font-size);
+            color: var(--text-color);
+            line-height: 1.4;
+            word-break: break-word; 
+            overflow: visible;
         }
-        #container::-webkit-scrollbar { display: none; }
+
+        /* Animasi bisa diganti dari Wadah */
+        .fade-in { animation: fadeIn 0.5s ease forwards; }
+        .slide-left { animation: slideLeft 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
+        .slide-up { animation: slideUp 0.5s ease forwards; }
+        .bounce { animation: bouncePop 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55) forwards; }
+
+        @keyframes slideLeft { 0% { opacity: 0; transform: translateX(-20px); } 100% { opacity: 1; transform: translateX(0); } }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes bouncePop { 0% { opacity: 0; transform: scale(0.5); } 100% { opacity: 1; transform: scale(1); } }
     </style>
 </head>
 <body>
     <div id="container"></div>
+    <audio id="tts-audio" style="display:none;"></audio>
+
     <script>
         const urlParams = new URLSearchParams(window.location.search);
         
-        // Initial Settings dari URL
-        let settings = {
-            session: urlParams.get('session') || 'ROOT',
-            limit: parseInt(urlParams.get('limit')) || 10,
-            layout: urlParams.get('layout') || 'vertical',
-            avt: urlParams.get('avt') || 'circle',
-            showtime: parseInt(urlParams.get('showtime')) || 0
-        };
+        // Settings dari URL
+        const roomID = urlParams.get('session') || 'TESTROOM';
+        const layoutMode = urlParams.get('layout') || 'vertical'; 
+        const chatLimit = parseInt(urlParams.get('limit')) || 5;
+        const animation = urlParams.get('anim') || 'slide-left';
 
         const container = document.getElementById('container');
-        container.className = `layout-${settings.layout}`;
+        container.className = (layoutMode === 'horizontal') ? 'layout-horizontal' : 'layout-vertical';
 
-        // FUNGSI UTAMA: Menerima Update dari Dashboard (Wadah) lo
-        window.addEventListener("message", function(e) {
+        // --- FUNGSI UPDATE STYLE DARI WADAH ---
+        function applyStyles(data) {
+            const root = document.documentElement;
+            if(data.radius) root.style.setProperty('--radius', data.radius + 'px');
+            if(data.font) root.style.setProperty('--font-size', data.font + 'px');
+            if(data.uColor) root.style.setProperty('--user-color', data.uColor);
+            if(data.tColor) root.style.setProperty('--text-color', data.tColor);
+            
+            // Background Logic (Solid vs Gradient)
+            if(data.mode === 'gradient') {
+                root.style.setProperty('--bg-color', `linear-gradient(135deg, ${data.g1}, ${data.g2})`);
+            } else if(data.bg) {
+                // Konversi hex ke RGBA untuk opacity
+                const hex = data.bg.replace('#','');
+                const r = parseInt(hex.substring(0,2), 16);
+                const g = parseInt(hex.substring(2,4), 16);
+                const b = parseInt(hex.substring(4,6), 16);
+                root.style.setProperty('--bg-color', `rgba(${r},${g},${b},${data.opac || 0.7})`);
+            }
+
+            if(data.bColor) {
+                const bHex = data.bColor.replace('#','');
+                const br = parseInt(bHex.substring(0,2), 16);
+                const bg = parseInt(bHex.substring(2,4), 16);
+                const bb = parseInt(bHex.substring(4,6), 16);
+                root.style.setProperty('--border-color', `rgba(${br},${bg},${bb},${data.bOpac || 1})`);
+            }
+        }
+
+        // Jalankan style awal dari URL jika ada
+        const initialData = {
+            radius: urlParams.get('radius'),
+            font: urlParams.get('font'),
+            uColor: '#' + urlParams.get('ucolor'),
+            tColor: '#' + urlParams.get('tcolor'),
+            bg: '#' + urlParams.get('bg'),
+            opac: urlParams.get('opac'),
+            bColor: '#' + urlParams.get('bcolor'),
+            bOpac: urlParams.get('bopac'),
+            mode: urlParams.get('grad') ? 'gradient' : 'solid',
+            g1: '#' + (urlParams.get('grad')?.split(',')[0] || ''),
+            g2: '#' + (urlParams.get('grad')?.split(',')[1] || '')
+        };
+        applyStyles(initialData);
+
+        // --- LISTENER DARI WADAH (REALTIME) ---
+        window.addEventListener("message", (e) => {
             if (e.data.type === 'UPDATE_STYLE') {
-                const d = e.data;
-                const root = document.documentElement;
-                
-                // Sinkron Radius & Font
-                if(d.radius) root.style.setProperty('--radius', d.radius + 'px');
-                if(d.font) root.style.setProperty('--font-size', d.font + 'px');
-                
-                // Sinkron Warna User & Pesan
-                if(d.uColor) root.style.setProperty('--user-color', d.uColor);
-                if(d.tColor) root.style.setProperty('--msg-color', d.tColor);
-                
-                // Sinkron Border
-                if(d.bColor) {
-                    const bo = d.bOpac || 1;
-                    root.style.setProperty('--border-color', d.bColor + Math.round(bo * 255).toString(16).padStart(2, '0'));
-                }
-
-                // Sinkron Background Atmosphere
-                if(d.mode === 'gradient') {
-                    root.style.setProperty('--bg-color', `linear-gradient(135deg, ${d.g1}, ${d.g2})`);
-                } else {
-                    const op = d.opac || 0.9;
-                    root.style.setProperty('--bg-color', d.bg + Math.round(op * 255).toString(16).padStart(2, '0'));
-                }
-
-                // Sinkron Variabel Logika
-                if(d.avtShape) settings.avt = d.avtShape;
-                if(d.limit) settings.limit = parseInt(d.limit);
-                if(d.layout) {
-                    settings.layout = d.layout;
-                    container.className = `layout-${d.layout}`;
-                }
+                applyStyles(e.data);
             }
         });
 
+        // --- LOGIKA CHAT (SOCIAL STREAM) ---
         function createIframe() {
             var iframe = document.createElement("iframe");
-            iframe.src = `https://vdo.socialstream.ninja/?ln&notmobile&salt=vdo.ninja&label=overlay&exclude=${settings.session}&scene&novideo&noaudio&cleanoutput&room=${settings.session}`;
+            // Menggunakan vdo.socialstream.ninja sesuai code original lu
+            iframe.src = `https://vdo.socialstream.ninja/?ln&notmobile&salt=vdo.ninja&label=overlay&exclude=${roomID}&scene&novideo&noaudio&cleanoutput&room=${roomID}`;
             iframe.style.display = "none";
             document.body.appendChild(iframe);
 
@@ -158,14 +199,13 @@
 
         function updateMessage(data) {
             const card = document.createElement('div');
-            card.className = 'notification-card';
-            const avatarUrl = data.chatimg || "https://cdn-icons-png.flaticon.com/512/3046/3046121.png";
+            // Tambahin class animasi yang dipilih
+            card.className = `notification-card ${animation}`;
+            const tiktokIcon = "https://cdn-icons-png.flaticon.com/512/3046/3046121.png"; 
 
             card.innerHTML = `
                 <div class="notif-header">
-                    <div class="app-icon-bg shape-${settings.avt}">
-                        <img src="${avatarUrl}" class="app-icon">
-                    </div>
+                    <div class="app-icon-bg"><img src="${tiktokIcon}" class="app-icon"></div>
                     <span class="app-name">MESSAGES</span>
                     <span class="notif-time">NOW</span>
                 </div>
@@ -175,23 +215,14 @@
                 </div>
             `;
 
+            // Auto Remove berdasarkan limit
             container.appendChild(card);
-
-            // Logic Limit Chat
-            while (container.children.length > settings.limit) {
+            if (container.children.length > chatLimit) {
                 container.removeChild(container.children[0]);
             }
-
-            // Logic Hide Timer
-            if (settings.showtime > 0) {
-                setTimeout(() => {
-                    card.style.opacity = '0';
-                    card.style.transition = '0.4s';
-                    setTimeout(() => card.remove(), 400);
-                }, settings.showtime);
-            }
-
-            if (settings.layout === 'horizontal') container.scrollLeft = container.scrollWidth;
+            
+            // Auto Scroll jika horizontal
+            if (layoutMode === 'horizontal') container.scrollLeft = container.scrollWidth;
         }
 
         createIframe();
