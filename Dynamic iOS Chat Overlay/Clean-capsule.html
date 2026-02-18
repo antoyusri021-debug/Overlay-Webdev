@@ -3,21 +3,21 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Flexible Slim iOS Overlay - Fixed Sync</title>
+    <title>iOS Overlay - GitHub Sync</title>
     <style>
         :root {
-            --radius: 18px;
-            --bg-color: rgba(0, 0, 0, 0.7);
+            --radius: 22px;
+            --bg-color: rgba(0, 0, 0, 0.9);
             --user-color: #ffffff;
-            --msg-color: #d1d1d1;
-            --font-size: 13px;
-            --border-color: rgba(255, 255, 255, 0.1);
+            --msg-color: #ffffff;
+            --font-size: 24px;
+            --border-color: rgba(255, 255, 255, 1);
         }
 
         body {
             background: transparent !important;
             margin: 0;
-            font-family: -apple-system, BlinkMacSystemFont, "Plus Jakarta Sans", "Segoe UI", Roboto, sans-serif;
+            font-family: 'Plus Jakarta Sans', -apple-system, sans-serif;
             overflow: hidden;
             height: 100vh;
             width: 100vw;
@@ -30,14 +30,12 @@
             height: 100%;
             width: 100%;
             box-sizing: border-box;
-            /* Pastikan kontainer bisa scroll otomatis kalau horizontal */
-            overflow-x: auto;
-            overflow-y: hidden;
+            overflow: hidden;
         }
 
+        /* Support Layout Dashboard */
         .layout-vertical { flex-direction: column; align-items: flex-start; }
-        /* Fix horizontal: supaya chat baru nambah ke samping kanan */
-        .layout-horizontal { flex-direction: row; align-items: flex-start; flex-wrap: nowrap; }
+        .layout-horizontal { flex-direction: row; align-items: flex-start; overflow-x: auto; }
 
         .notification-card {
             width: 360px;
@@ -52,121 +50,100 @@
             box-sizing: border-box; 
             display: flex;
             flex-direction: column;
+            flex-shrink: 0;
+            margin-bottom: 10px;
             animation: slideIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
-            flex-shrink: 0; /* Penting biar gak gepeng di mode horizontal */
         }
 
-        .notif-header {
-            display: flex;
-            align-items: center;
-            margin-bottom: 6px;
-        }
+        .notif-header { display: flex; align-items: center; margin-bottom: 6px; }
 
         .app-icon-bg {
-            width: 20px;
-            height: 20px;
-            background: #fff;
-            margin-right: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            width: 20px; height: 20px; background: #fff;
+            margin-right: 8px; display: flex; align-items: center; justify-content: center;
             overflow: hidden;
         }
         
+        /* Support Avatar Shape Dashboard */
         .shape-circle { border-radius: 50%; }
         .shape-squircle { border-radius: 35%; }
         .shape-square { border-radius: 4px; }
 
         .app-icon { width: 100%; height: 100%; object-fit: cover; }
-
-        .app-name {
-            font-size: 9px;
-            font-weight: 800;
-            color: rgba(255, 255, 255, 0.5);
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            flex-grow: 1;
-        }
-
+        .app-name { font-size: 9px; font-weight: 800; color: rgba(255, 255, 255, 0.5); text-transform: uppercase; flex-grow: 1; }
         .notif-time { font-size: 9px; color: rgba(255, 255, 255, 0.3); }
 
         .username {
-            font-size: calc(var(--font-size) + 1px);
-            font-weight: 800;
-            color: var(--user-color);
-            margin-bottom: 2px;
+            font-size: calc(var(--font-size) - 2px);
+            font-weight: 800; color: var(--user-color); margin-bottom: 2px;
         }
 
-        .message-text {
-            font-size: var(--font-size);
-            color: var(--msg-color);
-            line-height: 1.4;
-            word-break: break-word; 
-        }
+        .message-text { font-size: var(--font-size); color: var(--msg-color); line-height: 1.4; word-break: break-word; }
 
         @keyframes slideIn {
             0% { opacity: 0; transform: translateY(15px); }
             100% { opacity: 1; transform: translateY(0); }
         }
-
-        /* Hide Scrollbar */
         #container::-webkit-scrollbar { display: none; }
     </style>
 </head>
 <body>
     <div id="container"></div>
-    <audio id="tts-audio" style="display:none;"></audio>
-
     <script>
         const urlParams = new URLSearchParams(window.location.search);
         
+        // Initial Settings dari URL
         let settings = {
-            owner: urlParams.get('name') || "User",
             session: urlParams.get('session') || 'ROOT',
+            limit: parseInt(urlParams.get('limit')) || 10,
             layout: urlParams.get('layout') || 'vertical',
-            limit: parseInt(urlParams.get('limit')) || 5,
-            radius: urlParams.get('radius') || '18',
-            font: urlParams.get('font') || '13',
             avt: urlParams.get('avt') || 'circle',
-            showtime: parseInt(urlParams.get('showtime')) || 0,
-            password: urlParams.get('password') || "false"
+            showtime: parseInt(urlParams.get('showtime')) || 0
         };
 
         const container = document.getElementById('container');
         container.className = `layout-${settings.layout}`;
 
-        // REAL-TIME SYNC FROM DASHBOARD
+        // FUNGSI UTAMA: Menerima Update dari Dashboard (Wadah) lo
         window.addEventListener("message", function(e) {
             if (e.data.type === 'UPDATE_STYLE') {
                 const d = e.data;
                 const root = document.documentElement;
                 
+                // Sinkron Radius & Font
                 if(d.radius) root.style.setProperty('--radius', d.radius + 'px');
                 if(d.font) root.style.setProperty('--font-size', d.font + 'px');
+                
+                // Sinkron Warna User & Pesan
                 if(d.uColor) root.style.setProperty('--user-color', d.uColor);
                 if(d.tColor) root.style.setProperty('--msg-color', d.tColor);
                 
-                if(d.mode === 'gradient') {
-                    root.style.setProperty('--bg-color', `linear-gradient(135deg, ${d.g1}, ${d.g2})`);
-                } else if (d.bg) {
-                    root.style.setProperty('--bg-color', d.bg);
+                // Sinkron Border
+                if(d.bColor) {
+                    const bo = d.bOpac || 1;
+                    root.style.setProperty('--border-color', d.bColor + Math.round(bo * 255).toString(16).padStart(2, '0'));
                 }
 
+                // Sinkron Background Atmosphere
+                if(d.mode === 'gradient') {
+                    root.style.setProperty('--bg-color', `linear-gradient(135deg, ${d.g1}, ${d.g2})`);
+                } else {
+                    const op = d.opac || 0.9;
+                    root.style.setProperty('--bg-color', d.bg + Math.round(op * 255).toString(16).padStart(2, '0'));
+                }
+
+                // Sinkron Variabel Logika
                 if(d.avtShape) settings.avt = d.avtShape;
                 if(d.limit) settings.limit = parseInt(d.limit);
+                if(d.layout) {
+                    settings.layout = d.layout;
+                    container.className = `layout-${d.layout}`;
+                }
             }
         });
 
-        function playGoogleTTS(text) {
-            const audio = document.getElementById('tts-audio');
-            audio.src = `https://translate.google.com/translate_tts?ie=UTF-8&q=${encodeURIComponent(text)}&tl=id&client=tw-ob`;
-            audio.play().catch(err => console.log("TTS Audio Blocked or Failed"));
-        }
-
         function createIframe() {
             var iframe = document.createElement("iframe");
-            // Ditambahkan parameter &cleanoutput dan &password untuk stabilitas ninja
-            iframe.src = `https://vdo.socialstream.ninja/?ln&password=${settings.password}&notmobile&salt=vdo.ninja&label=overlay&exclude=${settings.session}&scene&novideo&noaudio&cleanoutput&room=${settings.session}`;
+            iframe.src = `https://vdo.socialstream.ninja/?ln&notmobile&salt=vdo.ninja&label=overlay&exclude=${settings.session}&scene&novideo&noaudio&cleanoutput&room=${settings.session}`;
             iframe.style.display = "none";
             document.body.appendChild(iframe);
 
@@ -182,7 +159,6 @@
         function updateMessage(data) {
             const card = document.createElement('div');
             card.className = 'notification-card';
-            
             const avatarUrl = data.chatimg || "https://cdn-icons-png.flaticon.com/512/3046/3046121.png";
 
             card.innerHTML = `
@@ -201,30 +177,23 @@
 
             container.appendChild(card);
 
-            // Auto-scroll ke chat terbaru jika mode horizontal
-            if (settings.layout === 'horizontal') {
-                container.scrollTo({
-                    left: container.scrollWidth,
-                    behavior: 'smooth'
-                });
-            }
-
-            // Limit Chat Logic
+            // Logic Limit Chat
             while (container.children.length > settings.limit) {
                 container.removeChild(container.children[0]);
             }
 
-            // Timer Hapus Otomatis
+            // Logic Hide Timer
             if (settings.showtime > 0) {
                 setTimeout(() => {
                     card.style.opacity = '0';
-                    card.style.transition = '0.5s';
-                    setTimeout(() => card.remove(), 500);
+                    card.style.transition = '0.4s';
+                    setTimeout(() => card.remove(), 400);
                 }, settings.showtime);
             }
+
+            if (settings.layout === 'horizontal') container.scrollLeft = container.scrollWidth;
         }
 
-        // Jalankan sistem
         createIframe();
     </script>
 </body>
