@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>iOS Overlay - Auto Sync URL</title>
+    <title>iOS Overlay - Stable Version</title>
     <style>
         :root {
             --bg-color: rgba(0, 0, 0, 0.7);
@@ -44,7 +44,7 @@
             border: 1px solid var(--border-color);
             box-sizing: border-box; 
             margin-bottom: 10px;
-            transition: all 0.2s ease-out;
+            transition: all 0.3s ease;
         }
 
         /* Animasi */
@@ -67,41 +67,47 @@
     <script>
         const urlParams = new URLSearchParams(window.location.search);
         
-        // Ambil data awal dari URL (Biar pas di buka di tempat lain, warnanya tetep sama)
-        function initFromURL() {
-            const data = {
-                radius: urlParams.get('radius') || 18,
-                font: urlParams.get('font') || 13,
-                uColor: urlParams.get('ucolor') ? '#' + urlParams.get('ucolor') : '#ffffff',
-                tColor: urlParams.get('tcolor') ? '#' + urlParams.get('tcolor') : '#d1d1d1',
-                bg: urlParams.get('bg') ? '#' + urlParams.get('bg') : '#000000',
-                opac: urlParams.get('opac') || 0.7,
-                bColor: urlParams.get('bcolor') ? '#' + urlParams.get('bcolor') : '#ffffff20'
-            };
-            applyStyles(data);
+        // 1. Ambil Settingan URL atau Default
+        function getParam(name, def) {
+            let val = urlParams.get(name);
+            return val ? (val.startsWith('#') ? val : '#' + val) : def;
         }
 
-        function applyStyles(data) {
+        function applyInitialStyles() {
             const root = document.documentElement;
-            if(data.radius) root.style.setProperty('--radius', data.radius + 'px');
-            if(data.font) root.style.setProperty('--font-size', data.font + 'px');
-            if(data.uColor) root.style.setProperty('--user-color', data.uColor);
-            if(data.tColor) root.style.setProperty('--text-color', data.tColor);
+            root.style.setProperty('--radius', (urlParams.get('radius') || 18) + 'px');
+            root.style.setProperty('--font-size', (urlParams.get('font') || 13) + 'px');
+            root.style.setProperty('--user-color', getParam('ucolor', '#ffffff'));
+            root.style.setProperty('--text-color', getParam('tcolor', '#d1d1d1'));
             
-            if(data.bg) {
-                const hex = data.bg.replace('#','');
-                const r = parseInt(hex.substring(0,2), 16), g = parseInt(hex.substring(2,4), 16), b = parseInt(hex.substring(4,6), 16);
-                root.style.setProperty('--bg-color', `rgba(${r},${g},${b},${data.opac || 0.7})`);
-            }
+            const bg = getParam('bg', '#000000');
+            const opac = urlParams.get('opac') || 0.7;
+            const hex = bg.replace('#','');
+            const r = parseInt(hex.substring(0,2), 16), g = parseInt(hex.substring(2,4), 16), b = parseInt(hex.substring(4,6), 16);
+            root.style.setProperty('--bg-color', `rgba(${r},${g},${b},${opac})`);
         }
 
-        // Listener buat Realtime di Wadah
+        // 2. Listener Message (Penting!)
         window.addEventListener("message", (e) => {
-            if (e.data.type === 'UPDATE_STYLE') applyStyles(e.data);
-            if (e.data.dataReceived?.overlayNinja) createCard(e.data.dataReceived.overlayNinja);
+            // Cek data dari Wadah Generator
+            if (e.data.type === 'UPDATE_STYLE') {
+                const root = document.documentElement;
+                if(e.data.radius) root.style.setProperty('--radius', e.data.radius + 'px');
+                if(e.data.uColor) root.style.setProperty('--user-color', e.data.uColor);
+                if(e.data.bg) {
+                    const hex = e.data.bg.replace('#','');
+                    const r = parseInt(hex.substring(0,2), 16), g = parseInt(hex.substring(2,4), 16), b = parseInt(hex.substring(4,6), 16);
+                    root.style.setProperty('--bg-color', `rgba(${r},${g},${b},${e.data.opac || 0.7})`);
+                }
+            }
+            
+            // Cek data Chat dari Social Stream
+            if (e.data.dataReceived && e.data.dataReceived.overlayNinja) {
+                renderChat(e.data.dataReceived.overlayNinja);
+            }
         });
 
-        function createCard(data) {
+        function renderChat(data) {
             const container = document.getElementById('container');
             const card = document.createElement('div');
             card.className = `notification-card ${urlParams.get('anim') || 'fade-in'}`;
@@ -114,17 +120,22 @@
                 <div class="message-text">${data.chatmessage}</div>
             `;
             container.appendChild(card);
-            if(container.children.length > (urlParams.get('limit') || 4)) container.removeChild(container.children[0]);
+            const limit = parseInt(urlParams.get('limit')) || 4;
+            if (container.children.length > limit) container.removeChild(container.children[0]);
         }
 
-        // Jalankan Iframe Social Stream
-        const room = urlParams.get('session') || 'TEST';
-        const ifr = document.createElement("iframe");
-        ifr.src = `https://vdo.socialstream.ninja/?ln&api=1&room=${room}`;
-        ifr.style.display = "none";
-        document.body.appendChild(ifr);
+        // 3. Panggil Iframe Social Stream
+        function initSocialStream() {
+            const roomID = urlParams.get('session') || 'TEST';
+            const ifr = document.createElement("iframe");
+            // Ditambah &api=1 biar dia ngirim data ke sini
+            ifr.src = `https://vdo.socialstream.ninja/?ln&api=1&room=${roomID}&password=false&salt=vdo.ninja&label=overlay`;
+            ifr.style.display = "none";
+            document.body.appendChild(ifr);
+        }
 
-        initFromURL();
+        applyInitialStyles();
+        initSocialStream();
     </script>
 </body>
 </html>
