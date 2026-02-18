@@ -147,33 +147,55 @@
         let chatLimit = parseInt(urlParams.get('limit')) || 1;
         const container = document.getElementById('container');
 
-        // --- FUNGSI UPDATE STYLE (SINYAL DARI WADAH) ---
+        // --- HELPER: HEX TO RGBA ---
+        function hexToRgba(hex, alpha) {
+            if(!hex) return `rgba(0,0,0,${alpha})`;
+            hex = hex.replace('#','');
+            let r = parseInt(hex.substring(0,2), 16), g = parseInt(hex.substring(2,4), 16), b = parseInt(hex.substring(4,6), 16);
+            return `rgba(${r},${g},${b},${alpha})`;
+        }
+
+        // --- FUNGSI UPDATE STYLE ---
         function applyStyles(data) {
             const root = document.documentElement;
             
             // 1. Border & Opacity Sync
             if(data.bColor && data.bOpac) {
-                let hex = data.bColor.replace('#','');
-                let r = parseInt(hex.substring(0,2), 16), g = parseInt(hex.substring(2,4), 16), b = parseInt(hex.substring(4,6), 16);
-                root.style.setProperty('--b-color', `rgba(${r},${g},${b},${data.bOpac})`);
+                root.style.setProperty('--b-color', hexToRgba(data.bColor, data.bOpac));
             }
 
-            // 2. Background Sync (Solid & Glass)
-            if(data.mode === 'gradient') {
-                let grad = `linear-gradient(135deg, ${hexToRgba(data.g1, data.opac)}, ${hexToRgba(data.g2, data.opac)})`;
-                root.style.setProperty('--bg-base', grad);
-                root.style.setProperty('--bg-solid', hexToRgba(data.g1, 0.9)); // Kiri lebih pekat
+            // 2. LOGIKA GRADIENT VS SOLID (PERBAIKAN DI SINI)
+            if(data.mode === 'gradient' || data.grad) {
+                let g1, g2;
+                // Jika data datang dari URL (string dipisah koma)
+                if (typeof data.grad === 'string' && data.grad.includes(',')) {
+                    let colors = data.grad.split(',');
+                    g1 = colors[0].startsWith('#') ? colors[0] : '#' + colors[0];
+                    g2 = colors[1].startsWith('#') ? colors[1] : '#' + colors[1];
+                } else {
+                    // Jika data datang dari PostMessage Wadah
+                    g1 = data.g1;
+                    g2 = data.g2;
+                }
+
+                if(g1 && g2) {
+                    let gradVal = `linear-gradient(135deg, ${hexToRgba(g1, data.opac)}, ${hexToRgba(g2, data.opac)})`;
+                    root.style.setProperty('--bg-base', gradVal);
+                    root.style.setProperty('--bg-solid', hexToRgba(g1, 0.9)); 
+                }
             } else if(data.bg) {
-                root.style.setProperty('--bg-base', hexToRgba(data.bg, data.opac));
-                root.style.setProperty('--bg-solid', hexToRgba(data.bg, 0.95)); // Kiri hampir solid
+                // Mode Solid
+                let solidColor = data.bg.startsWith('#') ? data.bg : '#' + data.bg;
+                root.style.setProperty('--bg-base', hexToRgba(solidColor, data.opac));
+                root.style.setProperty('--bg-solid', hexToRgba(solidColor, 0.95));
             }
 
-            // 3. Animasi & Font
+            // 3. Animasi & Font & Lainnya
             if(data.anim) root.style.setProperty('--anim-name', data.anim);
             if(data.font) root.style.setProperty('--font-size', data.font + 'px');
             if(data.radius) root.style.setProperty('--radius', data.radius + 'px');
-            if(data.uColor) root.style.setProperty('--u-color', data.uColor);
-            if(data.tColor) root.style.setProperty('--t-color', data.tColor);
+            if(data.uColor) root.style.setProperty('--u-color', data.uColor.startsWith('#') ? data.uColor : '#' + data.uColor);
+            if(data.tColor) root.style.setProperty('--t-color', data.tColor.startsWith('#') ? data.tColor : '#' + data.tColor);
             
             // 4. Avatar Geometry
             if(data.avtShape) {
@@ -188,30 +210,26 @@
             }
         }
 
-        function hexToRgba(hex, alpha) {
-            hex = hex.replace('#','');
-            let r = parseInt(hex.substring(0,2), 16), g = parseInt(hex.substring(2,4), 16), b = parseInt(hex.substring(4,6), 16);
-            return `rgba(${r},${g},${b},${alpha})`;
-        }
-
-        // Listener Real-time
+        // Listener Real-time (Untuk Wadah Editor)
         window.addEventListener('message', (e) => {
             if (e.data.type === 'UPDATE_STYLE') applyStyles(e.data);
         });
 
-        // Jalankan awal
+        // JALANKAN AWAL (Untuk URL pas di Paste di tab baru)
         applyStyles({
-            radius: urlParams.get('radius') || 24,
-            font: urlParams.get('font') || 14,
-            bg: urlParams.get('bg') ? '#' + urlParams.get('bg') : '#1e1e1e',
+            radius: urlParams.get('radius'),
+            font: urlParams.get('font'),
+            grad: urlParams.get('grad'), // Tangkap parameter grad
+            bg: urlParams.get('bg'),
             opac: urlParams.get('opac') || 0.4,
-            uColor: urlParams.get('ucolor') ? '#' + urlParams.get('ucolor') : '#ffffff',
-            tColor: urlParams.get('tcolor') ? '#' + urlParams.get('tcolor') : '#cccccc',
-            bColor: urlParams.get('bcolor') ? '#' + urlParams.get('bcolor') : '#ffffff',
-            bOpac: urlParams.get('bopac') || 0.1,
-            anim: urlParams.get('anim') || 'fadeIn',
+            uColor: urlParams.get('ucolor'),
+            tColor: urlParams.get('tcolor'),
+            bColor: urlParams.get('bcolor'),
+            bOpac: urlParams.get('bopac'),
+            anim: urlParams.get('anim'),
             avtShape: urlParams.get('avt'),
-            layout: urlParams.get('layout')
+            layout: urlParams.get('layout'),
+            mode: urlParams.get('grad') ? 'gradient' : 'solid' // Auto detect mode
         });
 
         // --- SOSIAL STREAM CORE ---
