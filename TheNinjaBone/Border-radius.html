@@ -3,11 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ninja Bone - Ultimate Sync</title>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@700;800&family=Inter:wght@400;700&display=swap" rel="stylesheet">
+    <title>Ninja Bone - Ultimate Sync Fixed</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@700;800&display=swap" rel="stylesheet">
     <style>
         :root {
-            /* Variable Default */
             --radius: 20px;
             --font-size: 16px;
             --u-color: #d63031;
@@ -42,7 +41,6 @@
             will-change: transform, opacity;
         }
 
-        /* Tipe Animasi Masuk */
         .fade-in { transform: scale(0.9); }
         .slide-left { transform: translateX(-100px); }
         .slide-up { transform: translateY(100px); }
@@ -61,9 +59,10 @@
         }
 
         .message-wrapper.hide {
-            opacity: 0;
-            transform: scale(0.8) translateY(-20px);
+            opacity: 0 !important;
+            transform: scale(0.8) translateY(-20px) !important;
             filter: blur(8px);
+            transition: all 0.4s ease-in;
         }
 
         /* --- BOX DESIGN (BONE STYLE) --- */
@@ -74,18 +73,18 @@
             background: var(--bg-color);
             padding: 12px 20px;
             border-radius: var(--radius);
-            border: 3px solid var(--border-color); /* Garis tebal khas Bone */
-            box-shadow: 8px 8px 0px rgba(0,0,0,0.15); /* Shadow kaku retro */
+            border: 3px solid var(--border-color);
+            box-shadow: 8px 8px 0px rgba(0,0,0,0.15); /* Shadow khas bone */
             width: 450px;
             height: 115px; 
             position: relative;
         }
 
-        /* Ekor Bubble - Mengikuti warna border */
+        /* Ekor Bubble */
         .message-box::after {
             content: '';
             position: absolute;
-            bottom: -15px;
+            bottom: -18px; /* Disesuaikan sedikit */
             right: 30px;
             border-left: 18px solid transparent;
             border-top: 18px solid var(--border-color);
@@ -107,6 +106,9 @@
             text-transform: uppercase;
             margin-bottom: 4px;
             letter-spacing: 0.5px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
 
         .chat-text {
@@ -141,14 +143,14 @@
         const urlParams = new URLSearchParams(window.location.search);
         const roomID = urlParams.get('session') || 'TESTROOM';
         const password = urlParams.get('password') || "false";
-        const timerDur = parseInt(urlParams.get('timer')) || 15000;
+        const timerDur = parseInt(urlParams.get('timer') || urlParams.get('showtime')) || 15000;
 
         let currentMessage = null;
         let hideTimeout = null;
         let currentAnim = urlParams.get('anim') || 'fade-in';
 
-        // 1. Helper: Hex to RGBA
         function hexToRgba(hex, alpha) {
+            if (!hex) return `rgba(0,0,0,${alpha})`;
             hex = hex.replace('#', '');
             if (hex.length === 3) hex = hex.split('').map(s => s + s).join('');
             let r = parseInt(hex.substring(0, 2), 16);
@@ -157,35 +159,31 @@
             return `rgba(${r}, ${g}, ${b}, ${alpha})`;
         }
 
-        // 2. Helper: Avatar Radius
         function getAvtRadius(shape) {
             if (shape === 'circle') return '50%';
             if (shape === 'squircle') return '25%';
             return '0%'; 
         }
 
-        // 3. Update CSS Variables
         function updateStyles(data) {
             const root = document.documentElement.style;
             
-            // Background Sync
             if (data.mode === 'gradient') {
                 root.setProperty('--bg-color', `linear-gradient(135deg, ${data.g1}, ${data.g2})`);
             } else {
-                root.setProperty('--bg-color', hexToRgba(data.bg || '#F5F2EB', data.opac || 1));
+                root.setProperty('--bg-color', hexToRgba(data.bg, data.opac));
             }
 
-            root.setProperty('--border-color', hexToRgba(data.bColor || '#333333', data.bOpac || 1));
-            root.setProperty('--u-color', data.uColor || '#d63031');
-            root.setProperty('--t-color', data.tColor || '#1a1a1a');
-            root.setProperty('--radius', (data.radius || 20) + 'px');
-            root.setProperty('--font-size', (data.font || 16) + 'px');
+            root.setProperty('--border-color', hexToRgba(data.bColor, data.bOpac));
+            root.setProperty('--u-color', data.uColor);
+            root.setProperty('--t-color', data.tColor);
+            root.setProperty('--radius', data.radius + 'px');
+            root.setProperty('--font-size', data.font + 'px');
             root.setProperty('--avt-radius', getAvtRadius(data.avtShape));
             
             if (data.anim) currentAnim = data.anim;
         }
 
-        // 4. URL Parameter Sync (Initial Load)
         function applyUrlSettings() {
             const settings = {
                 bg: '#' + (urlParams.get('bg') || 'F5F2EB'),
@@ -202,14 +200,12 @@
             updateStyles(settings);
         }
 
-        // 5. Real-time Listener
         window.addEventListener("message", (e) => {
             if (e.data.type === 'UPDATE_STYLE') {
                 updateStyles(e.data);
             }
         });
 
-        // 6. Main Logic Ninja
         function createIframe() {
             const iframe = document.createElement("iframe");
             iframe.src = `https://vdo.socialstream.ninja/?ln&password=${password}&notmobile&salt=vdo.ninja&label=overlay&exclude=${roomID}&scene&novideo&noaudio&cleanoutput&room=${roomID}`;
@@ -227,11 +223,18 @@
 
         function renderChat(data) {
             const output = document.getElementById('output');
+            
+            // Clear timeout lama jika ada pesan baru masuk
             if (hideTimeout) clearTimeout(hideTimeout);
 
             if (currentMessage) {
+                // Beri animasi hide dulu
                 currentMessage.classList.add('hide');
-                setTimeout(() => { output.innerHTML = ''; generateNew(data); }, 450);
+                // Tunggu animasi selesai baru ganti konten
+                setTimeout(() => { 
+                    output.innerHTML = ''; 
+                    generateNew(data); 
+                }, 400); 
             } else {
                 generateNew(data);
             }
@@ -241,7 +244,6 @@
             const wrapper = document.createElement('div');
             wrapper.className = `message-wrapper ${currentAnim}`;
             
-            // Auto-initials Avatar
             const img = data.chatimg || `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(data.chatname)}&backgroundColor=d63031,000000&bold=true`;
 
             wrapper.innerHTML = `
@@ -255,17 +257,24 @@
 
             document.getElementById('output').appendChild(wrapper);
             currentMessage = wrapper;
+            
+            // Trigger show
             setTimeout(() => wrapper.classList.add('show'), 50);
 
+            // Timer hapus otomatis
             if (timerDur > 0) {
                 hideTimeout = setTimeout(() => {
-                    wrapper.classList.add('hide');
-                    setTimeout(() => { if(wrapper.parentNode) wrapper.remove(); currentMessage = null; }, 500);
+                    if (wrapper) {
+                        wrapper.classList.add('hide');
+                        setTimeout(() => { 
+                            if(wrapper.parentNode) wrapper.remove(); 
+                            if(currentMessage === wrapper) currentMessage = null;
+                        }, 400);
+                    }
                 }, timerDur);
             }
         }
 
-        // Init
         applyUrlSettings();
         createIframe();
     </script>
