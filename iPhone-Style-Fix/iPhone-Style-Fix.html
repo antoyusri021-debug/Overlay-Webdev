@@ -3,8 +3,22 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>iPhone Style - Fix Avatar TikTok</title>
+    <title>iPhone Style - Ultimate Sync</title>
     <style>
+        /* --- 1. JANTUNG SINKRONISASI (CSS VARIABLES) --- */
+        :root {
+            --radius: 24px;
+            --font-size: 15px;
+            --bg-base: rgba(255, 255, 255, 0.9);
+            --opac: 0.9;
+            --u-color: #000000;
+            --t-color: #1c1c1e;
+            --b-color: rgba(255, 255, 255, 0.5);
+            --b-opac: 0.5;
+            --avt-radius: 14px;
+            --anim-name: iosSlideLeft;
+        }
+
         body {
             background: transparent !important;
             margin: 0;
@@ -17,40 +31,48 @@
 
         #container {
             display: flex;
-            align-items: center; /* Tengah Vertikal */
-            justify-content: flex-start; /* Rata Kiri */
-            height: 100vh;
-            padding-left: 30px;
+            padding: 20px;
+            gap: 15px;
+            width: 100%;
+            height: 100%;
+            box-sizing: border-box;
         }
+
+        /* Layouting */
+        .layout-vertical { flex-direction: column; align-items: flex-start; justify-content: center; }
+        .layout-horizontal { flex-direction: row; align-items: center; flex-wrap: nowrap; }
 
         .message-wrapper {
             position: relative;
             width: 420px; 
-            min-height: 100px;
+            min-height: 80px;
             padding: 16px;
-            background: rgba(255, 255, 255, 0.9); 
+            background: var(--bg-base); 
             backdrop-filter: blur(25px) saturate(180%);
             -webkit-backdrop-filter: blur(25px) saturate(180%);
-            border-radius: 24px;
-            border: 0.5px solid rgba(255, 255, 255, 0.5);
+            border-radius: var(--radius);
+            border: 1px solid var(--b-color);
             box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
             display: flex;
             gap: 15px;
             align-items: center;
             box-sizing: border-box;
-            animation: iosSlideLeft 0.5s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+            animation: var(--anim-name) 0.5s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+            flex-shrink: 0;
         }
 
+        /* --- 2. DAFTAR ANIMASI --- */
         @keyframes iosSlideLeft {
             0% { opacity: 0; transform: translateX(-40px) scale(0.95); }
             100% { opacity: 1; transform: translateX(0) scale(1); }
         }
+        @keyframes fadeIn { 0% { opacity: 0; transform: translateY(-10px); } 100% { opacity: 1; transform: translateY(0); } }
+        @keyframes bounce { 0% { opacity: 0; transform: scale(0.3); } 50% { transform: scale(1.05); } 100% { opacity: 1; transform: scale(1); } }
 
-        /* AVATAR STYLE - Menggunakan variabel chatimg */
         .avatar {
             width: 60px;
             height: 60px;
-            border-radius: 14px; /* iOS Squircle */
+            border-radius: var(--avt-radius);
             background: #eee;
             object-fit: cover;
             flex-shrink: 0;
@@ -67,7 +89,7 @@
         .username {
             font-size: 16px;
             font-weight: 700;
-            color: #000;
+            color: var(--u-color);
             margin-bottom: 2px;
             display: flex;
             align-items: center;
@@ -82,9 +104,9 @@
         }
 
         .text {
-            font-size: 15px;
+            font-size: var(--font-size);
             line-height: 1.35;
-            color: #1c1c1e;
+            color: var(--t-color);
             font-weight: 400;
             display: -webkit-box;
             -webkit-line-clamp: 2;
@@ -95,47 +117,112 @@
     </style>
 </head>
 <body>
-    <div id="container">
+    <div id="container" class="layout-vertical">
         <div id="output"></div>
     </div>
 
     <script>
         const urlParams = new URLSearchParams(window.location.search);
-        const roomID = urlParams.get('session') || urlParams.get('room') || 'TESTROOM';
-        const password = urlParams.get('password') || "false";
+        let layoutMode = urlParams.get('layout') || 'vertical'; 
+        let chatLimit = parseInt(urlParams.get('limit')) || 1;
+        const container = document.getElementById('container');
+        const output = document.getElementById('output');
 
+        // --- HELPER: HEX TO RGBA ---
+        function hexToRgba(hex, alpha) {
+            if(!hex) return `rgba(255,255,255,${alpha})`;
+            hex = hex.replace('#','');
+            let r = parseInt(hex.substring(0,2), 16), g = parseInt(hex.substring(2,4), 16), b = parseInt(hex.substring(4,6), 16);
+            return `rgba(${r},${g},${b},${alpha})`;
+        }
+
+        // --- FUNGSI UPDATE STYLE ---
+        function applyStyles(data) {
+            const root = document.documentElement;
+            
+            if(data.bColor && data.bOpac) {
+                root.style.setProperty('--b-color', hexToRgba(data.bColor, data.bOpac));
+            }
+
+            if(data.mode === 'gradient' || data.grad) {
+                let g1, g2;
+                if (typeof data.grad === 'string' && data.grad.includes(',')) {
+                    let colors = data.grad.split(',');
+                    g1 = colors[0].startsWith('#') ? colors[0] : '#' + colors[0];
+                    g2 = colors[1].startsWith('#') ? colors[1] : '#' + colors[1];
+                } else {
+                    g1 = data.g1; g2 = data.g2;
+                }
+                if(g1 && g2) {
+                    root.style.setProperty('--bg-base', `linear-gradient(135deg, ${hexToRgba(g1, data.opac)}, ${hexToRgba(g2, data.opac)})`);
+                }
+            } else if(data.bg) {
+                root.style.setProperty('--bg-base', hexToRgba(data.bg, data.opac));
+            }
+
+            if(data.anim) root.style.setProperty('--anim-name', data.anim);
+            if(data.font) root.style.setProperty('--font-size', data.font + 'px');
+            if(data.radius) root.style.setProperty('--radius', data.radius + 'px');
+            if(data.uColor) root.style.setProperty('--u-color', data.uColor.startsWith('#') ? data.uColor : '#' + data.uColor);
+            if(data.tColor) root.style.setProperty('--t-color', data.tColor.startsWith('#') ? data.tColor : '#' + data.tColor);
+            
+            if(data.avtShape) {
+                let r = data.avtShape === 'circle' ? '50%' : (data.avtShape === 'squircle' ? '14px' : '0%');
+                root.style.setProperty('--avt-radius', r);
+            }
+
+            if(data.layout) {
+                layoutMode = data.layout;
+                container.className = (data.layout === 'horizontal') ? 'layout-horizontal' : 'layout-vertical';
+            }
+        }
+
+        window.addEventListener('message', (e) => {
+            if (e.data.type === 'UPDATE_STYLE') applyStyles(e.data);
+        });
+
+        // Load Awal
+        applyStyles({
+            radius: urlParams.get('radius') || 24,
+            font: urlParams.get('font') || 15,
+            grad: urlParams.get('grad'),
+            bg: urlParams.get('bg') || '#ffffff',
+            opac: urlParams.get('opac') || 0.9,
+            uColor: urlParams.get('ucolor') || '#000000',
+            tColor: urlParams.get('tcolor') || '#1c1c1e',
+            bColor: urlParams.get('bcolor') || '#ffffff',
+            bOpac: urlParams.get('bopac') || 0.5,
+            anim: urlParams.get('anim') || 'iosSlideLeft',
+            avtShape: urlParams.get('avt'),
+            layout: urlParams.get('layout'),
+            mode: urlParams.get('grad') ? 'gradient' : 'solid'
+        });
+
+        // --- SOSIAL STREAM CORE ---
         function createIframe() {
             var iframe = document.createElement("iframe");
-            iframe.src = `https://vdo.socialstream.ninja/?ln&password=${password}&notmobile&salt=vdo.ninja&label=overlay&exclude=${roomID}&scene&novideo&noaudio&cleanoutput&room=${roomID}`;
+            const room = urlParams.get('session') || urlParams.get('room') || 'TESTROOM';
+            const pass = urlParams.get('password') || "false";
+            iframe.src = `https://vdo.socialstream.ninja/?ln&password=${pass}&notmobile&salt=vdo.ninja&label=overlay&exclude=${room}&scene&novideo&noaudio&cleanoutput&room=${room}`;
             iframe.style.display = "none";
             document.body.appendChild(iframe);
 
             window.addEventListener("message", function (e) {
                 if (e.source != iframe.contentWindow) return;
-                
-                if ("dataReceived" in e.data) {
-                    if ("overlayNinja" in e.data.dataReceived) {
-                        const ninjaData = e.data.dataReceived.overlayNinja;
-                        // Mengikuti logika referensi kamu: cek contents
-                        if (ninjaData && !ninjaData.response) {
-                            updateMessage(ninjaData);
-                        }
+                if (e.data.dataReceived && e.data.dataReceived.overlayNinja) {
+                    const ninjaData = e.data.dataReceived.overlayNinja;
+                    if (ninjaData && !ninjaData.response && ninjaData.chatmessage) {
+                        updateMessage(ninjaData);
                     }
                 }
             });
         }
 
         function updateMessage(content) {
-            if (!content.chatmessage && !content.chatname) return;
-
-            const output = document.getElementById('output');
-            output.innerHTML = ''; // Satu tampilan saja
-
             const wrapper = document.createElement('div');
             wrapper.className = 'message-wrapper';
 
-            // REFERENSI VARIABEL: chatimg (foto profil), chatname (nama), chatmessage (isi)
-            const photoUrl = content.chatimg ? content.chatimg : 'https://api.dicebear.com/7.x/avataaars/svg?seed=' + content.chatname;
+            const photoUrl = content.chatimg ? content.chatimg : 'https://api.dicebear.com/7.x/initials/svg?seed=' + content.chatname;
             
             wrapper.innerHTML = `
                 <img src="${photoUrl}" class="avatar" onerror="this.src='https://api.dicebear.com/7.x/initials/svg?seed=${content.chatname}'">
@@ -145,9 +232,9 @@
                 </div>
             `;
 
+            output.innerHTML = ''; 
             output.appendChild(wrapper);
 
-            // Auto-hide setelah 10 detik agar layar bersih
             clearTimeout(window.hideTimeout);
             window.hideTimeout = setTimeout(() => {
                 wrapper.style.transition = '0.5s ease-in';
