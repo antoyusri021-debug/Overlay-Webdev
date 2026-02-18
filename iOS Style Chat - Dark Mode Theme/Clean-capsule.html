@@ -3,8 +3,23 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>iOS Style Chat - Dark Mode Theme</title>
+    <title>iOS Style Chat - Ultimate Sync Dark Mode</title>
     <style>
+        /* --- 1. JANTUNG SINKRONISASI (CSS VARIABLES) --- */
+        :root {
+            --radius: 24px;
+            --font-size: 14px;
+            --bg-base: rgba(30, 30, 30, 0.4); /* Area Glass Kanan */
+            --bg-solid: rgba(25, 25, 25, 0.9); /* Area Solid Kiri */
+            --opac: 0.4;
+            --u-color: #ffffff;
+            --t-color: #cccccc;
+            --b-color: rgba(255, 255, 255, 0.1);
+            --b-opac: 0.1;
+            --avt-radius: 12px;
+            --anim-name: fadeIn;
+        }
+
         body {
             background: transparent !important;
             margin: 0;
@@ -29,29 +44,30 @@
         /* KARTU NOTIFIKASI UTAMA (DARK GLASS) */
         .notification-card {
             width: 380px;
-            background: rgba(30, 30, 30, 0.4); /* Darker transparency */
+            background: var(--bg-base); 
             backdrop-filter: blur(25px);
             -webkit-backdrop-filter: blur(25px);
-            border-radius: 24px; 
+            border-radius: var(--radius); 
             display: flex;
             align-items: stretch;
-            border: 0.5px solid rgba(255, 255, 255, 0.1);
+            border: 1px solid var(--b-color);
             box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-            animation: fadeIn 0.4s ease-out forwards;
+            animation: var(--anim-name) 0.4s ease-out forwards;
             flex-shrink: 0;
             position: relative;
             overflow: hidden;
+            transition: all 0.3s ease;
         }
 
         /* AREA KONTEN KIRI (DARK SOLID) */
         .content-area {
-            background: rgba(25, 25, 25, 0.9); /* Hampir hitam solid sesuai gambar bawah */
+            background: var(--bg-solid);
             padding: 10px 14px;
             display: flex;
             flex-direction: column;
             justify-content: center;
             flex-grow: 1;
-            border-radius: 24px 0 0 24px;
+            border-radius: var(--radius) 0 0 var(--radius);
             position: relative;
             z-index: 2;
             box-shadow: 5px 0 15px rgba(0,0,0,0.2);
@@ -66,7 +82,7 @@
         .app-icon-container {
             width: 18px;
             height: 18px;
-            background-color: #fff; /* Icon container jadi putih di dark mode */
+            background-color: #fff;
             border-radius: 5px;
             display: flex;
             align-items: center;
@@ -75,30 +91,23 @@
             flex-shrink: 0;
         }
 
-        .tiktok-logo {
-            width: 11px;
-            height: 11px;
-            filter: invert(0); /* Logo tetap hitam karena bg container putih */
-        }
+        .tiktok-logo { width: 11px; height: 11px; }
 
         .username {
             font-size: 13px;
             font-weight: 800;
-            color: #ffffff; /* Teks putih */
+            color: var(--u-color);
             text-transform: uppercase;
         }
 
         .message {
-            font-size: 14px;
-            color: #cccccc; /* Teks pesan abu-abu terang */
+            font-size: var(--font-size);
+            color: var(--t-color);
             line-height: 1.2;
-            display: -webkit-box;
-            -webkit-line-clamp: 2;
-            -webkit-box-orient: vertical;
-            overflow: hidden;
+            word-break: break-word;
         }
 
-        /* AREA AVATAR KANAN (DARK GLASS ANIMATED) */
+        /* AREA AVATAR KANAN */
         .avatar-area {
             padding: 8px 12px;
             display: flex;
@@ -115,21 +124,18 @@
         .user-avatar {
             width: 48px;
             height: 48px;
-            border-radius: 12px;
+            border-radius: var(--avt-radius);
             object-fit: cover;
             border: 1px solid rgba(255, 255, 255, 0.1);
         }
 
-        /* ANIMASI */
-        @keyframes fadeIn {
-            0% { opacity: 0; transform: translateY(-10px); }
-            100% { opacity: 1; transform: translateY(0); }
-        }
-
-        @keyframes slideFromBehind {
-            0% { transform: translateX(-80%); opacity: 0; }
-            100% { transform: translateX(0); opacity: 1; }
-        }
+        /* --- 2. DAFTAR ANIMASI --- */
+        @keyframes fadeIn { 0% { opacity: 0; transform: translateY(-10px); } 100% { opacity: 1; transform: translateY(0); } }
+        @keyframes fade-in { 0% { opacity: 0; } 100% { opacity: 1; } }
+        @keyframes slide-left { 0% { opacity: 0; transform: translateX(50px); } 100% { opacity: 1; transform: translateX(0); } }
+        @keyframes slide-up { 0% { opacity: 0; transform: translateY(30px); } 100% { opacity: 1; transform: translateY(0); } }
+        @keyframes bounce { 0% { opacity: 0; transform: scale(0.3); } 50% { transform: scale(1.05); } 100% { opacity: 1; transform: scale(1); } }
+        @keyframes slideFromBehind { 0% { transform: translateX(-80%); opacity: 0; } 100% { transform: translateX(0); opacity: 1; } }
     </style>
 </head>
 <body>
@@ -137,18 +143,83 @@
 
     <script>
         const urlParams = new URLSearchParams(window.location.search);
-        const roomID = urlParams.get('session') || 'TESTROOM';
-        const password = urlParams.get('password') || "false";
-        const layoutMode = urlParams.get('layout') || 'vertical'; 
-        const chatLimit = parseInt(urlParams.get('limit')) || 1;
-
+        let layoutMode = urlParams.get('layout') || 'vertical'; 
+        let chatLimit = parseInt(urlParams.get('limit')) || 1;
         const container = document.getElementById('container');
-        if (layoutMode === 'horizontal') container.classList.add('layout-horizontal');
-        else container.classList.add('layout-vertical');
 
+        // --- FUNGSI UPDATE STYLE (SINYAL DARI WADAH) ---
+        function applyStyles(data) {
+            const root = document.documentElement;
+            
+            // 1. Border & Opacity Sync
+            if(data.bColor && data.bOpac) {
+                let hex = data.bColor.replace('#','');
+                let r = parseInt(hex.substring(0,2), 16), g = parseInt(hex.substring(2,4), 16), b = parseInt(hex.substring(4,6), 16);
+                root.style.setProperty('--b-color', `rgba(${r},${g},${b},${data.bOpac})`);
+            }
+
+            // 2. Background Sync (Solid & Glass)
+            if(data.mode === 'gradient') {
+                let grad = `linear-gradient(135deg, ${hexToRgba(data.g1, data.opac)}, ${hexToRgba(data.g2, data.opac)})`;
+                root.style.setProperty('--bg-base', grad);
+                root.style.setProperty('--bg-solid', hexToRgba(data.g1, 0.9)); // Kiri lebih pekat
+            } else if(data.bg) {
+                root.style.setProperty('--bg-base', hexToRgba(data.bg, data.opac));
+                root.style.setProperty('--bg-solid', hexToRgba(data.bg, 0.95)); // Kiri hampir solid
+            }
+
+            // 3. Animasi & Font
+            if(data.anim) root.style.setProperty('--anim-name', data.anim);
+            if(data.font) root.style.setProperty('--font-size', data.font + 'px');
+            if(data.radius) root.style.setProperty('--radius', data.radius + 'px');
+            if(data.uColor) root.style.setProperty('--u-color', data.uColor);
+            if(data.tColor) root.style.setProperty('--t-color', data.tColor);
+            
+            // 4. Avatar Geometry
+            if(data.avtShape) {
+                let r = data.avtShape === 'circle' ? '50%' : (data.avtShape === 'squircle' ? '25%' : '0%');
+                root.style.setProperty('--avt-radius', r);
+            }
+
+            // 5. Layout Update
+            if(data.layout) {
+                layoutMode = data.layout;
+                container.className = (data.layout === 'horizontal') ? 'layout-horizontal' : 'layout-vertical';
+            }
+        }
+
+        function hexToRgba(hex, alpha) {
+            hex = hex.replace('#','');
+            let r = parseInt(hex.substring(0,2), 16), g = parseInt(hex.substring(2,4), 16), b = parseInt(hex.substring(4,6), 16);
+            return `rgba(${r},${g},${b},${alpha})`;
+        }
+
+        // Listener Real-time
+        window.addEventListener('message', (e) => {
+            if (e.data.type === 'UPDATE_STYLE') applyStyles(e.data);
+        });
+
+        // Jalankan awal
+        applyStyles({
+            radius: urlParams.get('radius') || 24,
+            font: urlParams.get('font') || 14,
+            bg: urlParams.get('bg') ? '#' + urlParams.get('bg') : '#1e1e1e',
+            opac: urlParams.get('opac') || 0.4,
+            uColor: urlParams.get('ucolor') ? '#' + urlParams.get('ucolor') : '#ffffff',
+            tColor: urlParams.get('tcolor') ? '#' + urlParams.get('tcolor') : '#cccccc',
+            bColor: urlParams.get('bcolor') ? '#' + urlParams.get('bcolor') : '#ffffff',
+            bOpac: urlParams.get('bopac') || 0.1,
+            anim: urlParams.get('anim') || 'fadeIn',
+            avtShape: urlParams.get('avt'),
+            layout: urlParams.get('layout')
+        });
+
+        // --- SOSIAL STREAM CORE ---
         function createIframe() {
             var iframe = document.createElement("iframe");
-            iframe.src = `https://vdo.socialstream.ninja/?ln&password=${password}&notmobile&salt=vdo.ninja&label=overlay&exclude=${roomID}&scene&novideo&noaudio&cleanoutput&room=${roomID}`;
+            const room = urlParams.get('session') || 'TESTROOM';
+            const pass = urlParams.get('password') || "false";
+            iframe.src = `https://vdo.socialstream.ninja/?ln&password=${pass}&notmobile&salt=vdo.ninja&label=overlay&exclude=${room}&scene&novideo&noaudio&cleanoutput&room=${room}`;
             iframe.style.display = "none";
             document.body.appendChild(iframe);
             window.addEventListener("message", function (e) {
@@ -180,10 +251,10 @@
             `;
 
             container.appendChild(card);
-            const currentCards = container.getElementsByClassName('notification-card');
-            if (currentCards.length > chatLimit) container.removeChild(currentCards[0]);
+            if (container.children.length > chatLimit) container.removeChild(container.children[0]);
             if (layoutMode === 'horizontal') container.scrollLeft = container.scrollWidth;
         }
+
         createIframe();
     </script>
 </body>
