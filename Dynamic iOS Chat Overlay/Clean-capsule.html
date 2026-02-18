@@ -1,151 +1,148 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>iOS Overlay - Sync & Generate Fix</title>
-    <style>
-        :root {
-            --bg-color: rgba(0, 0, 0, 0.7);
-            --radius: 18px;
-            --font-size: 13px;
-            --user-color: #ffffff;
-            --text-color: #d1d1d1;
-            --border-color: rgba(255, 255, 255, 0.1);
-        }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flexible Slim iOS Overlay - Final Fix</title>
+    <style>
+        :root {
+            --bg-color: rgba(0, 0, 0, 0.7);
+            --radius: 18px;
+            --font-size: 13px;
+            --user-color: #ffffff;
+            --text-color: #d1d1d1;
+            --border-color: rgba(255, 255, 255, 0.1);
+        }
 
-        body {
-            background: transparent !important;
-            margin: 0;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            overflow: hidden;
-            height: 100vh; width: 100vw;
-        }
+        body {
+            background: transparent !important;
+            margin: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            overflow: hidden;
+            height: 100vh; width: 100vw;
+        }
 
-        #container {
-            display: flex;
-            padding: 20px;
-            gap: 12px;
-            height: 100%;
-            pointer-events: none;
-        }
+        #container {
+            display: flex;
+            padding: 20px;
+            gap: 12px;
+            height: 100%;
+            pointer-events: none; /* Biar nggak ganggu klik di OBS */
+        }
 
-        .layout-vertical { flex-direction: column; align-items: flex-start; }
-        .layout-horizontal { flex-direction: row; align-items: flex-start; }
+        .layout-vertical { flex-direction: column; align-items: flex-start; }
+        .layout-horizontal { flex-direction: row; align-items: flex-start; }
 
-        .notification-card {
-            width: 360px;
-            min-height: 70px;
-            background: var(--bg-color); 
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border-radius: var(--radius);
-            padding: 12px 16px;
-            box-shadow: 0 4px 25px rgba(0, 0, 0, 0.4);
-            border: 1px solid var(--border-color);
-            box-sizing: border-box; 
-            margin-bottom: 10px;
-            transition: all 0.3s ease;
-        }
+        .notification-card {
+            width: 360px;
+            min-height: 70px;
+            background: var(--bg-color); 
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-radius: var(--radius);
+            padding: 12px 16px;
+            box-shadow: 0 4px 25px rgba(0, 0, 0, 0.4);
+            border: 1px solid var(--border-color);
+            box-sizing: border-box; 
+            margin-bottom: 10px;
+            transition: all 0.3s ease;
+            position: relative;
+        }
 
-        .fade-in { animation: fadeIn 0.5s ease forwards; }
-        .slide-left { animation: slideLeft 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
-        .slide-up { animation: slideUp 0.5s ease forwards; }
-        .bounce { animation: bouncePop 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55) forwards; }
+        /* Animasi */
+        .fade-in { animation: fadeIn 0.5s ease forwards; }
+        .slide-left { animation: slideLeft 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
+        .slide-up { animation: slideUp 0.5s ease forwards; }
+        .bounce { animation: bouncePop 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55) forwards; }
 
-        @keyframes slideLeft { 0% { opacity: 0; transform: translateX(-30px); } 100% { opacity: 1; transform: translateX(0); } }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-        @keyframes slideUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
-        @keyframes bouncePop { 0% { opacity: 0; transform: scale(0.5); } 100% { opacity: 1; transform: scale(1); } }
+        @keyframes slideLeft { 0% { opacity: 0; transform: translateX(-30px); } 100% { opacity: 1; transform: translateX(0); } }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes bouncePop { 0% { opacity: 0; transform: scale(0.5); } 100% { opacity: 1; transform: scale(1); } }
 
-        .notif-header { display: flex; align-items: center; margin-bottom: 6px; }
-        .app-icon-bg { width: 16px; height: 16px; background: white; border-radius: 4px; margin-right: 8px; display: flex; align-items: center; justify-content: center; }
-        .username { font-size: var(--font-size); font-weight: 800; color: var(--user-color); margin-bottom: 2px; }
-        .message-text { font-size: var(--font-size); color: var(--text-color); line-height: 1.4; word-break: break-word; }
-    </style>
+        .notif-header { display: flex; align-items: center; margin-bottom: 6px; }
+        .app-icon-bg { width: 16px; height: 16px; background: white; border-radius: 4px; margin-right: 8px; display: flex; align-items: center; justify-content: center; }
+        .app-name { font-size: 10px; font-weight: 700; color: rgba(255,255,255,0.5); text-transform: uppercase; flex-grow: 1; }
+        .notif-time { font-size: 10px; color: rgba(255,255,255,0.3); }
+        .username { font-size: var(--font-size); font-weight: 800; color: var(--user-color); margin-bottom: 2px; }
+        .message-text { font-size: var(--font-size); color: var(--text-color); line-height: 1.4; word-break: break-word; }
+    </style>
 </head>
 <body>
-    <div id="container"></div>
+    <div id="container"></div>
+    
+    <script>
+        const urlParams = new URLSearchParams(window.location.search);
+        const roomID = urlParams.get('session') || 'ROOT';
+        const layoutMode = urlParams.get('layout') || 'vertical'; 
+        const chatLimit = parseInt(urlParams.get('limit')) || 5;
+        const animationClass = urlParams.get('anim') || 'fade-in';
 
-    <script>
-        const urlParams = new URLSearchParams(window.location.search);
-        
-        // --- 1. AMBIL DATA DARI URL (UNTUK GENERATE LINK) ---
-        function initFromURL() {
-            const data = {
-                radius: urlParams.get('radius'),
-                font: urlParams.get('font'),
-                uColor: urlParams.get('ucolor') ? '#' + urlParams.get('ucolor') : null,
-                tColor: urlParams.get('tcolor') ? '#' + urlParams.get('tcolor') : null,
-                bg: urlParams.get('bg') ? '#' + urlParams.get('bg') : null,
-                opac: urlParams.get('opac'),
-                mode: urlParams.get('grad') ? 'gradient' : 'solid',
-                g1: urlParams.get('grad')?.split(',')[0] ? '#' + urlParams.get('grad').split(',')[0] : null,
-                g2: urlParams.get('grad')?.split(',')[1] ? '#' + urlParams.get('grad').split(',')[1] : null
-            };
-            applyStyles(data);
-        }
+        const container = document.getElementById('container');
+        container.className = `layout-${layoutMode}`;
 
-        // --- 2. FUNGSI APPLY STYLE (CORE) ---
-        function applyStyles(data) {
-            const root = document.documentElement;
-            if(data.radius) root.style.setProperty('--radius', data.radius + 'px');
-            if(data.font) root.style.setProperty('--font-size', data.font + 'px');
-            if(data.uColor) root.style.setProperty('--user-color', data.uColor);
-            if(data.tColor) root.style.setProperty('--text-color', data.tColor);
-            
-            if(data.mode === 'gradient' && data.g1 && data.g2) {
-                root.style.setProperty('--bg-color', `linear-gradient(135deg, ${data.g1}, ${data.g2})`);
-            } else if(data.bg) {
-                const hex = data.bg.replace('#','');
-                const r = parseInt(hex.substring(0,2), 16), g = parseInt(hex.substring(2,4), 16), b = parseInt(hex.substring(4,6), 16);
-                root.style.setProperty('--bg-color', `rgba(${r},${g},${b},${data.opac || 0.8})`);
-            }
-        }
+        // 1. Fungsi Ganti Style Realtime
+        function applyStyles(data) {
+            const root = document.documentElement;
+            if(data.radius) root.style.setProperty('--radius', data.radius + 'px');
+            if(data.font) root.style.setProperty('--font-size', data.font + 'px');
+            if(data.uColor) root.style.setProperty('--user-color', data.uColor);
+            if(data.tColor) root.style.setProperty('--text-color', data.tColor);
+            
+            if(data.mode === 'gradient') {
+                root.style.setProperty('--bg-color', `linear-gradient(135deg, ${data.g1}, ${data.g2})`);
+            } else if(data.bg) {
+                const hex = data.bg.replace('#','');
+                const r = parseInt(hex.substring(0,2), 16), g = parseInt(hex.substring(2,4), 16), b = parseInt(hex.substring(4,6), 16);
+                root.style.setProperty('--bg-color', `rgba(${r},${g},${b},${data.opac || 0.8})`);
+            }
+        }
 
-        // --- 3. LISTENER UNTUK REALTIME DI WADAH ---
-        window.addEventListener("message", (e) => {
-            if (e.data.type === 'UPDATE_STYLE') applyStyles(e.data);
-            if (e.data.dataReceived && e.data.dataReceived.overlayNinja) {
-                const chat = e.data.dataReceived.overlayNinja;
-                if (chat.chatmessage) createChatCard(chat);
-            }
-        });
+        // 2. Listener dari Wadah Generator
+        window.addEventListener("message", (e) => {
+            if (e.data.type === 'UPDATE_STYLE') applyStyles(e.data);
+            
+            // Logika Social Stream (Ninja)
+            if (e.data.dataReceived && e.data.dataReceived.overlayNinja) {
+                const chat = e.data.dataReceived.overlayNinja;
+                if (chat.chatmessage) createChatCard(chat);
+            }
+        });
 
-        function createChatCard(data) {
-            const container = document.getElementById('container');
-            const layout = urlParams.get('layout') || 'vertical';
-            const limit = parseInt(urlParams.get('limit')) || 5;
-            const anim = urlParams.get('anim') || 'fade-in';
-            
-            container.className = `layout-${layout}`;
-            
-            const card = document.createElement('div');
-            card.className = `notification-card ${anim}`;
-            card.innerHTML = `
-                <div class="notif-header">
-                    <div class="app-icon-bg"><img src="https://cdn-icons-png.flaticon.com/512/3046/3046121.png" style="width:10px"></div>
-                    <span style="font-size:10px; font-weight:700; color:rgba(255,255,255,0.5); flex-grow:1;">MESSAGES</span>
-                </div>
-                <div class="username">${data.chatname}</div>
-                <div class="message-text">${data.chatmessage}</div>
-            `;
+        // 3. Render Card Chat
+        function createChatCard(data) {
+            const card = document.createElement('div');
+            card.className = `notification-card ${animationClass}`;
+            
+            card.innerHTML = `
+                <div class="notif-header">
+                    <div class="app-icon-bg"><img src="https://cdn-icons-png.flaticon.com/512/3046/3046121.png" style="width:10px"></div>
+                    <span class="app-name">MESSAGES</span>
+                    <span class="notif-time">now</span>
+                </div>
+                <div class="username">${data.chatname}</div>
+                <div class="message-text">${data.chatmessage}</div>
+            `;
 
-            container.appendChild(card);
-            if (container.children.length > limit) container.removeChild(container.children[0]);
-        }
+            container.appendChild(card);
+            
+            // Limit management
+            if (container.children.length > chatLimit) {
+                container.removeChild(container.children[0]);
+            }
+        }
 
-        // --- 4. INIT SEMUA ---
-        function init() {
-            initFromURL(); // Baca URL saat pertama buka
-            const roomID = urlParams.get('session') || 'ROOT';
-            const ifr = document.createElement("iframe");
-            ifr.src = `https://vdo.socialstream.ninja/?ln&api=1&room=${roomID}`;
-            ifr.style.display = "none";
-            document.body.appendChild(ifr);
-        }
+        // 4. Inisialisasi Iframe Social Stream (Hidden)
+        // PENTING: Tambahkan &api=1 agar pesan terkirim ke window parent
+        function initSocialStream() {
+            const ifr = document.createElement("iframe");
+            ifr.src = `https://vdo.socialstream.ninja/?ln&password=false&api=1&salt=vdo.ninja&label=overlay&exclude=${roomID}&scene&novideo&noaudio&cleanoutput&room=${roomID}`;
+            ifr.style.display = "none";
+            document.body.appendChild(ifr);
+            console.log("Social Stream Initialized for Room:", roomID);
+        }
 
-        init();
-    </script>
+        initSocialStream();
+    </script>
 </body>
 </html>
