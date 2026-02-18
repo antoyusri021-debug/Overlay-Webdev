@@ -3,17 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>iOS Ultimate Sync Overlay</title>
+    <title>iOS Overlay - Atmosphere Sync</title>
     <style>
-        /* CSS Variables - Diterima dari Dashboard */
         :root {
             --bg-color: rgba(0, 0, 0, 0.7);
             --border-color: rgba(255, 255, 255, 0.1);
-            --radius: 18px;
-            --avt-radius: 50%; /* Circle by default */
-            --font-size: 13px;
+            --radius: 22px;
+            --avt-radius: 50%;
+            --font-size: 24px;
             --user-color: #ffffff;
-            --text-color: #d1d1d1;
+            --text-color: #ffffff;
         }
 
         body {
@@ -21,8 +20,7 @@
             margin: 0;
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
             overflow: hidden;
-            height: 100vh;
-            width: 100vw;
+            height: 100vh; width: 100vw;
         }
 
         #container {
@@ -36,83 +34,41 @@
         .layout-vertical { flex-direction: column; align-items: flex-start; }
         .layout-horizontal { flex-direction: row; align-items: flex-start; }
 
-        /* BUBBLE CHAT */
         .notification-card {
             width: 360px;
-            min-height: 70px;
+            min-height: 80px;
             background: var(--bg-color); 
             backdrop-filter: blur(20px);
             -webkit-backdrop-filter: blur(20px);
             border-radius: var(--radius);
-            padding: 12px 16px;
+            padding: 14px 18px;
             box-shadow: 0 4px 25px rgba(0, 0, 0, 0.4);
             border: 1px solid var(--border-color);
             box-sizing: border-box; 
             display: flex;
-            gap: 12px;
+            gap: 14px;
             margin-bottom: 10px;
             flex-shrink: 0;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: all 0.3s ease;
         }
 
         /* AVATAR GEOMETRY */
-        .avatar-container {
-            width: 40px;
-            height: 40px;
-            flex-shrink: 0;
-        }
+        .avatar-container { width: 45px; height: 45px; flex-shrink: 0; }
+        .avatar-img { width: 100%; height: 100%; border-radius: var(--avt-radius); object-fit: cover; }
 
-        .avatar-img {
-            width: 100%;
-            height: 100%;
-            border-radius: var(--avt-radius);
-            object-fit: cover;
-        }
+        .content-right { flex-grow: 1; display: flex; flex-direction: column; justify-content: center; }
+        .app-name { font-size: 10px; font-weight: 700; color: rgba(255, 255, 255, 0.4); text-transform: uppercase; margin-bottom: 4px; }
+        .username { font-size: var(--font-size); font-weight: 800; color: var(--user-color); margin-bottom: 2px; }
+        .message-text { font-size: var(--font-size); color: var(--text-color); line-height: 1.3; word-break: break-word; }
 
-        .content-right {
-            flex-grow: 1;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-        }
-
-        .notif-header {
-            display: flex;
-            align-items: center;
-            margin-bottom: 4px;
-        }
-
-        .app-name {
-            font-size: 9px;
-            font-weight: 600;
-            color: rgba(255, 255, 255, 0.4);
-            text-transform: uppercase;
-            letter-spacing: 0.8px;
-            flex-grow: 1;
-        }
-
-        .username {
-            font-size: var(--font-size);
-            font-weight: 700;
-            color: var(--user-color);
-            margin-bottom: 2px;
-        }
-
-        .message-text {
-            font-size: var(--font-size);
-            color: var(--text-color);
-            line-height: 1.4;
-            word-break: break-word;
-        }
-
-        /* DYNAMIC ANIMATIONS */
+        /* ANIMATIONS */
         .fade-in { animation: fadeIn 0.5s ease forwards; }
         .slide-left { animation: slideLeft 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
         .slide-up { animation: slideUp 0.5s ease forwards; }
         .bounce { animation: bouncePop 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55) forwards; }
 
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-        @keyframes slideLeft { 0% { opacity: 0; transform: translateX(-30px); } 100% { opacity: 1; transform: translateX(0); } }
+        @keyframes slideLeft { from { opacity: 0; transform: translateX(-30px); } to { opacity: 1; transform: translateX(0); } }
         @keyframes slideUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
         @keyframes bouncePop { 0% { opacity: 0; transform: scale(0.5); } 100% { opacity: 1; transform: scale(1); } }
     </style>
@@ -124,134 +80,120 @@
         const urlParams = new URLSearchParams(window.location.search);
         const container = document.getElementById('container');
 
-        // Helper: Convert Hex to RGBA
+        // Helper untuk warna
         function hexToRgba(hex, alpha) {
             if (!hex) return null;
             hex = hex.replace('#', '');
-            const r = parseInt(hex.substring(0, 2), 16);
-            const g = parseInt(hex.substring(2, 4), 16);
-            const b = parseInt(hex.substring(4, 6), 16);
+            const r = parseInt(hex.substring(0, 2), 16), g = parseInt(hex.substring(2, 4), 16), b = parseInt(hex.substring(4, 6), 16);
             return `rgba(${r}, ${g}, ${b}, ${alpha})`;
         }
 
-        // 1. Avatar Geometry Logic
-        function getAvtRadius(geometry) {
-            if (geometry === 'circle') return '50%';
-            if (geometry === 'squircle') return '12px';
-            if (geometry === 'square') return '0%';
-            return '50%';
+        // Mapping Bentuk Avatar
+        function getAvtRadius(s) {
+            if (s === 'squircle') return '14px';
+            if (s === 'square') return '0%';
+            return '50%'; // circle
         }
 
-        // 2. Core Style Application (Initial & Real-time)
+        // FUNGSI UTAMA: Menerapkan Style (Disesuaikan dengan Wadah)
         function applySettings(data) {
             const root = document.documentElement;
 
-            // Background Sync (Solid vs Gradient)
-            if (data.mode === 'gradient' && data.g1 && data.g2) {
-                root.style.setProperty('--bg-color', `linear-gradient(135deg, ${data.g1}, ${data.g2})`);
+            // Background (Solid / Gradient)
+            if (data.mode === 'gradient' || data.grad) {
+                let g1, g2;
+                if (data.grad) { // Dari URL (&grad=hex,hex)
+                    const colors = data.grad.split(',');
+                    g1 = '#' + colors[0]; g2 = '#' + colors[1];
+                } else { // Dari postMessage
+                    g1 = data.g1; g2 = data.g2;
+                }
+                root.style.setProperty('--bg-color', `linear-gradient(135deg, ${g1}, ${g2})`);
             } else if (data.bg) {
-                root.style.setProperty('--bg-color', hexToRgba(data.bg, data.opac || 0.7));
+                const color = data.bg.startsWith('#') ? data.bg : '#' + data.bg;
+                root.style.setProperty('--bg-color', hexToRgba(color, data.opac || 0.9));
             }
 
-            // Border & Geometry
-            if (data.bColor) root.style.setProperty('--border-color', hexToRgba(data.bColor, data.bOpac || 1));
-            if (data.avatarGeometry) root.style.setProperty('--avt-radius', getAvtRadius(data.avatarGeometry));
+            // Border & Colors
+            if (data.bColor) root.style.setProperty('--border-color', hexToRgba(data.bColor.startsWith('#')?data.bColor:'#'+data.bColor, data.bOpac || 1));
+            if (data.uColor) root.style.setProperty('--user-color', data.uColor.startsWith('#')?data.uColor:'#'+data.uColor);
+            if (data.tColor) root.style.setProperty('--text-color', data.tColor.startsWith('#')?data.tColor:'#'+data.tColor);
             
             // Typography & Radius
             if (data.radius) root.style.setProperty('--radius', data.radius + 'px');
             if (data.font) root.style.setProperty('--font-size', data.font + 'px');
             
-            // Color Persona
-            if (data.uColor) root.style.setProperty('--user-color', data.uColor);
-            if (data.tColor) root.style.setProperty('--text-color', data.tColor);
+            // Avatar Shape (Wadah kirim 'avtShape' atau 'avt')
+            const shape = data.avtShape || data.avt;
+            if (shape) root.style.setProperty('--avt-radius', getAvtRadius(shape));
 
-            // Layout & Limit (Global variable update)
+            // Layout
             if (data.layout) container.className = `layout-${data.layout}`;
         }
 
-        // 3. URL Parameter Sync (Load settings on start)
+        // Sinkronisasi URL saat pertama buka (Load Setting)
         function applyUrlSettings() {
             const settings = {
-                bg: urlParams.get('bg') ? '#' + urlParams.get('bg') : '#000000',
-                opac: urlParams.get('opac') || 0.7,
-                g1: urlParams.get('g1') ? '#' + urlParams.get('g1') : null,
-                g2: urlParams.get('g2') ? '#' + urlParams.get('g2') : null,
-                mode: urlParams.get('mode') || 'solid',
-                bColor: urlParams.get('bcolor') ? '#' + urlParams.get('bcolor') : '#ffffff',
-                bOpac: urlParams.get('bopac') || 0.1,
-                avatarGeometry: urlParams.get('avatar') || 'circle',
-                radius: urlParams.get('radius') || 18,
-                font: urlParams.get('font') || 13,
-                uColor: urlParams.get('ucolor') ? '#' + urlParams.get('ucolor') : '#ffffff',
-                tColor: urlParams.get('tcolor') ? '#' + urlParams.get('tcolor') : '#d1d1d1',
+                bg: urlParams.get('bg'),
+                opac: urlParams.get('opac'),
+                grad: urlParams.get('grad'),
+                mode: urlParams.get('grad') ? 'gradient' : 'solid',
+                bColor: urlParams.get('bcolor'),
+                bOpac: urlParams.get('bopac'),
+                avt: urlParams.get('avt'),
+                radius: urlParams.get('radius'),
+                font: urlParams.get('font'),
+                uColor: urlParams.get('ucolor'),
+                tColor: urlParams.get('tcolor'),
                 layout: urlParams.get('layout') || 'vertical'
             };
             applySettings(settings);
         }
 
-        // 4. Real-time Message Listener
+        // Listener Message dari Wadah
         window.addEventListener("message", (e) => {
             if (e.data.type === 'UPDATE_STYLE') {
                 applySettings(e.data);
             }
-            
-            // Handle Chat Data from Social Stream Ninja
-            if (e.data.dataReceived && e.data.dataReceived.overlayNinja) {
-                const chatData = e.data.dataReceived.overlayNinja;
-                if (chatData.chatmessage) createChatCard(chatData);
+            if (e.data.dataReceived?.overlayNinja) {
+                createChatCard(e.data.dataReceived.overlayNinja);
             }
         });
 
-        // 5. Chat Card Rendering with Avatar
         function createChatCard(data) {
-            const limit = parseInt(urlParams.get('limit')) || 5;
-            const anim = urlParams.get('anim') || 'slide-left';
-            
-            // Dicebear Avatar Fallback
-            const avatarUrl = data.chatimg && data.chatimg !== "" 
-                ? data.chatimg 
-                : `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(data.chatname)}&backgroundColor=00897b,00acc1,039be5,1e88e5,3949ab,5e35b1,8e24aa,d81b60,e53935`;
+            const limit = parseInt(urlParams.get('limit')) || 10;
+            const anim = urlParams.get('anim') || 'fade-in';
+            const avatarUrl = `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(data.chatname)}&backgroundColor=039be5,1e88e5,3949ab,8e24aa,d81b60`;
 
             const card = document.createElement('div');
             card.className = `notification-card ${anim}`;
-            
             card.innerHTML = `
-                <div class="avatar-container">
-                    <img src="${avatarUrl}" class="avatar-img">
-                </div>
+                <div class="avatar-container"><img src="${data.chatimg || avatarUrl}" class="avatar-img"></div>
                 <div class="content-right">
-                    <div class="notif-header">
-                        <span class="app-name">MESSAGES</span>
-                    </div>
+                    <div class="app-name">MESSAGES • NOW</div>
                     <div class="username">${data.chatname}</div>
                     <div class="message-text">${data.chatmessage}</div>
                 </div>
             `;
 
             container.appendChild(card);
+            if (container.children.length > limit) container.removeChild(container.children[0]);
+            if (container.className.includes('horizontal')) container.scrollLeft = container.scrollWidth;
 
-            // Auto-scroll for horizontal
-            if (container.className.includes('layout-horizontal')) {
-                container.scrollLeft = container.scrollWidth;
-            }
-
-            // Remove old messages
-            if (container.children.length > limit) {
-                container.removeChild(container.children[0]);
+            // Auto Hide (Timer)
+            const showTime = parseInt(urlParams.get('showtime'));
+            if (showTime > 0) {
+                setTimeout(() => { card.style.opacity = '0'; setTimeout(() => card.remove(), 500); }, showTime);
             }
         }
 
-        // 6. Initialize Iframe & Settings
-        function init() {
-            applyUrlSettings();
-            const roomID = urlParams.get('session') || 'ROOT';
-            const ifr = document.createElement("iframe");
-            ifr.src = `https://vdo.socialstream.ninja/?ln&api=1&room=${roomID}`;
-            ifr.style.display = "none";
-            document.body.appendChild(ifr);
-        }
-
-        init();
+        // Init
+        applyUrlSettings();
+        const roomID = urlParams.get('session') || 'ROOT';
+        const ifr = document.createElement("iframe");
+        ifr.src = `https://vdo.socialstream.ninja/?ln&api=1&room=${roomID}`;
+        ifr.style.display = "none";
+        document.body.appendChild(ifr);
     </script>
 </body>
 </html>
