@@ -3,8 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Featured Message - Itachi Edition Final Fix</title>
+    <title>Featured Message - Itachi Edition Fixed</title>
+    <link rel="icon" href="../../favicon.ico" />
     <style>
+        /* =====================================================
+           CHAT CONTAINER
+        ===================================================== */
         html, body {
             width: 100%; height: 100%;
             overflow: hidden !important;
@@ -16,191 +20,196 @@
             display: flex;
             flex-direction: column;
             justify-content: flex-end; 
-            height: 100%; 
-            width: 100%;
-            max-width: 500px;
+            height: 100vh;
+            max-width: 520px;
             margin: 0 auto;
+            gap: 15px; 
             padding-bottom: 20px;
-            box-sizing: border-box;
+            transition: all 0.5s ease;
         }
 
+        /* =====================================================
+           MESSAGE WRAPPER & ANIMATION
+        ===================================================== */
         .message-wrapper {
             position: relative;
-            margin: 60px 20px 10px 20px; /* Margin atas gede buat ruang Itachi */
+            margin: 0;
             opacity: 0; 
+            filter: blur(2px);
+            flex-shrink: 0;
             transition: all 0.5s ease;
         }
 
         .message-wrapper.show {
             opacity: 1;
-            animation: pillIn 0.4s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+            filter: blur(0);
+            animation: pillIn 0.35s cubic-bezier(0.22, 1, 0.36, 1) forwards;
         }
 
-        /* GAMBAR ITACHI - Sekarang pakai elemen terpisah */
-        .itachi-img {
-            position: absolute;
-            width: 130px; 
-            left: -15px; 
-            bottom: 40px; /* Di atas box sedikit */
-            z-index: 50; /* Di atas background, di bawah teks kalau perlu */
-            pointer-events: none;
-            filter: drop-shadow(0 5px 15px rgba(0,0,0,0.3));
-        }
-
-        /* MATA SHARINGAN */
-        .sharingan-icon {
-            position: absolute;
-            top: -10px; right: 10px;
-            width: 25px; height: 25px;
-            background: #111 url("mata.png") no-repeat center;
-            background-size: 80%;
-            border-radius: 50%;
-            z-index: 100;
+        /* Class untuk animasi keluar */
+        .message-wrapper.hide {
+            opacity: 0;
+            transform: translateX(-50px) scale(0.9);
+            filter: blur(5px);
         }
 
         .message {
             position: relative;
             display: flex;
             align-items: center;
-            gap: 15px;
-            padding: 15px 20px;
-            z-index: 10;
+            gap: 12px;
+            padding: 14px 18px;
+            border-radius: 40px;
+            background: none;
             overflow: visible;
+            z-index: 1;
         }
 
-        .message-bg {
+        .message::before {
+            content: "";
+            position: absolute;
+            width: 150px; height: 150px;
+            left: -1px; top: -95px;
+            background-image: url("itachi.png");
+            background-repeat: no-repeat;
+            background-size: contain;
+            background-position: center;
+            opacity: 0.95;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        .message-wrapper::after {
+            content: "";
+            position: absolute;
+            top: -6px; right: 18px;
+            width: 22px; height: 22px;
+            background-image: url("mata.png");
+            background-repeat: no-repeat;
+            background-position: center;
+            background-size: contain;
+            background-color: #111;
+            border-radius: 50%;
+            padding: 3px;
+            z-index: 20;
+            pointer-events: none;
+        }
+
+        .message::after {
+            content: "";
             position: absolute;
             inset: 0;
-            z-index: 1; /* Paling bawah */
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-            transition: all 0.3s ease;
+            background: rgb(255, 255, 255);
+            border-radius: 40px;
+            box-shadow: 0 8px 25px rgba(14, 12, 12, 0.6);
+            z-index: 1;
+            pointer-events: none;
         }
 
-        .avatar { 
-            position: relative; 
-            z-index: 60; /* Di depan Itachi */
-            width: 55px; height: 55px; 
-            border-radius: 50%; 
-            object-fit: cover; 
-            border: 2px solid rgba(255,255,255,0.4);
-            margin-left: 5px;
-        }
-
-        .message-content { 
-            position: relative; 
-            z-index: 70; /* Paling depan biar nggak ketutup */
-            display: flex; 
-            flex-direction: column; 
-            gap: 2px; 
-            flex: 1;
-        }
-
-        .username { 
-            background: #da0303; 
-            padding: 2px 12px; 
-            border-radius: 999px; 
-            font-size: 14px; 
-            font-weight: 800; 
-            color: #fff; 
-            width: fit-content;
-            margin-bottom: 4px;
-        }
-
-        .text { 
-            font-size: 16px; 
-            font-weight: 700; 
-            color: #000; 
-            line-height: 1.2;
-            word-break: break-word; 
-            font-family: 'Plus Jakarta Sans', sans-serif;
-            text-shadow: 0 0 1px rgba(255,255,255,0.2);
-        }
+        .avatar { position: relative; z-index: 2; width: 60px; height: 60px; border-radius: 50%; object-fit: cover; flex-shrink: 0; }
+        .message-content { position: relative; z-index: 2; display: flex; flex-direction: column; gap: 4px; }
+        .header { display: inline-flex; align-items: center; gap: 6px; }
+        .username { background: rgba(218, 3, 3, 0.85); padding: 4px 12px; border-radius: 999px; font-size: 0.95rem; font-weight: 900; color: #ffffff; font-family: Arial, Helvetica, sans-serif !important; box-shadow: 0 3px 10px rgba(0,0,0,0.18); line-height: 1; }
+        .badges img { width: 14px; height: 14px; margin-left: 2px; }
+        .text { font-size: 19px; font-weight: bold; line-height: 1.32; color: #000; opacity: 0.85; word-break: break-word; font-family: Arial, Helvetica, sans-serif !important; }
 
         @keyframes pillIn {
-            0% { opacity: 0; transform: translateY(50px); }
-            100% { opacity: 1; transform: translateY(0); }
+            0% { opacity: 0; transform: translateX(60px) scale(0.9); }
+            60% { opacity: 1; transform: translateX(-4px) scale(1.03); }
+            100% { opacity: 1; transform: translateX(0) scale(1); }
         }
     </style>
 </head>
 <body>
     <div id="container"></div>
 
+    <script src="../../tts.js"></script>
     <script>
         const urlParams = new URLSearchParams(window.location.search);
-        const container = document.getElementById('container');
-        const roomID = urlParams.get('session') || 'TESTROOM';
+        const roomID = urlParams.get('session') || urlParams.get('room') || 'TESTROOM';
+        const password = urlParams.get('password') || "false";
+        const chatLimit = parseInt(urlParams.get('limit') || '1'); 
+        
+        // LOGIKA TIMER
+        const showtime = parseInt(urlParams.get('showtime') || urlParams.get('timer') || '10000'); 
 
-        function hexToRgba(hex, alpha) {
-            if (!hex) return 'rgba(255,255,255,1)';
-            hex = hex.replace('#', '');
-            let r = parseInt(hex.slice(0, 2), 16),
-                g = parseInt(hex.slice(2, 4), 16),
-                b = parseInt(hex.slice(4, 6), 16);
-            return `rgba(${r}, ${g}, ${b}, ${alpha})`;
-        }
+        const container = document.getElementById('container');
 
         function showMessage(content) {
+            if (!content.chatmessage && !content.chatname) return;
+
             const wrapper = document.createElement('div');
             wrapper.className = 'message-wrapper';
             
-            const rad = urlParams.get('radius') || '15';
-            const fSize = urlParams.get('font') || '16';
-            const showtime = parseInt(urlParams.get('showtime') || '10000');
-            let bgStyle = '#ffffff';
-
-            if(urlParams.has('grad')) {
-                const colors = urlParams.get('grad').split(',');
-                bgStyle = `linear-gradient(135deg, #${colors[0]}, #${colors[1]})`;
-            } else if(urlParams.has('bg')) {
-                bgStyle = hexToRgba(urlParams.get('bg'), urlParams.get('opac') || '1');
+            let badgeHTML = '';
+            if (content.chatbadges && Array.isArray(content.chatbadges)) {
+                content.chatbadges.forEach(b => {
+                    const src = typeof b === 'string' ? b : b.src;
+                    badgeHTML += `<img src="${src}" style="width:14px;height:14px;margin-left:2px;">`;
+                });
             }
 
             wrapper.innerHTML = `
-                <img src="itachi.png" class="itachi-img">
-                <div class="sharingan-icon"></div>
-                <div class="message" style="border-radius: ${rad}px">
-                    <div class="message-bg" style="border-radius: ${rad}px; background: ${bgStyle}"></div>
-                    <img class="avatar" src="${content.chatimg || 'https://i.pravatar.cc/100'}">
+                <div class="message">
+                    <img class="avatar" src="${content.chatimg || '../../sources/images/unknown.png'}" onerror="this.src='../../sources/images/unknown.png'">
                     <div class="message-content">
-                        <div class="header"><span class="username">${content.chatname}</span></div>
-                        <div class="text" style="font-size: ${fSize}px">${content.chatmessage}</div>
+                        <div class="header">
+                            <span class="username">${content.chatname}</span>
+                            <div class="badges">${badgeHTML}</div>
+                        </div>
+                        <div class="text">${content.chatmessage}</div>
                     </div>
                 </div>
             `;
 
-            container.innerHTML = ''; 
-            container.appendChild(wrapper);
-            
-            setTimeout(() => wrapper.classList.add('show'), 50);
+            // Batasi jumlah pesan sesuai Limit
+            const currentMessages = container.getElementsByClassName('message-wrapper');
+            if (currentMessages.length >= chatLimit) {
+                container.removeChild(currentMessages[0]);
+            }
 
+            container.appendChild(wrapper);
+
+            // Munculkan dengan animasi
+            requestAnimationFrame(() => {
+                wrapper.classList.add('show');
+            });
+
+            // LOGIKA AUTO-HIDE: Jika showtime > 0, hapus pesan ini setelah waktu tertentu
             if (showtime > 0) {
                 setTimeout(() => {
-                    wrapper.style.opacity = '0';
-                    wrapper.style.transform = 'translateX(-20px)';
-                    setTimeout(() => wrapper.remove(), 500);
+                    wrapper.classList.add('hide'); // Tambah class animasi keluar
+                    setTimeout(() => {
+                        if (wrapper.parentNode) {
+                            wrapper.parentNode.removeChild(wrapper);
+                        }
+                    }, 500); // Tunggu animasi transisi selesai
                 }, showtime);
+            }
+
+            // TTS Logic
+            if (window.initTTS && urlParams.has('tts')) {
+                const ttsText = content.chatmessage.replace(/<[^>]*>/g, '');
+                window.speak(content.chatname + ' says ' + ttsText);
             }
         }
 
-        window.addEventListener("message", (e) => {
-            if (e.data.dataReceived && e.data.dataReceived.overlayNinja) {
-                showMessage(e.data.dataReceived.overlayNinja);
-            }
-            if (e.data.type === 'UPDATE_STYLE') {
-                const bgs = document.querySelectorAll('.message-bg');
-                const texts = document.querySelectorAll('.text');
-                bgs.forEach(bg => {
-                    bg.style.background = e.data.mode === 'solid' ? hexToRgba(e.data.bg, e.data.opac) : `linear-gradient(135deg, ${e.data.g1}, ${e.data.g2})`;
-                    bg.style.borderRadius = e.data.radius + 'px';
-                });
-                texts.forEach(t => t.style.fontSize = e.data.font + 'px');
-            }
-        });
+        function createIframe() {
+            const iframe = document.createElement("iframe");
+            iframe.src = `https://vdo.socialstream.ninja/?ln&password=${password}&notmobile&salt=vdo.ninja&label=overlay&exclude=${roomID}&scene&novideo&noaudio&cleanoutput&room=${roomID}`;
+            iframe.style.display = "none";
+            document.body.appendChild(iframe);
 
-        const iframe = document.createElement("iframe");
-        iframe.src = `https://vdo.socialstream.ninja/?ln&notmobile&salt=vdo.ninja&label=overlay&exclude=${roomID}&scene&novideo&noaudio&cleanoutput&room=${roomID}`;
-        iframe.style.display = "none";
-        document.body.appendChild(iframe);
+            window.addEventListener("message", (e) => {
+                if (e.source != iframe.contentWindow) return;
+                if (e.data.dataReceived && e.data.dataReceived.overlayNinja) {
+                    const data = e.data.dataReceived.overlayNinja;
+                    if (data.chatmessage) showMessage(data);
+                }
+            });
+        }
+
+        createIframe();
     </script>
 </body>
 </html>
