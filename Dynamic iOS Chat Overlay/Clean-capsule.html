@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="id">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>iOS Overlay - Stable Version</title>
+    <title>iOS Overlay - Sync & Generate Fix</title>
     <style>
         :root {
             --bg-color: rgba(0, 0, 0, 0.7);
@@ -27,6 +27,7 @@
             padding: 20px;
             gap: 12px;
             height: 100%;
+            pointer-events: none;
         }
 
         .layout-vertical { flex-direction: column; align-items: flex-start; }
@@ -47,17 +48,19 @@
             transition: all 0.3s ease;
         }
 
-        /* Animasi */
         .fade-in { animation: fadeIn 0.5s ease forwards; }
         .slide-left { animation: slideLeft 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
+        .slide-up { animation: slideUp 0.5s ease forwards; }
+        .bounce { animation: bouncePop 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55) forwards; }
 
-        @keyframes slideLeft { 0% { opacity: 0; transform: translateX(-20px); } 100% { opacity: 1; transform: translateX(0); } }
+        @keyframes slideLeft { 0% { opacity: 0; transform: translateX(-30px); } 100% { opacity: 1; transform: translateX(0); } }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes bouncePop { 0% { opacity: 0; transform: scale(0.5); } 100% { opacity: 1; transform: scale(1); } }
 
-        .notif-header { display: flex; align-items: center; margin-bottom: 4px; }
+        .notif-header { display: flex; align-items: center; margin-bottom: 6px; }
         .app-icon-bg { width: 16px; height: 16px; background: white; border-radius: 4px; margin-right: 8px; display: flex; align-items: center; justify-content: center; }
-        .app-name { font-size: 9px; font-weight: 600; color: rgba(255,255,255,0.4); text-transform: uppercase; flex-grow: 1; }
-        .username { font-size: var(--font-size); font-weight: 700; color: var(--user-color); margin-bottom: 2px; }
+        .username { font-size: var(--font-size); font-weight: 800; color: var(--user-color); margin-bottom: 2px; }
         .message-text { font-size: var(--font-size); color: var(--text-color); line-height: 1.4; word-break: break-word; }
     </style>
 </head>
@@ -67,75 +70,82 @@
     <script>
         const urlParams = new URLSearchParams(window.location.search);
         
-        // 1. Ambil Settingan URL atau Default
-        function getParam(name, def) {
-            let val = urlParams.get(name);
-            return val ? (val.startsWith('#') ? val : '#' + val) : def;
+        // --- 1. AMBIL DATA DARI URL (UNTUK GENERATE LINK) ---
+        function initFromURL() {
+            const data = {
+                radius: urlParams.get('radius'),
+                font: urlParams.get('font'),
+                uColor: urlParams.get('ucolor') ? '#' + urlParams.get('ucolor') : null,
+                tColor: urlParams.get('tcolor') ? '#' + urlParams.get('tcolor') : null,
+                bg: urlParams.get('bg') ? '#' + urlParams.get('bg') : null,
+                opac: urlParams.get('opac'),
+                mode: urlParams.get('grad') ? 'gradient' : 'solid',
+                g1: urlParams.get('grad')?.split(',')[0] ? '#' + urlParams.get('grad').split(',')[0] : null,
+                g2: urlParams.get('grad')?.split(',')[1] ? '#' + urlParams.get('grad').split(',')[1] : null
+            };
+            applyStyles(data);
         }
 
-        function applyInitialStyles() {
+        // --- 2. FUNGSI APPLY STYLE (CORE) ---
+        function applyStyles(data) {
             const root = document.documentElement;
-            root.style.setProperty('--radius', (urlParams.get('radius') || 18) + 'px');
-            root.style.setProperty('--font-size', (urlParams.get('font') || 13) + 'px');
-            root.style.setProperty('--user-color', getParam('ucolor', '#ffffff'));
-            root.style.setProperty('--text-color', getParam('tcolor', '#d1d1d1'));
+            if(data.radius) root.style.setProperty('--radius', data.radius + 'px');
+            if(data.font) root.style.setProperty('--font-size', data.font + 'px');
+            if(data.uColor) root.style.setProperty('--user-color', data.uColor);
+            if(data.tColor) root.style.setProperty('--text-color', data.tColor);
             
-            const bg = getParam('bg', '#000000');
-            const opac = urlParams.get('opac') || 0.7;
-            const hex = bg.replace('#','');
-            const r = parseInt(hex.substring(0,2), 16), g = parseInt(hex.substring(2,4), 16), b = parseInt(hex.substring(4,6), 16);
-            root.style.setProperty('--bg-color', `rgba(${r},${g},${b},${opac})`);
+            if(data.mode === 'gradient' && data.g1 && data.g2) {
+                root.style.setProperty('--bg-color', `linear-gradient(135deg, ${data.g1}, ${data.g2})`);
+            } else if(data.bg) {
+                const hex = data.bg.replace('#','');
+                const r = parseInt(hex.substring(0,2), 16), g = parseInt(hex.substring(2,4), 16), b = parseInt(hex.substring(4,6), 16);
+                root.style.setProperty('--bg-color', `rgba(${r},${g},${b},${data.opac || 0.8})`);
+            }
         }
 
-        // 2. Listener Message (Penting!)
+        // --- 3. LISTENER UNTUK REALTIME DI WADAH ---
         window.addEventListener("message", (e) => {
-            // Cek data dari Wadah Generator
-            if (e.data.type === 'UPDATE_STYLE') {
-                const root = document.documentElement;
-                if(e.data.radius) root.style.setProperty('--radius', e.data.radius + 'px');
-                if(e.data.uColor) root.style.setProperty('--user-color', e.data.uColor);
-                if(e.data.bg) {
-                    const hex = e.data.bg.replace('#','');
-                    const r = parseInt(hex.substring(0,2), 16), g = parseInt(hex.substring(2,4), 16), b = parseInt(hex.substring(4,6), 16);
-                    root.style.setProperty('--bg-color', `rgba(${r},${g},${b},${e.data.opac || 0.7})`);
-                }
-            }
-            
-            // Cek data Chat dari Social Stream
+            if (e.data.type === 'UPDATE_STYLE') applyStyles(e.data);
             if (e.data.dataReceived && e.data.dataReceived.overlayNinja) {
-                renderChat(e.data.dataReceived.overlayNinja);
+                const chat = e.data.dataReceived.overlayNinja;
+                if (chat.chatmessage) createChatCard(chat);
             }
         });
 
-        function renderChat(data) {
+        function createChatCard(data) {
             const container = document.getElementById('container');
+            const layout = urlParams.get('layout') || 'vertical';
+            const limit = parseInt(urlParams.get('limit')) || 5;
+            const anim = urlParams.get('anim') || 'fade-in';
+            
+            container.className = `layout-${layout}`;
+            
             const card = document.createElement('div');
-            card.className = `notification-card ${urlParams.get('anim') || 'fade-in'}`;
+            card.className = `notification-card ${anim}`;
             card.innerHTML = `
                 <div class="notif-header">
-                    <div class="app-icon-bg"><img src="https://cdn-icons-png.flaticon.com/512/3046/3046121.png" width="10px"></div>
-                    <span class="app-name">MESSAGES</span>
+                    <div class="app-icon-bg"><img src="https://cdn-icons-png.flaticon.com/512/3046/3046121.png" style="width:10px"></div>
+                    <span style="font-size:10px; font-weight:700; color:rgba(255,255,255,0.5); flex-grow:1;">MESSAGES</span>
                 </div>
                 <div class="username">${data.chatname}</div>
                 <div class="message-text">${data.chatmessage}</div>
             `;
+
             container.appendChild(card);
-            const limit = parseInt(urlParams.get('limit')) || 4;
             if (container.children.length > limit) container.removeChild(container.children[0]);
         }
 
-        // 3. Panggil Iframe Social Stream
-        function initSocialStream() {
-            const roomID = urlParams.get('session') || 'TEST';
+        // --- 4. INIT SEMUA ---
+        function init() {
+            initFromURL(); // Baca URL saat pertama buka
+            const roomID = urlParams.get('session') || 'ROOT';
             const ifr = document.createElement("iframe");
-            // Ditambah &api=1 biar dia ngirim data ke sini
-            ifr.src = `https://vdo.socialstream.ninja/?ln&api=1&room=${roomID}&password=false&salt=vdo.ninja&label=overlay`;
+            ifr.src = `https://vdo.socialstream.ninja/?ln&api=1&room=${roomID}`;
             ifr.style.display = "none";
             document.body.appendChild(ifr);
         }
 
-        applyInitialStyles();
-        initSocialStream();
+        init();
     </script>
 </body>
 </html>
