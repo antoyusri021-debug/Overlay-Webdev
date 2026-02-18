@@ -3,12 +3,24 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ninja Bone - Fixed 3 Lines</title>
+    <title>Ninja Bone - Ultimate Sync</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@700;800&family=Inter:wght@400;700&display=swap" rel="stylesheet">
     <style>
+        :root {
+            /* Variable Default */
+            --radius: 20px;
+            --font-size: 16px;
+            --u-color: #d63031;
+            --t-color: #1a1a1a;
+            --bg-color: #F5F2EB;
+            --border-color: #333333;
+            --avt-radius: 50%;
+        }
+
         * { margin: 0; padding: 0; box-sizing: border-box; }
         
         body {
-            font-family: 'Inter', 'Segoe UI', sans-serif;
+            font-family: 'Plus Jakarta Sans', sans-serif;
             background: transparent;
             overflow: hidden;
             width: 100vw;
@@ -23,46 +35,60 @@
             justify-content: center;
         }
 
-        /* --- ANIMASI --- */
+        /* --- DYNAMIC ANIMATIONS --- */
         .message-wrapper {
             opacity: 0;
-            transform: scale(0.8) translateY(30px);
             transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            will-change: transform, opacity;
         }
 
-        .message-wrapper.show {
-            opacity: 1;
-            transform: scale(1) translateY(0);
+        /* Tipe Animasi Masuk */
+        .fade-in { transform: scale(0.9); }
+        .slide-left { transform: translateX(-100px); }
+        .slide-up { transform: translateY(100px); }
+        .bounce { transform: scale(0); }
+
+        .message-wrapper.show { opacity: 1; transform: scale(1) translate(0,0); }
+        
+        .message-wrapper.bounce.show {
+            animation: bouncePop 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        }
+
+        @keyframes bouncePop {
+            0% { transform: scale(0); }
+            60% { transform: scale(1.1); }
+            100% { transform: scale(1); }
         }
 
         .message-wrapper.hide {
             opacity: 0;
-            transform: scale(0.9) translateY(-20px);
+            transform: scale(0.8) translateY(-20px);
+            filter: blur(8px);
         }
 
-        /* --- DESIGN BOX FIXED --- */
+        /* --- BOX DESIGN (BONE STYLE) --- */
         .message-box {
             display: flex;
             flex-direction: row;
             align-items: center;
-            background: #F5F2EB;
+            background: var(--bg-color);
             padding: 12px 20px;
-            border-radius: 20px 20px 5px 20px;
-            border: 2.5px solid #333;
-            box-shadow: 6px 6px 0px rgba(0,0,0,0.15);
+            border-radius: var(--radius);
+            border: 3px solid var(--border-color); /* Garis tebal khas Bone */
+            box-shadow: 8px 8px 0px rgba(0,0,0,0.15); /* Shadow kaku retro */
             width: 450px;
-            height: 110px; /* TINGGI FIXED */
+            height: 115px; 
             position: relative;
         }
 
-        /* EKOR BUBBLE */
+        /* Ekor Bubble - Mengikuti warna border */
         .message-box::after {
             content: '';
             position: absolute;
-            bottom: -12px;
-            right: 25px;
-            border-left: 15px solid transparent;
-            border-top: 15px solid #333;
+            bottom: -15px;
+            right: 30px;
+            border-left: 18px solid transparent;
+            border-top: 18px solid var(--border-color);
             z-index: -1;
         }
 
@@ -70,25 +96,24 @@
             flex-grow: 1;
             text-align: left;
             padding-right: 15px;
-            overflow: hidden; /* Biar teks gak tumpah */
+            overflow: hidden;
         }
 
         .username {
             display: block;
             font-weight: 800;
             font-size: 12px;
-            color: #d63031; /* Warna merah gelap biar kontras */
+            color: var(--u-color);
             text-transform: uppercase;
-            margin-bottom: 2px;
+            margin-bottom: 4px;
+            letter-spacing: 0.5px;
         }
 
-        /* LOGIKA 3 BARIS TEKS */
         .chat-text {
             font-weight: 700;
-            font-size: 16px;
-            color: #1a1a1a;
+            font-size: var(--font-size);
+            color: var(--t-color);
             line-height: 1.3;
-            /* Clamp ke 3 baris */
             display: -webkit-box;
             -webkit-line-clamp: 3;
             -webkit-box-orient: vertical;
@@ -97,10 +122,10 @@
         }
 
         .avatar {
-            width: 60px;
-            height: 60px;
-            border-radius: 50%;
-            border: 2.5px solid #333;
+            width: 65px;
+            height: 65px;
+            border-radius: var(--avt-radius);
+            border: 3px solid var(--border-color);
             background: #fff;
             object-fit: cover;
             flex-shrink: 0;
@@ -120,7 +145,71 @@
 
         let currentMessage = null;
         let hideTimeout = null;
+        let currentAnim = urlParams.get('anim') || 'fade-in';
 
+        // 1. Helper: Hex to RGBA
+        function hexToRgba(hex, alpha) {
+            hex = hex.replace('#', '');
+            if (hex.length === 3) hex = hex.split('').map(s => s + s).join('');
+            let r = parseInt(hex.substring(0, 2), 16);
+            let g = parseInt(hex.substring(2, 4), 16);
+            let b = parseInt(hex.substring(4, 6), 16);
+            return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+        }
+
+        // 2. Helper: Avatar Radius
+        function getAvtRadius(shape) {
+            if (shape === 'circle') return '50%';
+            if (shape === 'squircle') return '25%';
+            return '0%'; 
+        }
+
+        // 3. Update CSS Variables
+        function updateStyles(data) {
+            const root = document.documentElement.style;
+            
+            // Background Sync
+            if (data.mode === 'gradient') {
+                root.setProperty('--bg-color', `linear-gradient(135deg, ${data.g1}, ${data.g2})`);
+            } else {
+                root.setProperty('--bg-color', hexToRgba(data.bg || '#F5F2EB', data.opac || 1));
+            }
+
+            root.setProperty('--border-color', hexToRgba(data.bColor || '#333333', data.bOpac || 1));
+            root.setProperty('--u-color', data.uColor || '#d63031');
+            root.setProperty('--t-color', data.tColor || '#1a1a1a');
+            root.setProperty('--radius', (data.radius || 20) + 'px');
+            root.setProperty('--font-size', (data.font || 16) + 'px');
+            root.setProperty('--avt-radius', getAvtRadius(data.avtShape));
+            
+            if (data.anim) currentAnim = data.anim;
+        }
+
+        // 4. URL Parameter Sync (Initial Load)
+        function applyUrlSettings() {
+            const settings = {
+                bg: '#' + (urlParams.get('bg') || 'F5F2EB'),
+                opac: urlParams.get('opac') || 1,
+                bColor: '#' + (urlParams.get('bcolor') || '333333'),
+                bOpac: urlParams.get('bopac') || 1,
+                uColor: '#' + (urlParams.get('ucolor') || 'd63031'),
+                tColor: '#' + (urlParams.get('tcolor') || '1a1a1a'),
+                radius: urlParams.get('radius') || 20,
+                font: urlParams.get('font') || 16,
+                avtShape: urlParams.get('avt') || 'circle',
+                anim: urlParams.get('anim') || 'fade-in'
+            };
+            updateStyles(settings);
+        }
+
+        // 5. Real-time Listener
+        window.addEventListener("message", (e) => {
+            if (e.data.type === 'UPDATE_STYLE') {
+                updateStyles(e.data);
+            }
+        });
+
+        // 6. Main Logic Ninja
         function createIframe() {
             const iframe = document.createElement("iframe");
             iframe.src = `https://vdo.socialstream.ninja/?ln&password=${password}&notmobile&salt=vdo.ninja&label=overlay&exclude=${roomID}&scene&novideo&noaudio&cleanoutput&room=${roomID}`;
@@ -150,8 +239,10 @@
 
         function generateNew(data) {
             const wrapper = document.createElement('div');
-            wrapper.className = 'message-wrapper';
-            const img = data.chatimg || `https://api.dicebear.com/7.x/initials/svg?seed=${data.chatname}`;
+            wrapper.className = `message-wrapper ${currentAnim}`;
+            
+            // Auto-initials Avatar
+            const img = data.chatimg || `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(data.chatname)}&backgroundColor=d63031,000000&bold=true`;
 
             wrapper.innerHTML = `
                 <div class="message-box">
@@ -169,11 +260,13 @@
             if (timerDur > 0) {
                 hideTimeout = setTimeout(() => {
                     wrapper.classList.add('hide');
-                    setTimeout(() => { if(wrapper.parentNode) wrapper.remove(); currentMessage = null; }, 450);
+                    setTimeout(() => { if(wrapper.parentNode) wrapper.remove(); currentMessage = null; }, 500);
                 }, timerDur);
             }
         }
 
+        // Init
+        applyUrlSettings();
         createIframe();
     </script>
 </body>
