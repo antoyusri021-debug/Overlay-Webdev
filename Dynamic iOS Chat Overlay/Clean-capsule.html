@@ -1,11 +1,10 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="id">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Flexible Slim iOS Overlay - Sync Version</title>
+    <title>Flexible Slim iOS Overlay - Final Fix</title>
     <style>
-        /* Variabel CSS untuk Kustomisasi Otomatis */
         :root {
             --bg-color: rgba(0, 0, 0, 0.7);
             --radius: 18px;
@@ -13,7 +12,6 @@
             --user-color: #ffffff;
             --text-color: #d1d1d1;
             --border-color: rgba(255, 255, 255, 0.1);
-            --border-opac: 1;
         }
 
         body {
@@ -21,8 +19,7 @@
             margin: 0;
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
             overflow: hidden;
-            height: 100vh;
-            width: 100vw;
+            height: 100vh; width: 100vw;
         }
 
         #container {
@@ -30,6 +27,7 @@
             padding: 20px;
             gap: 12px;
             height: 100%;
+            pointer-events: none; /* Biar nggak ganggu klik di OBS */
         }
 
         .layout-vertical { flex-direction: column; align-items: flex-start; }
@@ -37,8 +35,7 @@
 
         .notification-card {
             width: 360px;
-            min-height: 70px; 
-            max-width: 360px;
+            min-height: 70px;
             background: var(--bg-color); 
             backdrop-filter: blur(20px);
             -webkit-backdrop-filter: blur(20px);
@@ -47,88 +44,44 @@
             box-shadow: 0 4px 25px rgba(0, 0, 0, 0.4);
             border: 1px solid var(--border-color);
             box-sizing: border-box; 
-            flex-shrink: 0;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
             margin-bottom: 10px;
-            transition: all 0.3s ease; /* Biar smooth pas ganti warna */
+            transition: all 0.3s ease;
+            position: relative;
         }
 
-        .notif-header {
-            display: flex;
-            align-items: center;
-            margin-bottom: 4px;
-        }
-
-        .app-icon-bg {
-            width: 16px;
-            height: 16px;
-            background-color: #ffffff;
-            border-radius: 4px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-right: 8px;
-        }
-
-        .app-icon { width: 10px; height: 10px; }
-
-        .app-name {
-            font-size: 9px;
-            font-weight: 600;
-            color: rgba(255, 255, 255, 0.4);
-            text-transform: uppercase;
-            letter-spacing: 0.8px;
-            flex-grow: 1;
-        }
-
-        .notif-time { font-size: 9px; color: rgba(255, 255, 255, 0.3); }
-
-        .username {
-            font-size: var(--font-size);
-            font-weight: 700;
-            color: var(--user-color);
-            margin-bottom: 2px;
-        }
-
-        .message-text {
-            font-size: var(--font-size);
-            color: var(--text-color);
-            line-height: 1.4;
-            word-break: break-word; 
-            overflow: visible;
-        }
-
-        /* Animasi bisa diganti dari Wadah */
+        /* Animasi */
         .fade-in { animation: fadeIn 0.5s ease forwards; }
         .slide-left { animation: slideLeft 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
         .slide-up { animation: slideUp 0.5s ease forwards; }
         .bounce { animation: bouncePop 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55) forwards; }
 
-        @keyframes slideLeft { 0% { opacity: 0; transform: translateX(-20px); } 100% { opacity: 1; transform: translateX(0); } }
+        @keyframes slideLeft { 0% { opacity: 0; transform: translateX(-30px); } 100% { opacity: 1; transform: translateX(0); } }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
         @keyframes bouncePop { 0% { opacity: 0; transform: scale(0.5); } 100% { opacity: 1; transform: scale(1); } }
+
+        .notif-header { display: flex; align-items: center; margin-bottom: 6px; }
+        .app-icon-bg { width: 16px; height: 16px; background: white; border-radius: 4px; margin-right: 8px; display: flex; align-items: center; justify-content: center; }
+        .app-name { font-size: 10px; font-weight: 700; color: rgba(255,255,255,0.5); text-transform: uppercase; flex-grow: 1; }
+        .notif-time { font-size: 10px; color: rgba(255,255,255,0.3); }
+        .username { font-size: var(--font-size); font-weight: 800; color: var(--user-color); margin-bottom: 2px; }
+        .message-text { font-size: var(--font-size); color: var(--text-color); line-height: 1.4; word-break: break-word; }
     </style>
 </head>
 <body>
     <div id="container"></div>
-    <audio id="tts-audio" style="display:none;"></audio>
-
+    
     <script>
         const urlParams = new URLSearchParams(window.location.search);
-        
-        // Settings dari URL
-        const roomID = urlParams.get('session') || 'TESTROOM';
+        const roomID = urlParams.get('session') || 'ROOT';
         const layoutMode = urlParams.get('layout') || 'vertical'; 
         const chatLimit = parseInt(urlParams.get('limit')) || 5;
-        const animation = urlParams.get('anim') || 'slide-left';
+        const animationClass = urlParams.get('anim') || 'fade-in';
 
         const container = document.getElementById('container');
-        container.className = (layoutMode === 'horizontal') ? 'layout-horizontal' : 'layout-vertical';
+        container.className = `layout-${layoutMode}`;
 
-        // --- FUNGSI UPDATE STYLE DARI WADAH ---
+        // 1. Fungsi Ganti Style Realtime
         function applyStyles(data) {
             const root = document.documentElement;
             if(data.radius) root.style.setProperty('--radius', data.radius + 'px');
@@ -136,96 +89,60 @@
             if(data.uColor) root.style.setProperty('--user-color', data.uColor);
             if(data.tColor) root.style.setProperty('--text-color', data.tColor);
             
-            // Background Logic (Solid vs Gradient)
             if(data.mode === 'gradient') {
                 root.style.setProperty('--bg-color', `linear-gradient(135deg, ${data.g1}, ${data.g2})`);
             } else if(data.bg) {
-                // Konversi hex ke RGBA untuk opacity
                 const hex = data.bg.replace('#','');
-                const r = parseInt(hex.substring(0,2), 16);
-                const g = parseInt(hex.substring(2,4), 16);
-                const b = parseInt(hex.substring(4,6), 16);
-                root.style.setProperty('--bg-color', `rgba(${r},${g},${b},${data.opac || 0.7})`);
-            }
-
-            if(data.bColor) {
-                const bHex = data.bColor.replace('#','');
-                const br = parseInt(bHex.substring(0,2), 16);
-                const bg = parseInt(bHex.substring(2,4), 16);
-                const bb = parseInt(bHex.substring(4,6), 16);
-                root.style.setProperty('--border-color', `rgba(${br},${bg},${bb},${data.bOpac || 1})`);
+                const r = parseInt(hex.substring(0,2), 16), g = parseInt(hex.substring(2,4), 16), b = parseInt(hex.substring(4,6), 16);
+                root.style.setProperty('--bg-color', `rgba(${r},${g},${b},${data.opac || 0.8})`);
             }
         }
 
-        // Jalankan style awal dari URL jika ada
-        const initialData = {
-            radius: urlParams.get('radius'),
-            font: urlParams.get('font'),
-            uColor: '#' + urlParams.get('ucolor'),
-            tColor: '#' + urlParams.get('tcolor'),
-            bg: '#' + urlParams.get('bg'),
-            opac: urlParams.get('opac'),
-            bColor: '#' + urlParams.get('bcolor'),
-            bOpac: urlParams.get('bopac'),
-            mode: urlParams.get('grad') ? 'gradient' : 'solid',
-            g1: '#' + (urlParams.get('grad')?.split(',')[0] || ''),
-            g2: '#' + (urlParams.get('grad')?.split(',')[1] || '')
-        };
-        applyStyles(initialData);
-
-        // --- LISTENER DARI WADAH (REALTIME) ---
+        // 2. Listener dari Wadah Generator
         window.addEventListener("message", (e) => {
-            if (e.data.type === 'UPDATE_STYLE') {
-                applyStyles(e.data);
+            if (e.data.type === 'UPDATE_STYLE') applyStyles(e.data);
+            
+            // Logika Social Stream (Ninja)
+            if (e.data.dataReceived && e.data.dataReceived.overlayNinja) {
+                const chat = e.data.dataReceived.overlayNinja;
+                if (chat.chatmessage) createChatCard(chat);
             }
         });
 
-        // --- LOGIKA CHAT (SOCIAL STREAM) ---
-        function createIframe() {
-            var iframe = document.createElement("iframe");
-            // Menggunakan vdo.socialstream.ninja sesuai code original lu
-            iframe.src = `https://vdo.socialstream.ninja/?ln&notmobile&salt=vdo.ninja&label=overlay&exclude=${roomID}&scene&novideo&noaudio&cleanoutput&room=${roomID}`;
-            iframe.style.display = "none";
-            document.body.appendChild(iframe);
-
-            window.addEventListener("message", function (e) {
-                if (e.source != iframe.contentWindow) return;
-                if (e.data.dataReceived && e.data.dataReceived.overlayNinja) {
-                    const data = e.data.dataReceived.overlayNinja;
-                    if (data.chatmessage) updateMessage(data);
-                }
-            });
-        }
-
-        function updateMessage(data) {
+        // 3. Render Card Chat
+        function createChatCard(data) {
             const card = document.createElement('div');
-            // Tambahin class animasi yang dipilih
-            card.className = `notification-card ${animation}`;
-            const tiktokIcon = "https://cdn-icons-png.flaticon.com/512/3046/3046121.png"; 
-
+            card.className = `notification-card ${animationClass}`;
+            
             card.innerHTML = `
                 <div class="notif-header">
-                    <div class="app-icon-bg"><img src="${tiktokIcon}" class="app-icon"></div>
+                    <div class="app-icon-bg"><img src="https://cdn-icons-png.flaticon.com/512/3046/3046121.png" style="width:10px"></div>
                     <span class="app-name">MESSAGES</span>
-                    <span class="notif-time">NOW</span>
+                    <span class="notif-time">now</span>
                 </div>
-                <div class="content">
-                    <div class="username">${data.chatname}</div>
-                    <div class="message-text">${data.chatmessage}</div>
-                </div>
+                <div class="username">${data.chatname}</div>
+                <div class="message-text">${data.chatmessage}</div>
             `;
 
-            // Auto Remove berdasarkan limit
             container.appendChild(card);
+            
+            // Limit management
             if (container.children.length > chatLimit) {
                 container.removeChild(container.children[0]);
             }
-            
-            // Auto Scroll jika horizontal
-            if (layoutMode === 'horizontal') container.scrollLeft = container.scrollWidth;
         }
 
-        createIframe();
+        // 4. Inisialisasi Iframe Social Stream (Hidden)
+        // PENTING: Tambahkan &api=1 agar pesan terkirim ke window parent
+        function initSocialStream() {
+            const ifr = document.createElement("iframe");
+            ifr.src = `https://vdo.socialstream.ninja/?ln&password=false&api=1&salt=vdo.ninja&label=overlay&exclude=${roomID}&scene&novideo&noaudio&cleanoutput&room=${roomID}`;
+            ifr.style.display = "none";
+            document.body.appendChild(ifr);
+            console.log("Social Stream Initialized for Room:", roomID);
+        }
+
+        initSocialStream();
     </script>
 </body>
 </html>
