@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ramadhan Premium - Final Layer Fix</title>
+    <style>
+        :root {
+            --radius: 50px; 
+            --font-size: 22px;
+            --bg-base: #ffffff;
+            --u-color: #000000;
+            --t-color: #444444;
+            --avt-border: #000000;
+        }
+
+        body { 
+            margin: 0; padding: 0; 
+            overflow: hidden; 
+            background-color: transparent !important; 
+            font-family: 'Segoe UI', Arial, sans-serif;
+        }
+
+        #container {
+            display: flex; flex-direction: column; justify-content: center;
+            height: 100vh; max-width: 900px; margin: 0 auto;
+            /* Penting: biar lampu yang keluar batas box tetep keliatan */
+            overflow: visible; 
+        }
+
+        .message-wrapper {
+            position: relative;
+            opacity: 0;
+            transform: translateY(40px);
+            transition: all 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+            display: flex;
+            align-items: center;
+            height: 400px; /* Space lega buat lampu gantung */
+            padding: 0 40px;
+        }
+
+        .message-wrapper.show { opacity: 1; transform: translateY(0); }
+        .message-wrapper.hide { opacity: 0; transform: scale(0.9) translateY(-20px); }
+
+        /* BUBBLE CHAT */
+        .message-box {
+            position: relative;
+            background: var(--bg-base);
+            width: 100%;
+            height: 125px;
+            border-radius: var(--radius);
+            box-shadow: 0 15px 45px rgba(0,0,0,0.15);
+            display: flex;
+            align-items: center;
+            padding: 0 130px 0 210px; 
+            z-index: 10; /* Di bawah lampu dan bulan */
+            box-sizing: border-box;
+        }
+
+        /* BULAN & MASJID (DI KIRI) */
+        .dekor-bulan {
+            position: absolute;
+            left: -5px;
+            top: 50%;
+            transform: translateY(-50%);
+            height: 250px;
+            z-index: 30; /* Paling depan */
+            pointer-events: none;
+        }
+
+        /* AVATAR RING */
+        .avatar-container {
+            position: absolute;
+            right: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 105px;
+            height: 105px;
+            background: white;
+            border: 5px solid var(--avt-border);
+            border-radius: 50%;
+            overflow: hidden;
+            z-index: 35;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+        .avatar { width: 100%; height: 100%; object-fit: cover; }
+
+        /* AREA LAMPU GANTUNG - SEKARANG DI DEPAN BOX */
+        .lampu-row {
+            position: absolute;
+            top: 110px; /* Mulai dari pinggir bawah box */
+            right: 120px; /* Posisikan di area bawah chat/avatar */
+            display: flex;
+            align-items: flex-start;
+            gap: 25px;
+            z-index: 20; /* LEBIH TINGGI DARI MESSAGE-BOX (10) */
+        }
+
+        .lampu-item {
+            width: 42px;
+            height: auto;
+            transform-origin: top center;
+            animation: swing 3s ease-in-out infinite alternate;
+            filter: drop-shadow(0 5px 12px rgba(255, 200, 0, 0.4));
+        }
+
+        @keyframes swing {
+            from { transform: rotate(-5deg); }
+            to { transform: rotate(5deg); }
+        }
+
+        /* FIX TEKS: MAKS 2 BARIS */
+        .message-content {
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+            overflow: hidden;
+        }
+
+        .username {
+            font-size: 1.6rem;
+            font-weight: 900;
+            color: var(--u-color);
+            margin: 0;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .text {
+            font-size: var(--font-size);
+            font-weight: 600;
+            color: var(--t-color);
+            margin-top: 4px;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            text-overflow: ellipsis; 
+            line-height: 1.25;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="container">
+        <div id="output"></div>
+    </div>
+
+    <script>
+        const urlParams = new URLSearchParams(window.location.search);
+        const roomID = urlParams.get('session') || urlParams.get('room') || 'TESTROOM';
+        const password = urlParams.get('password') || "false";
+        const showtime = parseInt(urlParams.get('showtime') || '10000');
+
+        let currentMessage = null;
+        let messageTimeout = null;
+
+        // Lampu Base64 (Lentera Arab Gold)
+        const lampuBase64 = `data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+PHBhdGggZmlsbD0iI0RGOUUxQiIgZD0iTTEyIDJMMTAgNGg0bC0yLTJ6bTAgMnMtNCA0LTQgOWMwIDUuNSAzIDcgNCA3czQtMS41IDQtN2MwLTUtNC05LTQtOXptMCAxNWMtMS43IDAtMy0xLjMtMy0zcyAxLjMtMyAzLTMgMyAxLjMgMyAzLTEuMyAzLTMgM3oiLz48L3N2Zz4=`;
+
+        function renderPill(data) {
+            hideActiveMessage(() => {
+                const output = document.getElementById('output');
+                const wrapper = document.createElement('div');
+                wrapper.className = 'message-wrapper';
+
+                const avatarSrc = data.chatimg || 'https://api.dicebear.com/7.x/initials/svg?seed=' + data.chatname;
+
+                wrapper.innerHTML = `
+                    <img src="bulan.png" class="dekor-bulan" onerror="this.src='https://cdn-icons-png.flaticon.com/512/2633/2633912.png'">
+                    
+                    <div class="message-box">
+                        <div class="message-content">
+                            <div class="username">${data.chatname || 'Guest'}</div>
+                            <div class="text">${data.chatmessage}</div>
+                        </div>
+                        <div class="avatar-container">
+                            <img class="avatar" src="${avatarSrc}">
+                        </div>
+                    </div>
+
+                    <div class="lampu-row">
+                        <img src="${lampuBase64}" class="lampu-item">
+                        <img src="${lampuBase64}" class="lampu-item" style="margin-top: 30px; width: 34px;">
+                        <img src="${lampuBase64}" class="lampu-item" style="margin-top: 15px;">
+                        <img src="${lampuBase64}" class="lampu-item" style="margin-top: 45px; width: 28px;">
+                        <img src="${lampuBase64}" class="lampu-item">
+                    </div>
+                `;
+
+                output.appendChild(wrapper);
+                currentMessage = wrapper;
+                setTimeout(() => wrapper.classList.add('show'), 50);
+
+                if (showtime > 0) {
+                    messageTimeout = setTimeout(() => hideActiveMessage(), showtime);
+                }
+            });
+        }
+
+        function hideActiveMessage(callback) {
+            if (messageTimeout) clearTimeout(messageTimeout);
+            if (currentMessage) {
+                currentMessage.classList.add('hide');
+                setTimeout(() => {
+                    if (currentMessage && currentMessage.parentNode) currentMessage.parentNode.removeChild(currentMessage);
+                    currentMessage = null;
+                    if (callback) callback();
+                }, 600);
+            } else if (callback) {
+                callback();
+            }
+        }
+
+        function initNinja() {
+            const iframe = document.createElement("iframe");
+            iframe.style.display = "none";
+            iframe.src = `https://vdo.socialstream.ninja/?ln&password=${password}&salt=vdo.ninja&label=overlay&exclude=${roomID}&scene&novideo&noaudio&cleanoutput&room=${roomID}`;
+            document.body.appendChild(iframe);
+
+            window.addEventListener("message", (e) => {
+                if (e.source !== iframe.contentWindow) return;
+                const received = e.data?.dataReceived?.overlayNinja;
+                if (received) {
+                    const content = received.contents || received;
+                    if (content && content.chatmessage) renderPill(content);
+                }
+            });
+        }
+
+        initNinja();
+    </script>
+</body>
+</html>
