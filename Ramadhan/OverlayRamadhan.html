@@ -3,19 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ramadhan Premium - Ultimate Sync Edition</title>
+    <title>Ramadhan Premium - Perfect Layout Fix</title>
     <style>
         :root {
-            /* Syncable Variables */
-            --radius: 65px; 
-            --font-size: 20px;
+            /* Variables for Sync */
+            --radius: 50px; 
+            --font-size: 22px;
             --bg-base: #ffffff;
             --u-color: #000000;
             --t-color: #444444;
-            --b-color: #000000;
+            --avt-border: #000000;
             --b-opac: 1;
             --bg-opac: 1;
-            --avt-radius: 50%;
         }
 
         body { 
@@ -26,11 +25,8 @@
         }
 
         #container {
-            display: flex; 
-            flex-direction: column; 
-            justify-content: center;
-            height: 100vh; 
-            width: 100vw;
+            display: flex; flex-direction: column; justify-content: center;
+            height: 100vh; max-width: 900px; margin: 0 auto;
             overflow: visible; 
         }
 
@@ -41,78 +37,74 @@
             transition: all 0.6s cubic-bezier(0.22, 1, 0.36, 1);
             display: flex;
             align-items: center;
-            width: 900px;
-            height: 350px;
-            margin: 0 auto;
+            height: 400px; 
+            padding: 0 40px;
         }
 
-        /* SYNC ANIMATION CLASSES */
         .message-wrapper.show { opacity: 1; transform: translateY(0); }
         .message-wrapper.hide { opacity: 0; transform: scale(0.9) translateY(-20px); }
 
-        /* BUBBLE CHAT - DYNAMIC STYLE */
+        /* BUBBLE CHAT - POSISI FIX SESUAI GAMBAR */
         .message-box {
-            position: absolute;
-            left: 50px;
+            position: relative;
             background: var(--bg-base);
-            width: 780px;
+            width: 100%;
             height: 125px;
             border-radius: var(--radius);
-            border: 4px solid var(--b-color);
-            border-color: rgba(0,0,0, var(--b-opac)); /* Sync Border Opacity */
             box-shadow: 0 15px 45px rgba(0,0,0,0.15);
             display: flex;
-            flex-direction: column;
-            justify-content: center;
-            padding: 0 130px 0 180px; 
+            align-items: center;
+            padding: 0 130px 0 210px; /* Jarak aman dari bulan di kiri */
             z-index: 10;
             box-sizing: border-box;
-            transition: all 0.3s ease; /* Biar smooth pas ganti radius/warna */
+            border: 2px solid rgba(0,0,0, var(--b-opac)); /* Syncable Border */
         }
 
-        /* BULAN & MASJID */
+        /* DEKORASI BULAN - FIX DI KIRI */
         .dekor-bulan {
             position: absolute;
-            left: 0;
+            left: -5px;
             top: 50%;
             transform: translateY(-50%);
-            height: 280px;
+            height: 250px;
             z-index: 30;
             pointer-events: none;
         }
 
-        /* AVATAR RING - SYNC SHAPE */
+        /* AVATAR - FIX DI KANAN */
         .avatar-container {
             position: absolute;
-            right: 15px;
+            right: 20px;
             top: 50%;
             transform: translateY(-50%);
             width: 105px;
             height: 105px;
             background: white;
-            border: 4px solid var(--b-color);
-            border-radius: var(--avt-radius); /* SYNCED: Circle, Squircle, Square */
+            border: 5px solid var(--avt-border);
+            border-radius: 50%;
             overflow: hidden;
             z-index: 35;
-            transition: border-radius 0.4s ease;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
         }
         .avatar { width: 100%; height: 100%; object-fit: cover; }
 
-        /* LAMPU GANTUNG */
+        /* LAMPU GANTUNG - FIX DI BAWAH BOX */
         .lampu-row {
             position: absolute;
-            top: 250px;
-            left: 420px;
+            top: 115px; /* Nempel tepat di bawah box */
+            right: 120px;
             display: flex;
+            align-items: flex-start;
             gap: 25px;
-            z-index: 40;
+            z-index: 20;
         }
 
         .lampu-item {
-            width: 45px;
+            width: 42px;
             height: auto;
             transform-origin: top center;
             animation: swing 3s ease-in-out infinite alternate;
+            filter: drop-shadow(0 5px 12px rgba(255, 200, 0, 0.4));
         }
 
         @keyframes swing {
@@ -120,7 +112,7 @@
             to { transform: rotate(5deg); }
         }
 
-        /* TEXT STYLING - SYNC COLORS & FONT */
+        /* CONTENT TEKS */
         .message-content {
             display: flex;
             flex-direction: column;
@@ -129,7 +121,7 @@
         }
 
         .username {
-            font-size: 26px;
+            font-size: 1.6rem;
             font-weight: 900;
             color: var(--u-color);
             margin: 0;
@@ -142,13 +134,13 @@
             font-size: var(--font-size);
             font-weight: 600;
             color: var(--t-color);
-            margin-top: 2px;
+            margin-top: 4px;
             display: -webkit-box;
             -webkit-line-clamp: 2;
             -webkit-box-orient: vertical;
             overflow: hidden;
             text-overflow: ellipsis; 
-            line-height: 1.2;
+            line-height: 1.25;
         }
     </style>
 </head>
@@ -159,45 +151,35 @@
     </div>
 
     <script>
-        // 1. URL PARAMETERS LOADER
         const urlParams = new URLSearchParams(window.location.search);
         const roomID = urlParams.get('session') || 'TESTROOM';
-        const showtime = parseInt(urlParams.get('showtime') || '10000');
         const password = urlParams.get('password') || "false";
+        const showtime = parseInt(urlParams.get('showtime') || '10000');
 
         let currentMessage = null;
         let messageTimeout = null;
 
         const lampuBase64 = `data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+PHBhdGggZmlsbD0iI0RGOUUxQiIgZD0iTTEyIDJMMTAgNGg0bC0yLTJ6bTAgMnMtNCA0LTQgOWMwIDUuNSAzIDcgNCA3czQtMS41IDQtN2MwLTUtNC05LTQtOXptMCAxNWMtMS43IDAtMy0xLjMtMy0zcyAxLjMtMyAzLTMgMyAxLjMgMyAzLTEuMyAzLTMgM3oiLz48L3N2Zz4=`;
 
-        // 2. ULTIMATE SYNC - POSTMESSAGE LISTENER
+        // LISTENER UNTUK FITUR APLIKASI (SYNC TANPA MERUSAK POSISI)
         window.addEventListener("message", (e) => {
             const d = e.data;
             if (d.type === 'UPDATE_STYLE') {
                 const root = document.documentElement;
-                if(d.radius) root.style.setProperty('--radius', d.radius + 'px');
-                if(d.font) root.style.setProperty('--font-size', d.font + 'px');
                 if(d.uColor) root.style.setProperty('--u-color', d.uColor);
                 if(d.tColor) root.style.setProperty('--t-color', d.tColor);
-                if(d.bColor) root.style.setProperty('--b-color', d.bColor);
+                if(d.font) root.style.setProperty('--font-size', d.font + 'px');
                 if(d.bOpac) root.style.setProperty('--b-opac', d.bOpac);
                 
-                // Handle Solid vs Gradient
                 if(d.mode === 'gradient') {
                     root.style.setProperty('--bg-base', `linear-gradient(90deg, ${d.g1}, ${d.g2})`);
-                } else {
-                    // Convert Hex to RGBA for Opacity
+                } else if(d.bg) {
                     const hex = d.bg.replace('#','');
                     const r = parseInt(hex.substring(0,2), 16);
                     const g = parseInt(hex.substring(2,4), 16);
                     const b = parseInt(hex.substring(4,6), 16);
-                    root.style.setProperty('--bg-base', `rgba(${r},${g},${b}, ${d.opac})`);
+                    root.style.setProperty('--bg-base', `rgba(${r},${g},${b}, ${d.opac || 1})`);
                 }
-
-                // Handle Avatar Shape
-                if(d.avtShape === 'circle') root.style.setProperty('--avt-radius', '50%');
-                if(d.avtShape === 'squircle') root.style.setProperty('--avt-radius', '25%');
-                if(d.avtShape === 'square') root.style.setProperty('--avt-radius', '10px');
             }
         });
 
@@ -222,9 +204,9 @@
                     </div>
                     <div class="lampu-row">
                         <img src="${lampuBase64}" class="lampu-item">
-                        <img src="${lampuBase64}" class="lampu-item" style="margin-top: 25px; width: 35px;">
-                        <img src="${lampuBase64}" class="lampu-item" style="margin-top: 10px;">
-                        <img src="${lampuBase64}" class="lampu-item" style="margin-top: 45px; width: 30px;">
+                        <img src="${lampuBase64}" class="lampu-item" style="margin-top: 30px; width: 34px;">
+                        <img src="${lampuBase64}" class="lampu-item" style="margin-top: 15px;">
+                        <img src="${lampuBase64}" class="lampu-item" style="margin-top: 45px; width: 28px;">
                         <img src="${lampuBase64}" class="lampu-item">
                     </div>
                 `;
