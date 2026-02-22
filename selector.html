@@ -29,17 +29,58 @@
 
         iframe { width: 100%; height: 100%; border: none; background: transparent; border-radius: 1rem; }
         #resLink { display: block; white-space: pre-wrap; word-break: break-all; width: 100%; border: 1px solid rgba(255, 255, 255, 0.1); padding: 10px; border-radius: 10px; background: rgba(0, 0, 0, 0.5); font-size: 10px; color: #fff; }
+
+        .sidebar { 
+            width: 450px; 
+            flex-shrink: 0; 
+            display: flex; 
+            flex-direction: column; 
+            gap: 10px; 
+            overflow-y: auto; 
+            /* Tambahkan padding top agar hover tidak terpotong ke atas */
+            padding: 10px 10px 0 5px; 
+        }
+
+        /* Update pada bagian ini saja */
+        .btn-home {
+            width: 45px; 
+            height: 45px; 
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1); 
+            border-radius: 12px;
+            display: flex; 
+            align-items: center; 
+            justify-content: center;
+            cursor: pointer; 
+            transition: all 0.3s; 
+            backdrop-filter: blur(10px);
+            color: rgba(255,255,255,0.5);
+            /* Tambahkan ini agar tidak mepet ke atas saat normal */
+            margin-top: 5px; 
+        }
+
+        .btn-home:hover {
+            background: white; 
+            color: black; 
+            /* Kurangi sedikit lompatannya jika masih terasa terpotong */
+            transform: translateY(-2px); 
+            box-shadow: 0 10px 20px rgba(0,0,0,0.5);
+        }
     </style>
 </head>
 <body>
     <div class="main-wrapper">
         <div class="sidebar">
-            <div class="pl-2 mb-1 flex justify-between items-center">
-                <div>
-                    <h1 class="text-2xl font-black italic text-white tracking-tighter">THEME<span class="opacity-50 font-light">SELECTOR</span></h1>
-                    <p class="text-[8px] text-white/40 tracking-[0.5em] uppercase font-bold">Quick Deploy System</p>
+            <div class="pl-2 mb-2 flex justify-between items-center">
+                <div class="flex items-center gap-4">
+                    <div onclick="location.href='selection.html'" class="btn-home" title="Kembali ke Menu Utama">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+                    </div>
+                    <div>
+                        <h1 class="text-2xl font-black italic text-white tracking-tighter leading-none">DEFAULT<span class="opacity-50 font-light">THEMES</span></h1>
+                        <p class="text-[7px] text-white/40 tracking-[0.4em] uppercase font-bold mt-1">Custom Chat Engine • v3.3.4</p>
+                    </div>
                 </div>
-                <a href="editor.html" class="btn-back px-4 py-2 rounded-xl text-[10px] font-bold uppercase tracking-widest">Editor</a>
             </div>
 
             <div class="elite-card p-6 space-y-6 flex-grow flex flex-col justify-start overflow-y-auto">
@@ -100,10 +141,10 @@
 
                     <div class="max-w-[280px] ml-auto border-t border-white/10 pt-4">
                         <p class="text-[9px] leading-tight tracking-wider text-red-500 font-black uppercase mb-1.5">
-                            PROTECTION SYSTEM ACTIVE: AUTO-IP DETECTION ENABLED.
+                            PERINGATAN KERAS: HAK CIPTA MUTLAK DEVELOPER.
                         </p>
                         <p class="text-[8.5px] leading-relaxed tracking-wider text-white/80 font-bold uppercase mb-4">
-                            DILARANG KERAS MENJUAL KEMBALI APLIKASI INI TANPA IZIN DEVELOPER. DISTRIBUSI ILEGAL AKAN TERDETEKSI OTOMATIS DAN AKSES AKAN DIBLOKIR PERMANEN PADA IP YANG TIDAK TERDAFTAR.
+                            DILARANG KERAS MEMPERJUALBELIKAN ATAU MENDISTRIBUSIKAN ULANG APLIKASI INI DALAM BENTUK APAPUN! SIAPAPUN YANG TERBUKTI MENJUAL KEMBALI TANPA IZIN RESMI, MAKA AKSES AKAN DIMATIKAN TOTAL SAAT ITU JUGA. HARGAI KARYA DEVELOPER ATAU KEHILANGAN AKSES SELAMANYA. TIDAK ADA KOMPROMI.
                         </p>
                         
                         <div class="flex flex-col items-end gap-3 mt-2">
