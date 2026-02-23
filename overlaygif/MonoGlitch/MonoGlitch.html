@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MonoGlitch Pro - Avatar Only Edition</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap');
+
+        :root {
+            --accent-color: #ffcc00;
+            --bg-card: rgba(10, 10, 10, 0.98);
+        }
+
+        body { 
+            background: transparent !important; 
+            font-family: 'Inter', sans-serif; 
+            margin: 0;
+            overflow: hidden;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+        }
+
+        #main-display { padding-left: 40px; }
+
+        .pro-card {
+            display: flex;
+            align-items: center;
+            background: var(--bg-card);
+            min-width: 400px;
+            padding: 15px 25px;
+            border-left: 6px solid var(--accent-color);
+            box-shadow: 15px 15px 0px rgba(255, 204, 0, 0.1);
+            position: relative;
+        }
+
+        /* KOTAK AVATAR (FOTO PROFIL) */
+        .avatar-box {
+            width: 80px;
+            height: 80px;
+            background: #222;
+            border: 2px solid #fff;
+            margin-right: 20px;
+            overflow: hidden;
+            flex-shrink: 0;
+        }
+
+        .avatar-box img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .content-pro { display: flex; flex-direction: column; }
+
+        .name-pro { 
+            color: #fff; 
+            font-size: 18px; 
+            font-weight: 900; 
+            text-transform: uppercase; 
+            letter-spacing: 1px;
+            position: relative;
+        }
+
+        /* Efek Glitch Nama */
+        .name-pro::before, .name-pro::after {
+            content: attr(data-text);
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+        }
+        .name-pro::before { left: 2px; text-shadow: -2px 0 #ff00c1; animation: glitch-1 2s infinite linear alternate-reverse; }
+        .name-pro::after { left: -2px; text-shadow: -2px 0 #00fff9; animation: glitch-2 3s infinite linear alternate-reverse; }
+
+        .status-text { 
+            color: var(--accent-color); 
+            font-size: 24px; 
+            font-weight: 800; 
+            margin: 2px 0; 
+        }
+
+        .gift-detail { 
+            color: rgba(255,255,255,0.6); 
+            font-size: 14px; 
+            font-weight: 600; 
+            text-transform: uppercase;
+        }
+
+        .message-wrapper {
+            opacity: 0;
+            transform: scale(0.8) translateX(-50px);
+            transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .message-wrapper.show {
+            opacity: 1;
+            transform: scale(1) translateX(0);
+        }
+
+        @keyframes glitch-1 { 0% { clip: rect(10px, 9999px, 20px, 0); } 100% { clip: rect(30px, 9999px, 5px, 0); } }
+        @keyframes glitch-2 { 0% { clip: rect(5px, 9999px, 35px, 0); } 100% { clip: rect(15px, 9999px, 10px, 0); } }
+    </style>
+</head>
+<body>
+
+    <div id="main-display">
+        <div id="output"></div>
+    </div>
+    
+    <audio id="gift-sound" preload="auto"></audio>
+
+    <script>
+        const urlParams = new URLSearchParams(window.location.search);
+        const roomID = urlParams.get('session') || urlParams.get('room') || 'TESTROOM';
+        const password = urlParams.get('password') || "false";
+        const soundFile = "teddy.mp3"; 
+
+        let giftQueue = [];
+        let isShowing = false;
+
+        function connectToNinja() {
+            const iframe = document.createElement("iframe");
+            iframe.src = `https://vdo.socialstream.ninja/?ln&password=${password}&notmobile&salt=vdo.ninja&label=overlay&exclude=${roomID}&scene&novideo&noaudio&cleanoutput&includeavatars=1&chat=1&system=1&events=1&room=${roomID}`;
+            iframe.style.display = "none";
+            document.body.appendChild(iframe);
+
+            window.addEventListener("message", function (e) {
+                if (e.source != iframe.contentWindow) return;
+                const res = e.data.dataReceived?.overlayNinja;
+                if (!res) return;
+
+                if (res.hasDonation || (res.chatmessage && res.chatmessage.toLowerCase().includes("sent"))) {
+                    giftQueue.push({
+                        name: res.chatname || 'Supporter',
+                        gift: res.hasDonation || res.chatmessage.replace(/sent/i, "").trim(),
+                        // Logika avatar diperkuat dari code sultan
+                        img: res.avatar || res.user_img || res.chatimg 
+                    });
+                    if (!isShowing) processQueue();
+                }
+            });
+        }
+
+        function processQueue() {
+            if (isShowing || giftQueue.length === 0) return;
+            isShowing = true;
+            render(giftQueue.shift());
+        }
+
+        function render(data) {
+            const output = document.getElementById('output');
+            const audio = document.getElementById('gift-sound');
+            const userPic = data.img || `https://api.dicebear.com/7.x/initials/svg?seed=${data.name}`;
+            
+            output.innerHTML = `
+                <div class="message-wrapper">
+                    <div class="pro-card">
+                        <div class="avatar-box">
+                            <img src="${userPic}" onerror="this.src='https://via.placeholder.com/100'">
+                        </div>
+                        <div class="content-pro">
+                            <span class="name-pro" data-text="${data.name}">${data.name}</span>
+                            <span class="status-text">GIFT RECEIVED!</span>
+                            <span class="gift-detail">${data.gift}</span>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            audio.src = soundFile;
+            audio.play().catch(() => {});
+
+            const wrap = output.querySelector('.message-wrapper');
+            setTimeout(() => wrap.classList.add('show'), 100);
+
+            setTimeout(() => {
+                wrap.classList.remove('show');
+                setTimeout(() => { output.innerHTML = ''; isShowing = false; processQueue(); }, 600);
+            }, 8000);
+        }
+
+        // TEST MODE (SPASI)
+        window.addEventListener('keydown', (e) => {
+            if (e.code === "Space") {
+                giftQueue.push({ name: "BRO_TESTER", gift: "Finger Heart x1", img: "https://i.pravatar.cc/150?u=12" });
+                if (!isShowing) processQueue();
+            }
+        });
+
+        window.onload = connectToNinja;
+    </script>
+</body>
+</html>
