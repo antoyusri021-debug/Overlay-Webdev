@@ -36,6 +36,15 @@
 
         iframe { width: 100%; height: 100%; border: none; background: transparent; border-radius: 1rem; }
         #resLink { display: block; white-space: pre-wrap; word-break: break-all; width: 100%; border: 1px solid rgba(255, 255, 255, 0.1); padding: 10px; border-radius: 10px; background: rgba(0, 0, 0, 0.5); font-size: 10px; color: #fff; }
+        
+        /* Tambahan Animasi untuk Instruksi */
+        .key-hint {
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 0.5; }
+            50% { opacity: 1; }
+        }
     </style>
 </head>
 <body>
@@ -94,6 +103,11 @@
                 <div class="flex items-center gap-3">
                     <div id="statusDot" class="w-2.5 h-2.5 rounded-full bg-yellow-500"></div>
                     <span id="statusText" class="text-[10px] text-white/40 font-mono font-bold uppercase tracking-[0.3em]">Standby...</span>
+                </div>
+                <div class="flex items-center gap-2 px-3 py-1.5 bg-white/5 border border-white/10 rounded-lg key-hint">
+                    <span class="text-[9px] font-black text-white/70 tracking-widest uppercase">Press</span>
+                    <span class="px-2 py-0.5 bg-white text-black text-[9px] font-black rounded uppercase">SPACE</span>
+                    <span class="text-[9px] font-black text-white/70 tracking-widest uppercase">to Test Theme</span>
                 </div>
             </div>
             
@@ -210,10 +224,24 @@
         const link = document.getElementById('resLink').innerText;
         navigator.clipboard.writeText(link).then(() => { alert("LINK COPIED!"); });
     }
+
+    // --- LOGIKA TOMBOL SPASI UNTUK TEST ---
+    window.addEventListener('keydown', function(e) {
+        if (e.code === 'Space') {
+            // Mencegah scroll saat tekan spasi
+            e.preventDefault();
+            
+            const iframe = document.getElementById('previewIframe');
+            // Mengirim pesan simulasi ke iframe
+            if (iframe && iframe.contentWindow) {
+                // Kebanyakan overlay kita pakai sistem Keyboard Event untuk test internalnya
+                iframe.contentWindow.dispatchEvent(new KeyboardEvent('keydown', { 'code': 'Space' }));
+                
+                // Tambahan: Agar user tahu tombol terdeteksi
+                console.log("Simulasi Spasi dikirim ke Preview");
+            }
+        }
+    });
 </script>
 </body>
-
 </html>
-
-
-
