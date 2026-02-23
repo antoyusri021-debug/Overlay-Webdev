@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Minimalist Glitch Welcome Overlay</title>
+    <style>
+        /* Menggunakan font Inter yang sangat bersih dan modern */
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap');
+
+        body { 
+            background: transparent; 
+            margin: 0;
+            overflow: hidden;
+            height: 100vh;
+            display: flex;
+            justify-content: flex-start; 
+            align-items: center;     
+            padding-left: 40px;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .welcome-content {
+            display: flex;
+            align-items: center;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .welcome-content.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* ICON MINIMALIS */
+        .icon-container {
+            width: 60px;
+            height: 60px;
+            background: #ffffff;
+            border-radius: 16px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            z-index: 2;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .icon-img {
+            width: 70%;
+            height: 70%;
+            object-fit: contain;
+        }
+
+        /* TEXT BOX MINIMALIS */
+        .text-box {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 12px 30px 12px 40px;
+            margin-left: -20px;
+            border-radius: 0 15px 15px 0;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            border-left: 4px solid #333;
+            position: relative;
+        }
+
+        /* EFEK GLITCH PADA USERNAME */
+        .user-name {
+            color: #111;
+            font-size: 28px; 
+            font-weight: 800;
+            margin: 0;
+            line-height: 1.2;
+            position: relative;
+            display: inline-block;
+        }
+
+        /* Layer Glitch */
+        .welcome-content.show .user-name::before,
+        .welcome-content.show .user-name::after {
+            content: attr(data-text);
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0); /* background transparan agar tidak menutupi teks asli */
+            clip: rect(0, 0, 0, 0); 
+        }
+
+        .welcome-content.show .user-name::before {
+            left: -2px;
+            text-shadow: 2px 0 #ff00c1; /* Warna Neon Pink */
+            animation: glitch-anim-1 2s infinite linear alternate-reverse;
+        }
+
+        .welcome-content.show .user-name::after {
+            left: 2px;
+            text-shadow: -2px 0 #00fff9; /* Warna Neon Cyan */
+            animation: glitch-anim-2 3s infinite linear alternate-reverse;
+        }
+
+        @keyframes glitch-anim-1 {
+            0% { clip: rect(20px, 9999px, 10px, 0); }
+            20% { clip: rect(45px, 9999px, 50px, 0); }
+            40% { clip: rect(10px, 9999px, 80px, 0); }
+            60% { clip: rect(60px, 9999px, 5px, 0); }
+            80% { clip: rect(30px, 9999px, 40px, 0); }
+            100% { clip: rect(15px, 9999px, 70px, 0); }
+        }
+
+        @keyframes glitch-anim-2 {
+            0% { clip: rect(50px, 9999px, 20px, 0); }
+            25% { clip: rect(10px, 9999px, 60px, 0); }
+            50% { clip: rect(80px, 9999px, 30px, 0); }
+            75% { clip: rect(40px, 9999px, 10px, 0); }
+            100% { clip: rect(5px, 9999px, 90px, 0); }
+        }
+
+        .welcome-msg {
+            color: #666;
+            font-size: 14px;
+            font-weight: 400;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-top: 2px;
+        }
+
+        .line-loader {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            height: 3px;
+            background: #333;
+            width: 0%;
+        }
+
+        .welcome-content.show .line-loader {
+            animation: progress 5.5s linear forwards;
+        }
+
+        @keyframes progress {
+            to { width: 100%; }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="output"></div>
+    <audio id="welcome-sound"></audio>
+
+    <script>
+        const urlParams = new URLSearchParams(window.location.search);
+        const sessionID = urlParams.get('session') || 'TESTROOM';
+        const password = urlParams.get('password') || "false";
+
+        // ASSETS
+        const soundFile = "welcome.mp3"; 
+        const iconFile = "kabuto.png"; 
+
+        let chatQueue = [];
+        let isShowing = false;
+        const hasGreeted = new Set();
+
+        function playWelcomeSound() {
+            const audio = document.getElementById('welcome-sound');
+            audio.src = soundFile;
+            audio.volume = 0.5;
+            audio.play().catch(e => console.log("Audio unlock required"));
+        }
+
+        function connectToNinja() {
+            const iframe = document.createElement("iframe");
+            iframe.src = `https://vdo.socialstream.ninja/?ln&password=${password}&salt=vdo.ninja&label=overlay&exclude=${sessionID}&scene&novideo&noaudio&cleanoutput&chat=1&room=${sessionID}`;
+            iframe.style.display = "none";
+            document.body.appendChild(iframe);
+
+            window.addEventListener("message", function (e) {
+                if (e.source != iframe.contentWindow) return;
+                if (e.data?.dataReceived?.overlayNinja) {
+                    let res = e.data.dataReceived.overlayNinja;
+                    let name = res.chatname || res.chatname_clean;
+                    
+                    if (name && !hasGreeted.has(name.toLowerCase())) {
+                        if (name.toLowerCase() !== "vdo.ninja") {
+                            hasGreeted.add(name.toLowerCase());
+                            chatQueue.push(name);
+                            if (!isShowing) processQueue();
+                        }
+                    }
+                }
+            });
+        }
+
+        function processQueue() {
+            if (isShowing || chatQueue.length === 0) return;
+            isShowing = true;
+            render(chatQueue.shift());
+        }
+
+        function render(userName) {
+            const output = document.getElementById('output');
+            output.innerHTML = `
+                <div class="welcome-content">
+                    <div class="icon-container">
+                        <img src="${iconFile}" class="icon-img" onerror="this.src='https://cdn-icons-png.flaticon.com/512/1077/1077114.png'">
+                    </div>
+                    <div class="text-box">
+                        <div class="user-name" data-text="${userName}">${userName}</div>
+                        <div class="welcome-msg">Joined the chat</div>
+                        <div class="line-loader"></div>
+                    </div>
+                </div>
+            `;
+            
+            const content = document.querySelector('.welcome-content');
+            playWelcomeSound();
+            
+            setTimeout(() => { if(content) content.classList.add('show'); }, 100);
+
+            setTimeout(() => {
+                if(content) {
+                    content.style.opacity = "0";
+                    content.style.transform = "translateY(-10px)";
+                }
+                setTimeout(() => {
+                    output.innerHTML = '';
+                    isShowing = false;
+                    processQueue();
+                }, 600);
+            }, 6000); 
+        }
+
+        window.onload = connectToNinja;
+
+        window.addEventListener('click', () => {
+            const audio = document.getElementById('welcome-sound');
+            audio.play().then(() => audio.pause());
+        }, { once: true });
+    </script>
+</body>
+</html>
