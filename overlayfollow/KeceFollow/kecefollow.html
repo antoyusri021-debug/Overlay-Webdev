@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TikTok Live Follower Avatar - SSN Edition</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap');
+
+        body {
+            background: transparent !important;
+            margin: 0;
+            font-family: 'Inter', sans-serif;
+            overflow: hidden;
+            height: 100vh;
+            width: 100vw;
+        }
+
+        #container {
+            display: flex;
+            padding: 50px;
+            align-items: center;
+            justify-content: flex-start;
+            height: 100%;
+            box-sizing: border-box;
+        }
+
+        .notification-card {
+            display: flex;
+            align-items: center;
+            position: relative;
+            animation: glitchIn 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+
+        /* AVATAR DARI TIKTOK */
+        .avatar-wrapper {
+            position: relative;
+            width: 110px;
+            height: 110px;
+            background: #fff;
+            padding: 5px;
+            box-shadow: 10px 10px 0px rgba(255, 255, 255, 0.1);
+            z-index: 10;
+            border-radius: 4px; /* Sedikit rounded biar modern */
+        }
+
+        .avatar-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+
+        .content-area {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            background: rgba(10, 10, 10, 0.95);
+            padding: 20px 45px;
+            margin-left: -10px;
+            border-left: 6px solid #00ff44; 
+            z-index: 5;
+            position: relative;
+        }
+
+        .username {
+            color: #fff;
+            font-size: 34px; 
+            font-weight: 900;
+            margin: 0;
+            position: relative;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            line-height: 1.1;
+        }
+
+        /* Efek Glitch pada Nama */
+        .username::before, .username::after {
+            content: attr(data-text);
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: transparent;
+        }
+
+        .username::before {
+            left: 2px;
+            text-shadow: -2px 0 #ff00c1;
+            animation: glitch-anim 2s infinite linear alternate-reverse;
+        }
+
+        .username::after {
+            left: -2px;
+            text-shadow: -2px 0 #00fff9;
+            animation: glitch-anim 3s infinite linear alternate-reverse;
+        }
+
+        .thanks-msg {
+            color: #00ff44;
+            font-size: 13px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 4px;
+            margin-top: 5px;
+        }
+
+        @keyframes glitchIn {
+            0% { opacity: 0; transform: scale(0.8) skewX(-5deg) translateX(-50px); }
+            100% { opacity: 1; transform: scale(1) skewX(0deg) translateX(0); }
+        }
+
+        @keyframes glitch-anim {
+            0% { clip: rect(10px, 9999px, 25px, 0); }
+            50% { clip: rect(40px, 9999px, 10px, 0); }
+            100% { clip: rect(25px, 9999px, 50px, 0); }
+        }
+
+        .fade-out {
+            animation: fadeOut 0.5s ease-in forwards !important;
+        }
+
+        @keyframes fadeOut {
+            to { opacity: 0; transform: scale(1.1) translateX(100px); filter: blur(10px); }
+        }
+    </style>
+</head>
+<body>
+    <div id="container"></div>
+    <audio id="follow-sound" preload="auto"></audio>
+
+    <script>
+        const urlParams = new URLSearchParams(window.location.search);
+        const roomID = urlParams.get('session') || urlParams.get('room') || 'TESTROOM';
+        const password = urlParams.get('password') || "false";
+        
+        const soundFile = "follow.mp3";
+        const container = document.getElementById('container');
+        let isProcessing = false;
+        let queue = [];
+
+        function playFollowSound() {
+            const audio = document.getElementById('follow-sound');
+            audio.src = soundFile;
+            audio.volume = 0.7;
+            audio.play().catch(e => console.warn("Audio interaction needed"));
+        }
+
+        function renderFollower(name, img) {
+            // Jika img kosong atau undefined, pakai avatar default TikTok
+            const userImg = img && img !== "" ? img : `https://api.dicebear.com/7.x/initials/svg?seed=${name}`;
+            
+            const card = document.createElement('div');
+            card.className = 'notification-card';
+            card.innerHTML = `
+                <div class="avatar-wrapper">
+                    <img src="${userImg}" class="avatar-img" onerror="this.src='https://cdn-icons-png.flaticon.com/512/1077/1077114.png'">
+                </div>
+                <div class="content-area">
+                    <div class="username" data-text="${name}">${name}</div>
+                    <div class="thanks-msg">NEW FOLLOWER DETECTED</div>
+                </div>
+            `;
+
+            container.innerHTML = ''; 
+            container.appendChild(card);
+            playFollowSound();
+
+            setTimeout(() => {
+                card.classList.add('fade-out');
+                setTimeout(() => {
+                    card.remove();
+                    isProcessing = false;
+                    processQueue();
+                }, 500);
+            }, 6000);
+        }
+
+        function processQueue() {
+            if (isProcessing || queue.length === 0) return;
+            isProcessing = true;
+            const item = queue.shift();
+            renderFollower(item.name, item.img);
+        }
+
+        function createIframe() {
+            // URL SSN dengan includeavatars=1 untuk menarik PP user
+            const iframe = document.createElement("iframe");
+            iframe.src = `https://vdo.socialstream.ninja/?ln&password=${password}&notmobile&salt=vdo.ninja&label=overlay&exclude=${roomID}&scene&novideo&noaudio&cleanoutput&includeavatars=1&chat=1&system=1&events=1&room=${roomID}`;
+            iframe.style.display = "none";
+            document.body.appendChild(iframe);
+
+            window.addEventListener("message", function (e) {
+                if (e.source != iframe.contentWindow) return;
+                const res = e.data.dataReceived?.overlayNinja;
+                if (!res) return;
+
+                let isFollow = false;
+                let name = res.chatname || res.chatname_clean;
+                
+                // SSN biasanya mengirim avatar di properti 'avatar' atau 'user_img'
+                let avatar = res.avatar || res.user_img || "";
+
+                // Deteksi Follow TikTok/Twitch via SSN
+                if (res.event === 'follow' || res.type === 'follow') isFollow = true;
+                let msg = (res.text || "").toLowerCase();
+                if (msg.includes("followed") || msg.includes("mengikuti")) isFollow = true;
+
+                if (isFollow && name) {
+                    queue.push({ name: name, img: avatar });
+                    if (!isProcessing) processQueue();
+                }
+            });
+        }
+
+        // TEST MODE (Tekan Spasi)
+        window.addEventListener('keydown', (e) => {
+            if (e.code === "Space") {
+                queue.push({ 
+                    name: "USER_TEST", 
+                    img: "https://i.pravatar.cc/150?u="+Math.random() // Simulasi foto orang acak
+                });
+                if (!isProcessing) processQueue();
+            }
+        });
+
+        window.onload = createIframe;
+        window.addEventListener('click', () => {
+            const audio = document.getElementById('follow-sound');
+            audio.play().then(() => audio.pause());
+        }, { once: true });
+    </script>
+</body>
+</html>
