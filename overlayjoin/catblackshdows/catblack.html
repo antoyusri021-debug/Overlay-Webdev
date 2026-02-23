@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Clean First Chat Overlay</title>
+    <title>Clean First Chat Overlay - Space Test Edition</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;800&display=swap');
 
@@ -23,7 +23,7 @@
             display: flex;
             align-items: center;
             opacity: 0;
-            transform: translateY(30px); /* Muncul dari bawah sedikit */
+            transform: translateY(30px); 
             transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
 
@@ -36,7 +36,6 @@
             width: 280px; 
             height: 280px;
             object-fit: contain;
-            /* Shadow supaya gambar kucingnya tetap "pop out" tanpa box */
             filter: drop-shadow(0 10px 15px rgba(0,0,0,0.5));
             z-index: 2;
         }
@@ -50,11 +49,10 @@
 
         .user-name {
             color: #ffffff;
-            font-size: 45px; /* Lebih besar karena tidak ada box */
+            font-size: 45px; 
             font-weight: 800;
             margin: 0;
             text-transform: capitalize;
-            /* Stroke/Garis pinggir teks agar terbaca di background terang */
             text-shadow: 3px 3px 0px #000, 
                          -1px -1px 0px #000,  
                           1px -1px 0px #000,
@@ -64,7 +62,7 @@
         }
 
         .welcome-text {
-            color: #FFD700; /* Warna kuning emas */
+            color: #FFD700; 
             font-size: 26px;
             font-weight: 400;
             margin-top: 5px;
@@ -76,26 +74,17 @@
 <body>
 
     <div id="output"></div>
-    <audio id="swoosh-sound" preload="auto"></audio>
 
     <script>
         const urlParams = new URLSearchParams(window.location.search);
         const sessionID = urlParams.get('session') || urlParams.get('room') || 'TESTROOM';
         const password = urlParams.get('password') || "false";
 
-        const soundFile = "swoosh.mp3"; 
         const catFile = "meong.png"; 
 
         let chatQueue = [];
         let isShowing = false;
         const hasGreeted = new Set();
-
-        function playSwoosh() {
-            const audio = document.getElementById('swoosh-sound');
-            audio.src = soundFile;
-            audio.volume = 0.6;
-            audio.play().catch(e => console.log("Interaksi OBS diperlukan"));
-        }
 
         function connectToNinja() {
             const iframe = document.createElement("iframe");
@@ -139,7 +128,6 @@
             `;
             
             const content = document.querySelector('.welcome-content');
-            playSwoosh();
             
             setTimeout(() => { if(content) content.classList.add('show'); }, 100);
 
@@ -147,7 +135,7 @@
             setTimeout(() => {
                 if(content) {
                     content.style.opacity = "0";
-                    content.style.transform = "scale(0.8)"; /* Efek mengecil saat hilang */
+                    content.style.transform = "scale(0.8)"; 
                     content.style.transition = "all 0.4s ease-in";
                 }
                 setTimeout(() => {
@@ -157,6 +145,18 @@
                 }, 500);
             }, 5000); 
         }
+
+        // --- FITUR TES TEMA DENGAN SPASI ---
+        window.addEventListener('keydown', (e) => {
+            if (e.code === "Space") {
+                // Tambahkan nama dummy untuk testing
+                const testNames = ["Sultan_Ganteng", "User_Baru", "WebDev_Lover", "Mister_Meong"];
+                const randomName = testNames[Math.floor(Math.random() * testNames.length)];
+                
+                chatQueue.push(randomName);
+                if (!isShowing) processQueue();
+            }
+        });
 
         window.onload = connectToNinja;
     </script>
