@@ -141,8 +141,13 @@
         const MASTER_CODE = "webdev12345";
         const modal = document.getElementById('customModal');
 
-        function openModal() { modal.style.display = 'flex'; }
-        function closeModal() { modal.style.display = 'none'; }
+        function openModal() { 
+            modal.style.display = 'flex'; 
+        }
+
+        function closeModal() { 
+            modal.style.display = 'none'; 
+        }
 
         function redirectToWA() {
             const msg = encodeURIComponent("Halo Brow, saya mau beli Kode Akses Premium untuk YT Music Overlay (WebdevOverlay). Harga Rp 50.000.");
@@ -150,16 +155,19 @@
         }
 
         function askForCode() {
-            closeModal();
-            setTimeout(() => {
-                const code = prompt("MASUKKAN KODE AKSES PREMIUM:");
-                if (code && code.trim() === MASTER_CODE) {
+            // JANGAN tutup modal dulu biar browser gak bingung fokusnya
+            const code = prompt("MASUKKAN KODE AKSES PREMIUM:");
+            
+            if (code !== null) { // User tidak menekan 'Cancel'
+                if (code.trim() === MASTER_CODE) {
                     alert("AKSES DITERIMA!");
+                    // Tutup modal HANYA jika sukses
+                    closeModal(); 
                     window.location.href = "ytmusic_overlay.html";
-                } else if (code) {
-                    alert("KODE SALAH!");
+                } else {
+                    alert("KODE SALAH! Silakan hubungi developer jika belum punya.");
                 }
-            }, 300);
+            }
         }
     </script>
 </body>
