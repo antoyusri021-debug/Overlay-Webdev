@@ -44,35 +44,55 @@
         }
         .catalog-card:not(.locked-card):hover .btn-enter { background: white; color: black; }
 
-        /* CUSTOM MODAL STYLE */
+        /* MODAL DENGAN INPUT FORM */
         #customModal {
             display: none; position: fixed; inset: 0; z-index: 100;
-            background: rgba(0,0,0,0.8); backdrop-filter: blur(10px);
+            background: rgba(0,0,0,0.85); backdrop-filter: blur(15px);
             align-items: center; justify-content: center;
         }
         .modal-content {
-            background: #1a1a1a; border: 1px solid rgba(255,255,255,0.1);
-            padding: 30px; border-radius: 24px; max-width: 400px; width: 90%; text-align: center;
+            background: #151515; border: 1px solid rgba(255,255,255,0.1);
+            padding: 35px; border-radius: 28px; max-width: 400px; width: 90%; text-align: center;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
         }
         .modal-btn {
-            width: 100%; padding: 12px; margin-top: 10px; border-radius: 12px;
+            width: 100%; padding: 14px; margin-top: 10px; border-radius: 14px;
             font-weight: 800; font-size: 11px; text-transform: uppercase; letter-spacing: 1px;
             transition: 0.3s;
         }
         .btn-wa { background: #25d366; color: white; }
-        .btn-code { background: white; color: black; }
-        .btn-close { color: rgba(255,255,255,0.4); font-size: 10px; margin-top: 15px; display: block; }
+        .btn-wa:hover { background: #1eb954; transform: scale(1.02); }
+        
+        .btn-verify { background: white; color: black; }
+        .btn-verify:hover { background: #e5e5e5; }
+
+        .input-code {
+            width: 100%; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);
+            color: white; padding: 12px; border-radius: 12px; text-align: center;
+            font-weight: 700; font-size: 14px; margin-bottom: 10px; outline: none;
+            transition: 0.3s;
+        }
+        .input-code:focus { border-color: #facc15; background: rgba(255,255,255,0.1); }
+
+        .btn-close { color: rgba(255,255,255,0.4); font-size: 10px; margin-top: 20px; display: inline-block; text-decoration: none; }
     </style>
 </head>
 <body>
 
     <div id="customModal">
         <div class="modal-content">
-            <h2 class="text-white font-black text-xl mb-2">PREMIUM ACCESS</h2>
-            <p class="text-white/50 text-xs mb-6">Silakan pilih opsi untuk melanjutkan akses ke modul YT Music.</p>
-            <button onclick="redirectToWA()" class="modal-btn btn-wa">Hubungi Developer (Rp 50.000)</button>
-            <button onclick="askForCode()" class="modal-btn btn-code">Sudah Punya Kode</button>
-            <a href="#" onclick="closeModal()" class="btn-close uppercase tracking-widest">Tutup</a>
+            <h2 class="text-white font-black text-2xl mb-2 italic">PREMIUM ACCESS</h2>
+            <p class="text-white/50 text-[10px] mb-8 uppercase tracking-widest">YT Music Engine V3.4</p>
+            
+            <button onclick="redirectToWA()" class="modal-btn btn-wa mb-6">Hubungi Developer (Rp 50.000)</button>
+            
+            <div class="border-t border-white/10 pt-6">
+                <p class="text-white/40 text-[9px] mb-3 uppercase font-bold tracking-tighter">Sudah punya kode akses?</p>
+                <input type="text" id="accessCodeField" class="input-code" placeholder="ENTER PREMIUM CODE">
+                <button onclick="checkAccessCode()" class="modal-btn btn-verify">Verifikasi Kode</button>
+            </div>
+
+            <a href="javascript:void(0)" onclick="closeModal()" class="btn-close uppercase tracking-[0.3em] font-bold">Tutup</a>
         </div>
     </div>
 
@@ -129,6 +149,15 @@
                 <p class="text-white/40 text-[10px]">Tema minimalis dan super ringan.</p>
                 <div class="btn-enter uppercase">Gunakan Default</div>
             </div>
+            
+            <a href="https://github.com/antoyusri021-debug/Overlay-Webdev/raw/main/TemaYT/ytmusik.zip" download class="catalog-card p-6 rounded-[2rem] no-underline">
+                <div class="icon-box bg-blue-500/20 text-blue-400 border border-blue-500/30">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                </div>
+                <h3 class="text-white font-black text-lg uppercase tracking-wider mb-2">Support Software</h3>
+                <p class="text-white/40 text-[10px]">Download file .zip untuk YT Music Engine.</p>
+                <div class="btn-enter uppercase">Download File</div>
+            </a>
         </div>
 
         <div class="warning-text mt-8 text-white uppercase font-bold opacity-30 text-[7px] text-center">
@@ -140,13 +169,16 @@
         const WA_NUMBER = "6281343901082";
         const MASTER_CODE = "webdev12345";
         const modal = document.getElementById('customModal');
+        const codeField = document.getElementById('accessCodeField');
 
         function openModal() { 
             modal.style.display = 'flex'; 
+            codeField.focus();
         }
 
         function closeModal() { 
             modal.style.display = 'none'; 
+            codeField.value = "";
         }
 
         function redirectToWA() {
@@ -154,21 +186,28 @@
             window.open(`https://wa.me/${WA_NUMBER}?text=${msg}`, '_blank');
         }
 
-        function askForCode() {
-            // JANGAN tutup modal dulu biar browser gak bingung fokusnya
-            const code = prompt("MASUKKAN KODE AKSES PREMIUM:");
+        function checkAccessCode() {
+            const code = codeField.value.trim();
             
-            if (code !== null) { // User tidak menekan 'Cancel'
-                if (code.trim() === MASTER_CODE) {
-                    alert("AKSES DITERIMA!");
-                    // Tutup modal HANYA jika sukses
-                    closeModal(); 
-                    window.location.href = "ytmusic_overlay.html";
-                } else {
-                    alert("KODE SALAH! Silakan hubungi developer jika belum punya.");
-                }
+            if (code === MASTER_CODE) {
+                alert("AKSES DITERIMA! Selamat menikmati fitur Premium.");
+                closeModal(); 
+                window.location.href = "ytmusic_overlay.html";
+            } else if (code === "") {
+                alert("Silakan masukkan kode terlebih dahulu.");
+            } else {
+                alert("KODE SALAH! Hubungi developer jika Anda belum memiliki kode.");
+                codeField.value = "";
+                codeField.focus();
             }
         }
+
+        // Support tombol 'Enter' pada input keyboard
+        codeField.addEventListener("keyup", function(event) {
+            if (event.key === "Enter") {
+                checkAccessCode();
+            }
+        });
     </script>
 </body>
 </html>
