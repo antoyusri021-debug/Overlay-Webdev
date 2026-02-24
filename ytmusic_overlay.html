@@ -7,149 +7,39 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;700;800&display=swap" rel="stylesheet">
     <style>
-        :root {
-            --primary: #facc15;
-            --bg-dark: #050505;
-            --card-bg: #0d0d0d;
-            --border-color: rgba(255, 255, 255, 0.05);
+        :root { --primary: #facc15; --bg-dark: #050505; --card-bg: #0d0d0d; --border-color: rgba(255, 255, 255, 0.05); }
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg-dark); color: white; min-height: 100vh; overflow: hidden; margin: 0; }
+        .glow-bg { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: radial-gradient(circle at 50% -20%, rgba(250, 204, 21, 0.05) 0%, transparent 50%); pointer-events: none; z-index: -1; }
+        .container-wide { width: 95%; max-width: 1400px; margin: 0 auto; padding: 40px 0; }
+        .main-card { background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 24px; display: grid; grid-template-columns: 380px 1fr; gap: 0; box-shadow: 0 40px 100px rgba(0,0,0,0.5); height: 780px; position: relative; z-index: 1; }
+        .side-panel { padding: 40px; border-right: 1px solid var(--border-color); background: rgba(255, 255, 255, 0.01); display: flex; flex-direction: column; }
+        .preview-panel { padding: 40px; background: #000; display: flex; flex-direction: column; position: relative; border-radius: 0 24px 24px 0; overflow: hidden; }
+        .section-box { background: rgba(255, 255, 255, 0.03); border: 1px solid var(--border-color); border-radius: 16px; padding: 24px; margin-bottom: 24px; }
+        .label-premium { font-size: 11px; font-weight: 800; color: var(--primary); text-transform: uppercase; letter-spacing: 2px; margin-bottom: 12px; display: block; }
+        
+        select { 
+            width: 100%; background: #111 !important; border: 1px solid rgba(255,255,255,0.1) !important; 
+            color: #fff !important; padding: 14px 18px; border-radius: 12px; font-size: 13px; outline: none; cursor: pointer; 
         }
 
-        body { 
-            font-family: 'Plus Jakarta Sans', sans-serif;
-            background: var(--bg-dark); 
-            color: white; 
-            min-height: 100vh;
-            overflow: hidden;
-        }
-
-        .glow-bg {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: radial-gradient(circle at 50% -20%, rgba(250, 204, 21, 0.05) 0%, transparent 50%);
-            pointer-events: none; z-index: -1;
-        }
-
-        .container-wide {
-            width: 95%; max-width: 1400px; margin: 0 auto; padding: 40px 0;
-        }
-
-        .main-card {
-            background: var(--card-bg);
-            border: 1px solid var(--border-color);
-            border-radius: 24px;
-            display: grid;
-            grid-template-columns: 380px 1fr;
-            gap: 0;
-            overflow: visible; /* PERBAIKAN: Diubah dari hidden ke visible supaya dropdown nggak kepotong */
-            box-shadow: 0 40px 100px rgba(0,0,0,0.5);
-            height: 780px;
-            position: relative;
-            z-index: 1;
-        }
-
-        .side-panel {
-            padding: 40px;
-            border-right: 1px solid var(--border-color);
-            background: rgba(255, 255, 255, 0.01);
-            display: flex;
-            flex-direction: column;
-            overflow: visible; /* PERBAIKAN: Supaya select bisa meluap keluar panel */
-        }
-
-        .preview-panel {
-            padding: 40px;
-            background: #000;
-            display: flex;
-            flex-direction: column;
-            position: relative;
-            border-radius: 0 24px 24px 0;
-            overflow: hidden; /* Preview tetap hidden supaya iframe nggak berantakan */
-        }
-
-        .section-box {
-            background: rgba(255, 255, 255, 0.03);
-            border: 1px solid var(--border-color);
-            border-radius: 16px;
-            padding: 24px;
-            margin-bottom: 24px;
-            position: relative;
-            z-index: 10; /* PERBAIKAN: Naikkan z-index box utama */
-        }
-
-        .label-premium {
-            font-size: 11px; font-weight: 800; color: var(--primary);
-            text-transform: uppercase; letter-spacing: 2px;
-            margin-bottom: 12px; display: block;
-        }
-
-        select {
-            width: 100%;
-            background: #111 !important;
-            border: 1px solid rgba(255,255,255,0.1) !important;
-            color: #fff !important;
-            padding: 14px 18px;
-            border-radius: 12px;
-            font-size: 13px;
-            outline: none;
-            cursor: pointer;
-            position: relative;
-            z-index: 50; /* PERBAIKAN: Pastikan dropdown paling atas */
-        }
-
-        /* PERBAIKAN: Paksa opsi dropdown agar tampil hitam solid di sistem windows/chrome */
-        select option {
-            background-color: #111;
-            color: white;
-        }
-
-        .btn-generate {
-            background: var(--primary); color: black; font-weight: 800;
-            width: 100%; padding: 16px; border-radius: 12px;
-            font-size: 12px; text-transform: uppercase; letter-spacing: 1px;
-            transition: 0.3s; cursor: pointer; border: none;
+        .btn-generate { 
+            background: var(--primary); color: black; font-weight: 800; width: 100%; padding: 16px; 
+            border-radius: 12px; font-size: 12px; text-transform: uppercase; letter-spacing: 1px; transition: 0.3s; cursor: pointer; border: none; 
         }
         .btn-generate:hover { transform: translateY(-3px); box-shadow: 0 10px 20px rgba(250, 204, 21, 0.2); }
 
-        .btn-download {
-            background: rgba(255,255,255,0.05); color: white; font-weight: 700;
-            width: 100%; padding: 12px; border-radius: 10px;
-            font-size: 10px; text-transform: uppercase; letter-spacing: 1px;
-            transition: 0.3s; cursor: pointer; border: 1px solid rgba(255,255,255,0.1);
-            margin-top: 10px; display: flex; align-items: center; justify-content: center; gap: 8px;
-            text-decoration: none;
-        }
-        .btn-download:hover { background: white; color: black; }
-
-        .viewport-preview {
-            flex-grow: 1;
-            background: #050505;
-            border: 1px solid rgba(255,255,255,0.05);
-            border-radius: 20px;
-            position: relative;
-            overflow: hidden;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+        .viewport-preview { 
+            flex-grow: 1; background: #050505; border: 1px solid rgba(255,255,255,0.05); 
+            border-radius: 20px; position: relative; overflow: hidden; display: flex; align-items: center; justify-content: center; 
         }
 
-        #placeholder-ui {
-            text-align: center;
-            z-index: 10;
-        }
-
-        iframe { 
-            position: absolute;
-            top: 0; left: 0;
-            width: 100%; height: 100%; 
-            border: none; display: none;
-        }
-
-        @media (max-width: 1100px) {
-            .main-card { grid-template-columns: 1fr; height: auto; overflow: visible; }
-            .side-panel { border-right: none; border-bottom: 1px solid var(--border-color); }
-        }
+        iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none; display: none; pointer-events: none; }
+        
+        /* Mencegah seleksi teks yang bikin spasi mati */
+        * { user-select: none; -webkit-user-drag: none; }
     </style>
 </head>
-<body>
+<body onclick="window.focus()">
 
     <div class="glow-bg"></div>
 
@@ -161,21 +51,14 @@
                 </div>
                 <h1 class="text-3xl font-black tracking-tighter uppercase italic">YT Music <span class="text-yellow-400">Premium</span></h1>
             </div>
-            <div class="flex items-center gap-6">
-                <div class="text-right">
-                    <p class="text-[9px] font-bold opacity-30 uppercase">Status Sistem</p>
-                    <p class="text-[10px] text-green-400 font-bold uppercase">● Online & Stable</p>
-                </div>
-                <button onclick="location.href='selection.html'" class="bg-white/5 border border-white/10 px-6 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-white hover:text-black transition-all">Kembali ke Menu</button>
-            </div>
+            <button onclick="location.href='selection.html'" class="bg-white/5 border border-white/10 px-6 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-white hover:text-black transition-all">Kembali ke Menu</button>
         </div>
 
         <div class="main-card">
             <div class="side-panel">
                 <div class="section-box">
                     <span class="label-premium">01. Konfigurasi Tema</span>
-                    <label class="text-[9px] opacity-40 mb-2 block font-bold uppercase">Pilih Modul Visual</label>
-                    <select id="theme-select" class="font-bold">
+                    <select id="theme-select" class="font-bold" onchange="window.focus()">
                         <option value="" selected disabled>-- PILIH TEMA --</option>
                         <option value="Themes1">AKATSUKI ITACHI (PREMIUM)</option>
                         <option value="Themes2">CLEAN CAPSULE (MINIMAL)</option>
@@ -187,56 +70,24 @@
 
                 <div class="section-box">
                     <span class="label-premium">02. Finalisasi Link</span>
-                    <input id="gh-input" type="hidden" value="https://antoyusri021-debug.github.io/Overlay-Webdev">
                     <button onclick="generateOBS()" class="btn-generate">Generate Link Overlay</button>
                     <div id="result-box" class="hidden mt-6 p-4 bg-yellow-400/5 border border-yellow-400/20 rounded-xl">
-                        <label class="text-[9px] text-yellow-400 font-bold mb-2 block uppercase">OBS Browser Source:</label>
-                        <div class="flex items-center gap-2">
-                            <input id="final-link" readonly type="text" class="text-[10px] font-mono !p-0 !bg-transparent border-none outline-none flex-1 overflow-hidden text-ellipsis text-yellow-400">
-                            <button onclick="copyNow()" class="bg-yellow-400 text-black px-3 py-1.5 rounded-lg text-[9px] font-black whitespace-nowrap">COPY</button>
-                        </div>
+                        <input id="final-link" readonly type="text" class="text-[10px] font-mono bg-transparent border-none outline-none w-full text-yellow-400 mb-2">
+                        <button onclick="copyNow()" class="w-full bg-yellow-400 text-black py-2 rounded-lg text-[9px] font-black">COPY LINK</button>
                     </div>
                 </div>
 
-                <div class="section-box">
-                    <span class="label-premium">03. Support Software</span>
-                    <p class="text-[9px] opacity-40 mb-3 leading-relaxed">Download aplikasi tambahan untuk sinkronisasi data YT Music.</p>
-                    <a href="javascript:void(0)" onclick="downloadBrowser('https://github.com/antoyusri021-debug/Overlay-Webdev/raw/main/TemaYT/ytmusik.zip')" class="btn-download">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
-                        Download (.ZIP)
-                    </a>
-                </div>
-
-                <div class="mt-auto p-6 border border-white/5 rounded-2xl bg-gradient-to-b from-white/[0.02] to-transparent">
-                    <h3 class="text-[11px] font-black uppercase mb-3 text-yellow-400">Panduan:</h3>
-                    <ul class="text-[10px] space-y-2 opacity-60 font-medium leading-relaxed">
-                        <li>1. Pilih tema premium di atas.</li>
-                        <li>2. Tekan <span class="text-white font-bold underline">SPASI</span> untuk preview.</li>
-                        <li>3. Klik <span class="text-white font-bold">GENERATE</span> & Copy ke OBS.</li>
-                    </ul>
+                <div class="mt-auto p-4 bg-white/5 rounded-xl border border-white/10">
+                    <p class="text-[10px] text-yellow-400 font-bold mb-1">PRO TIPS:</p>
+                    <p class="text-[9px] opacity-60">Jika SPASI tidak merespon, klik di mana saja pada layar ini lalu tekan SPASI kembali.</p>
                 </div>
             </div>
 
             <div class="preview-panel">
-                <div class="flex justify-between items-center mb-6">
-                    <div class="flex items-center gap-3">
-                        <div class="w-2 h-2 bg-red-500 rounded-full animate-pulse"></div>
-                        <span class="text-[11px] font-black uppercase tracking-widest">Live Editor Preview</span>
-                    </div>
-                    <div id="active-tag" class="hidden px-4 py-1.5 bg-yellow-400/10 border border-yellow-400/20 rounded-full">
-                        <span class="text-[9px] text-yellow-400 font-bold uppercase" id="current-theme-name"></span>
-                    </div>
-                </div>
-
                 <div class="viewport-preview">
-                    <div id="placeholder-ui">
-                        <div class="opacity-20 mb-4">
-                            <svg class="w-16 h-16 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
-                            </svg>
-                        </div>
+                    <div id="placeholder-ui" class="text-center">
                         <h2 class="text-sm font-black uppercase tracking-[0.5em] text-white/40">Engine Atmosphere Active</h2>
-                        <p class="text-[10px] font-bold text-yellow-400 mt-3 uppercase tracking-widest animate-pulse">Pilih Tema & Tap SPASI untuk Review</p>
+                        <p class="text-[10px] font-bold text-yellow-400 mt-3 uppercase animate-pulse">Pilih Tema & Tap SPASI untuk Preview</p>
                     </div>
                     <iframe id="main-preview" src=""></iframe>
                 </div>
@@ -245,18 +96,16 @@
     </div>
 
     <script>
-        function downloadBrowser(url) {
-            window.open(url, '_blank');
-        }
+        // Fokus otomatis ke window agar spasi langsung jalan
+        window.focus();
 
         function generateOBS() {
             const theme = document.getElementById('theme-select').value;
-            if(!theme) { alert("Pilih tema dulu, Brow!"); return; }
-            let baseUrl = "https://antoyusri021-debug.github.io/Overlay-Webdev";
-            const result = document.getElementById('result-box');
+            if(!theme) { alert("Pilih tema dulu!"); return; }
             const link = document.getElementById('final-link');
-            link.value = `${baseUrl}/TemaYT/${theme}.html`;
-            result.classList.remove('hidden');
+            link.value = `https://antoyusri021-debug.github.io/Overlay-Webdev/TemaYT/${theme}.html`;
+            document.getElementById('result-box').classList.remove('hidden');
+            window.focus(); // Balikin fokus setelah klik
         }
 
         function copyNow() {
@@ -264,24 +113,29 @@
             input.select();
             document.execCommand('copy');
             alert("Link Berhasil Disalin!");
+            window.focus();
         }
 
-        window.addEventListener('keydown', (e) => {
+        // PERBAIKAN LOGIKA SPASI
+        window.addEventListener('keydown', function(e) {
             if (e.code === "Space") {
+                // Mencegah scroll page saat tekan spasi
                 e.preventDefault();
+                
                 const theme = document.getElementById('theme-select').value;
-                if(!theme) { alert("Pilih tema dulu baru bisa di-preview!"); return; }
-                const themeName = document.getElementById('theme-select').options[document.getElementById('theme-select').selectedIndex].text;
+                if(!theme) return;
+
                 const iframe = document.getElementById('main-preview');
                 const placeholder = document.getElementById('placeholder-ui');
-                const tag = document.getElementById('active-tag');
-                const tagName = document.getElementById('current-theme-name');
                 
                 placeholder.style.display = 'none';
                 iframe.style.display = 'block';
-                tag.classList.remove('hidden');
-                tagName.innerText = themeName;
-                iframe.src = `https://antoyusri021-debug.github.io/Overlay-Webdev/TemaYT/${theme}.html`;
+                
+                // Gunakan timestamp agar preview selalu fresh
+                const timestamp = new Date().getTime();
+                iframe.src = `https://antoyusri021-debug.github.io/Overlay-Webdev/TemaYT/${theme}.html?t=${timestamp}`;
+                
+                console.log("Previewing: " + theme);
             }
         });
     </script>
