@@ -6,13 +6,12 @@
         
         body { 
             margin: 0; 
-            padding: 15px; /* Ruang untuk shadow agar tidak terpotong */
+            padding: 15px; 
             background: transparent; 
             font-family: 'Inter', sans-serif; 
             overflow: hidden; 
         }
 
-        /* UKURAN DIKUNCI (FIXED) - AGAR TIDAK MELEBAR */
         .music-box {
             display: flex;
             align-items: center;
@@ -22,12 +21,9 @@
             padding: 10px 18px;
             color: white;
             border: 1px solid rgba(255, 255, 255, 0.1);
-            
-            /* Kunci ukuran di sini */
             width: 340px; 
             height: 65px;
             box-sizing: border-box;
-            
             box-shadow: 0 8px 25px rgba(0,0,0,0.5);
             transition: all 0.3s ease-out; 
             overflow: hidden;
@@ -37,7 +33,7 @@
             display: flex;
             align-items: center;
             margin-right: 15px;
-            flex-shrink: 0; /* Mencegah bagian icon mengecil */
+            flex-shrink: 0;
             gap: 12px;
             border-right: 1px solid rgba(255, 255, 255, 0.1);
             padding-right: 15px;
@@ -48,7 +44,6 @@
             fill: #ff0000; 
         }
 
-        /* Equalizer minimalis & ringan */
         .equalizer {
             display: flex;
             align-items: flex-end;
@@ -72,20 +67,19 @@
 
         .info {
             flex-grow: 1;
-            overflow: hidden; /* Mengunci teks di dalam */
+            overflow: hidden;
             display: flex;
             flex-direction: column;
             justify-content: center;
         }
 
-        /* TEXT CLIPPING - ANTI MELEBAR */
         .title {
             font-size: 13px;
             font-weight: 700;
             color: #ffffff;
             white-space: nowrap;
             overflow: hidden;
-            text-overflow: ellipsis; /* Judul panjang jadi ... */
+            text-overflow: ellipsis;
             margin-bottom: 2px;
         }
 
@@ -95,7 +89,7 @@
             color: #aaaaaa;
             white-space: nowrap;
             overflow: hidden;
-            text-overflow: ellipsis; /* Artis panjang jadi ... */
+            text-overflow: ellipsis;
         }
     </style>
 </head>
@@ -116,37 +110,54 @@
     
     <div class="info">
         <div id="title" class="title">Menunggu Musik...</div>
-        <div id="artist" class="artist">Putar lagu di YouTube Music</div>
+        <div id="artist" class="artist">YT MUSIC PREMIUM</div>
     </div>
 </div>
 
 <script>
-    async function updateFromFile() {
-        try {
-            // Path relatif agar bisa jalan di folder mana saja
-            const response = await fetch('../judul_lagu.txt?t=' + new Date().getTime());
-            if (response.ok) {
-                const fullText = await response.text();
-                const titleElement = document.getElementById('title');
-                const artistElement = document.getElementById('artist');
-                
-                // Pisah judul dan artis
-                let parts = fullText.split(' - ');
-                let currentTitle = parts[0] || "Menunggu Musik...";
-                let currentArtist = parts.length > 1 ? parts.slice(1).join(' - ') : "YouTube Music";
+    const titleElement = document.getElementById('title');
+    const artistElement = document.getElementById('artist');
 
-                // Hanya update jika teks berubah (Hemat CPU)
-                if (titleElement.innerText !== currentTitle.trim()) {
-                    titleElement.innerText = currentTitle.trim();
-                    artistElement.innerText = currentArtist.trim();
-                }
+    async function updateMusic() {
+        try {
+            // MODE 1: Coba ambil dari API Lokal (Port 8080) - Untuk link Online/GitHub
+            const response = await fetch('http://localhost:8080/', { mode: 'cors' });
+            if (response.ok) {
+                const data = await response.json();
+                processData(data.title);
             }
         } catch (err) {
-            console.log("Mencari file teks...");
+            // MODE 2: Cadangan ambil dari File (Mode Lokal/OBS File)
+            try {
+                const resFile = await fetch('../judul_lagu.txt?t=' + new Date().getTime());
+                if (resFile.ok) {
+                    const text = await resFile.text();
+                    processData(text);
+                }
+            } catch (fileErr) {
+                console.log("Menunggu aplikasi dijalankan...");
+            }
         }
     }
-    // Cek setiap 2 detik
-    setInterval(updateFromFile, 2000);
+
+    function processData(fullText) {
+        if (!fullText) return;
+        
+        // Pisah judul dan artis (Asumsi format: Judul - Artis)
+        let parts = fullText.split(' - ');
+        let currentTitle = parts[0] || "Menunggu Musik...";
+        let currentArtist = parts.length > 1 ? parts.slice(1).join(' - ') : "YouTube Music";
+
+        // Update DOM jika ada perubahan
+        if (titleElement.innerText !== currentTitle.trim()) {
+            titleElement.innerText = currentTitle.trim();
+            artistElement.innerText = currentArtist.trim();
+        }
+    }
+
+    // Interval 2 detik biar nggak berat
+    setInterval(updateMusic, 2000);
+    updateMusic();
 </script>
 
 </body>
