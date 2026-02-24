@@ -39,9 +39,11 @@
             display: grid;
             grid-template-columns: 380px 1fr;
             gap: 0;
-            overflow: hidden;
+            overflow: visible; /* PERBAIKAN: Diubah dari hidden ke visible supaya dropdown nggak kepotong */
             box-shadow: 0 40px 100px rgba(0,0,0,0.5);
             height: 780px;
+            position: relative;
+            z-index: 1;
         }
 
         .side-panel {
@@ -50,6 +52,7 @@
             background: rgba(255, 255, 255, 0.01);
             display: flex;
             flex-direction: column;
+            overflow: visible; /* PERBAIKAN: Supaya select bisa meluap keluar panel */
         }
 
         .preview-panel {
@@ -58,6 +61,8 @@
             display: flex;
             flex-direction: column;
             position: relative;
+            border-radius: 0 24px 24px 0;
+            overflow: hidden; /* Preview tetap hidden supaya iframe nggak berantakan */
         }
 
         .section-box {
@@ -66,6 +71,8 @@
             border-radius: 16px;
             padding: 24px;
             margin-bottom: 24px;
+            position: relative;
+            z-index: 10; /* PERBAIKAN: Naikkan z-index box utama */
         }
 
         .label-premium {
@@ -84,6 +91,14 @@
             font-size: 13px;
             outline: none;
             cursor: pointer;
+            position: relative;
+            z-index: 50; /* PERBAIKAN: Pastikan dropdown paling atas */
+        }
+
+        /* PERBAIKAN: Paksa opsi dropdown agar tampil hitam solid di sistem windows/chrome */
+        select option {
+            background-color: #111;
+            color: white;
         }
 
         .btn-generate {
@@ -100,10 +115,10 @@
             font-size: 10px; text-transform: uppercase; letter-spacing: 1px;
             transition: 0.3s; cursor: pointer; border: 1px solid rgba(255,255,255,0.1);
             margin-top: 10px; display: flex; align-items: center; justify-content: center; gap: 8px;
+            text-decoration: none;
         }
         .btn-download:hover { background: white; color: black; }
 
-        /* --- KUNCI RATA TENGAH PREVIEW TANPA MERUSAK --- */
         .viewport-preview {
             flex-grow: 1;
             background: #050505;
@@ -129,7 +144,7 @@
         }
 
         @media (max-width: 1100px) {
-            .main-card { grid-template-columns: 1fr; height: auto; }
+            .main-card { grid-template-columns: 1fr; height: auto; overflow: visible; }
             .side-panel { border-right: none; border-bottom: 1px solid var(--border-color); }
         }
     </style>
@@ -156,7 +171,6 @@
         </div>
 
         <div class="main-card">
-            
             <div class="side-panel">
                 <div class="section-box">
                     <span class="label-premium">01. Konfigurasi Tema</span>
@@ -187,7 +201,7 @@
                 <div class="section-box">
                     <span class="label-premium">03. Support Software</span>
                     <p class="text-[9px] opacity-40 mb-3 leading-relaxed">Download aplikasi tambahan untuk sinkronisasi data YT Music.</p>
-                    <a href="https://github.com/antoyusri021-debug/Overlay-Webdev/raw/main/TemaYT/ytmusik.zip" download class="btn-download">
+                    <a href="javascript:void(0)" onclick="downloadBrowser('https://github.com/antoyusri021-debug/Overlay-Webdev/raw/main/TemaYT/ytmusik.zip')" class="btn-download">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
                         Download (.ZIP)
                     </a>
@@ -224,7 +238,6 @@
                         <h2 class="text-sm font-black uppercase tracking-[0.5em] text-white/40">Engine Atmosphere Active</h2>
                         <p class="text-[10px] font-bold text-yellow-400 mt-3 uppercase tracking-widest animate-pulse">Pilih Tema & Tap SPASI untuk Review</p>
                     </div>
-
                     <iframe id="main-preview" src=""></iframe>
                 </div>
             </div>
@@ -232,6 +245,10 @@
     </div>
 
     <script>
+        function downloadBrowser(url) {
+            window.open(url, '_blank');
+        }
+
         function generateOBS() {
             const theme = document.getElementById('theme-select').value;
             if(!theme) { alert("Pilih tema dulu, Brow!"); return; }
