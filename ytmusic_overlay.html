@@ -39,7 +39,7 @@
             display: grid;
             grid-template-columns: 380px 1fr;
             gap: 0;
-            overflow: visible; /* PERBAIKAN: Diubah dari hidden ke visible supaya dropdown nggak kepotong */
+            overflow: visible; 
             box-shadow: 0 40px 100px rgba(0,0,0,0.5);
             height: 780px;
             position: relative;
@@ -52,7 +52,7 @@
             background: rgba(255, 255, 255, 0.01);
             display: flex;
             flex-direction: column;
-            overflow: visible; /* PERBAIKAN: Supaya select bisa meluap keluar panel */
+            overflow: visible; 
         }
 
         .preview-panel {
@@ -62,7 +62,7 @@
             flex-direction: column;
             position: relative;
             border-radius: 0 24px 24px 0;
-            overflow: hidden; /* Preview tetap hidden supaya iframe nggak berantakan */
+            overflow: hidden; 
         }
 
         .section-box {
@@ -72,7 +72,7 @@
             padding: 24px;
             margin-bottom: 24px;
             position: relative;
-            z-index: 10; /* PERBAIKAN: Naikkan z-index box utama */
+            z-index: 10; 
         }
 
         .label-premium {
@@ -92,10 +92,9 @@
             outline: none;
             cursor: pointer;
             position: relative;
-            z-index: 50; /* PERBAIKAN: Pastikan dropdown paling atas */
+            z-index: 50; 
         }
 
-        /* PERBAIKAN: Paksa opsi dropdown agar tampil hitam solid di sistem windows/chrome */
         select option {
             background-color: #111;
             color: white;
@@ -141,6 +140,7 @@
             top: 0; left: 0;
             width: 100%; height: 100%; 
             border: none; display: none;
+            pointer-events: none; /* Biar keyboard tetep fokus ke main page */
         }
 
         @media (max-width: 1100px) {
@@ -149,7 +149,7 @@
         }
     </style>
 </head>
-<body>
+<body onclick="window.focus()">
 
     <div class="glow-bg"></div>
 
@@ -175,7 +175,7 @@
                 <div class="section-box">
                     <span class="label-premium">01. Konfigurasi Tema</span>
                     <label class="text-[9px] opacity-40 mb-2 block font-bold uppercase">Pilih Modul Visual</label>
-                    <select id="theme-select" class="font-bold">
+                    <select id="theme-select" class="font-bold" onchange="window.focus()">
                         <option value="" selected disabled>-- PILIH TEMA --</option>
                         <option value="Themes1">AKATSUKI ITACHI (PREMIUM)</option>
                         <option value="Themes2">CLEAN CAPSULE (MINIMAL)</option>
@@ -245,6 +245,9 @@
     </div>
 
     <script>
+        // Memastikan fokus awal
+        window.focus();
+
         function downloadBrowser(url) {
             window.open(url, '_blank');
         }
@@ -257,6 +260,7 @@
             const link = document.getElementById('final-link');
             link.value = `${baseUrl}/TemaYT/${theme}.html`;
             result.classList.remove('hidden');
+            window.focus();
         }
 
         function copyNow() {
@@ -264,13 +268,16 @@
             input.select();
             document.execCommand('copy');
             alert("Link Berhasil Disalin!");
+            window.focus();
         }
 
+        // PERBAIKAN: Spasi tetap jalan meskipun aplikasi running
         window.addEventListener('keydown', (e) => {
             if (e.code === "Space") {
                 e.preventDefault();
                 const theme = document.getElementById('theme-select').value;
-                if(!theme) { alert("Pilih tema dulu baru bisa di-preview!"); return; }
+                if(!theme) { return; }
+                
                 const themeName = document.getElementById('theme-select').options[document.getElementById('theme-select').selectedIndex].text;
                 const iframe = document.getElementById('main-preview');
                 const placeholder = document.getElementById('placeholder-ui');
@@ -281,10 +288,14 @@
                 iframe.style.display = 'block';
                 tag.classList.remove('hidden');
                 tagName.innerText = themeName;
-                iframe.src = `https://antoyusri021-debug.github.io/Overlay-Webdev/TemaYT/${theme}.html`;
+                
+                // Tambahkan random query biar nggak kena cache pas preview
+                const rand = Math.random();
+                iframe.src = `https://antoyusri021-debug.github.io/Overlay-Webdev/TemaYT/${theme}.html?v=${rand}`;
+                
+                console.log("Previewing: " + theme);
             }
         });
     </script>
 </body>
 </html>
-
