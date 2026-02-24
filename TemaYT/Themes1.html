@@ -1,19 +1,20 @@
 <!DOCTYPE html>
 <html>
 <head>
+    <meta charset="UTF-8">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
         
         body { 
             margin: 0; 
-            padding: 15px; 
+            padding: 20px; 
             background: transparent; 
             font-family: 'Inter', sans-serif; 
             overflow: hidden; 
         }
 
         /* CONTAINER UTAMA */
-        .music-box {
+        #main-container {
             display: flex;
             align-items: center;
             background: rgba(15, 15, 15, 0.95);
@@ -26,18 +27,19 @@
             height: 65px;
             box-sizing: border-box;
             box-shadow: 0 8px 25px rgba(0,0,0,0.5);
-            transition: all 0.5s ease-in-out; 
-            overflow: hidden;
             
-            /* EFEK SEMBUNYI OTOMATIS JIKA OFFLINE */
+            /* ANIMASI TRANSISI */
+            transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
             opacity: 0;
-            transform: translateY(20px);
+            transform: translateX(-20px);
+            visibility: hidden;
         }
 
-        /* KELAS UNTUK MENAMPILKAN BOX */
-        .music-box.active {
+        /* KELAS SAAT AKTIF */
+        #main-container.active {
             opacity: 1;
-            transform: translateY(0);
+            transform: translateX(0);
+            visibility: visible;
         }
 
         .left-section {
@@ -65,15 +67,15 @@
             width: 3px;
             background: #ff0000;
             border-radius: 1px;
-            animation: bounce 1s ease-in-out infinite;
+            animation: bounce 0.8s ease-in-out infinite;
         }
         .bar:nth-child(1) { height: 60%; animation-delay: 0.1s; }
         .bar:nth-child(2) { height: 100%; animation-delay: 0.3s; }
         .bar:nth-child(3) { height: 75%; animation-delay: 0.2s; }
 
         @keyframes bounce {
-            0%, 100% { transform: scaleY(0.5); }
-            50% { transform: scaleY(1); }
+            0%, 100% { transform: scaleY(0.6); }
+            50% { transform: scaleY(1.2); }
         }
 
         .info {
@@ -106,33 +108,31 @@
 </head>
 <body>
 
-<div id="main-container" class="music-box">
+<div id="main-container">
     <div class="left-section">
         <svg class="play-pause-icon" viewBox="0 0 24 24">
             <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 14.5v-9l6 4.5-6 4.5z"/>
         </svg>
-
         <div class="equalizer">
             <div class="bar"></div>
             <div class="bar"></div>
             <div class="bar"></div>
         </div>
     </div>
-    
     <div class="info">
-        <div id="title" class="title">...</div>
-        <div id="artist" class="artist">YT MUSIC</div>
+        <div id="title-text" class="title">Loading...</div>
+        <div id="artist-text" class="artist">YT MUSIC</div>
     </div>
 </div>
 
 <script>
     const container = document.getElementById('main-container');
-    const titleElement = document.getElementById('title');
-    const artistElement = document.getElementById('artist');
+    const titleLabel = document.getElementById('title-text');
+    const artistLabel = document.getElementById('artist-text');
 
-    async function updateMusic() {
+    async function checkMusic() {
         try {
-            // MODE API: Cek ke port 8080 aplikasi PowerShell
+            // Cek API dari aplikasi PowerShell
             const response = await fetch('http://localhost:8080/', { 
                 method: 'GET',
                 mode: 'cors',
@@ -141,41 +141,41 @@
             
             if (response.ok) {
                 const data = await response.json();
-                if (data.title && data.title !== "Menunggu Musik...") {
-                    showOverlay(data.title);
+                if (data.title && data.title !== "Menunggu Musik..." && data.title !== "") {
+                    updateDisplay(data.title);
                 } else {
-                    hideOverlay();
+                    container.classList.remove('active');
                 }
             } else {
-                hideOverlay();
+                container.classList.remove('active');
             }
         } catch (err) {
-            // MODE FILE: Jika API Gagal (Fallback untuk lokal)
+            // Fallback ke file lokal jika API tidak terjangkau
             fetch('../judul_lagu.txt?t=' + Date.now())
                 .then(res => res.text())
                 .then(text => {
                     if (text && text.trim() !== "") {
-                        showOverlay(text);
+                        updateDisplay(text);
                     } else {
-                        hideOverlay();
+                        container.classList.remove('active');
                     }
-                }).catch(() => hideOverlay());
+                })
+                .catch(() => {
+                    container.classList.remove('active');
+                });
         }
     }
 
-    function showOverlay(fullText) {
+    function updateDisplay(fullText) {
         let parts = fullText.split(' - ');
-        titleElement.innerText = parts[0] || "Unknown Title";
-        artistElement.innerText = parts[1] || "YouTube Music";
-        container.classList.add('active'); // Munculkan dengan animasi
+        titleLabel.innerText = parts[0] || "Unknown Title";
+        artistLabel.innerText = parts[1] || "YouTube Music";
+        container.classList.add('active');
     }
 
-    function hideOverlay() {
-        container.classList.remove('active'); // Sembunyikan otomatis
-    }
-
-    setInterval(updateMusic, 2000);
-    updateMusic();
+    // Jalankan pengecekan setiap 2 detik
+    setInterval(checkMusic, 2000);
+    checkMusic();
 </script>
 
 </body>
