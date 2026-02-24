@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html lang="id">
 <head>
     <meta charset="UTF-8">
     <style>
@@ -130,9 +130,16 @@
     const titleLabel = document.getElementById('title-text');
     const artistLabel = document.getElementById('artist-text');
 
+    // Fungsi pembersih teks agar tidak ada kode HTML/CSS yang ikut nampil
+    function sanitize(text) {
+        const temp = document.createElement('div');
+        temp.textContent = text;
+        return temp.innerHTML.trim();
+    }
+
     async function checkMusic() {
         try {
-            // Cek API dari aplikasi PowerShell
+            // 1. Cek via API (Port 8080)
             const response = await fetch('http://localhost:8080/', { 
                 method: 'GET',
                 mode: 'cors',
@@ -147,33 +154,39 @@
                     container.classList.remove('active');
                 }
             } else {
-                container.classList.remove('active');
+                throw new Error("API Offline");
             }
         } catch (err) {
-            // Fallback ke file lokal jika API tidak terjangkau
-            fetch('../judul_lagu.txt?t=' + Date.now())
-                .then(res => res.text())
-                .then(text => {
-                    if (text && text.trim() !== "") {
+            // 2. Fallback ke file lokal jika API gagal
+            try {
+                const resFile = await fetch('../judul_lagu.txt?t=' + Date.now());
+                if (resFile.ok) {
+                    const text = await resFile.text();
+                    if (text && text.trim() !== "" && !text.includes('<!DOCTYPE')) {
                         updateDisplay(text);
                     } else {
                         container.classList.remove('active');
                     }
-                })
-                .catch(() => {
-                    container.classList.remove('active');
-                });
+                }
+            } catch (fileErr) {
+                container.classList.remove('active');
+            }
         }
     }
 
     function updateDisplay(fullText) {
-        let parts = fullText.split(' - ');
-        titleLabel.innerText = parts[0] || "Unknown Title";
-        artistLabel.innerText = parts[1] || "YouTube Music";
+        // Bersihkan teks dari karakter aneh
+        let cleanText = sanitize(fullText);
+        
+        let parts = cleanText.split(' - ');
+        let song = parts[0] || "Unknown Title";
+        let artist = parts.length > 1 ? parts.slice(1).join(' - ') : "YouTube Music";
+
+        titleLabel.innerText = song;
+        artistLabel.innerText = artist;
         container.classList.add('active');
     }
 
-    // Jalankan pengecekan setiap 2 detik
     setInterval(checkMusic, 2000);
     checkMusic();
 </script>
