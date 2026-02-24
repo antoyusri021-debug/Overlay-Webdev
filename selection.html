@@ -9,187 +9,158 @@
     <style>
         body { 
             font-family: 'Plus Jakarta Sans', sans-serif;
-            min-height: 100vh; 
-            display: flex; 
-            align-items: center; 
-            justify-content: center;
-            overflow-x: hidden; 
-            margin: 0; 
-            background: #0a0a0a;
-            background-image: url('indexbg.jpg'); 
-            background-size: cover; 
-            background-position: center;
+            height: 100vh; display: flex; align-items: center; justify-content: center;
+            overflow: hidden; margin: 0; background: #0a0a0a;
+            background-image: url('indexbg.jpg'); background-size: cover; background-position: center;
             position: relative;
-            padding: 40px 0;
         }
-        body::after { 
-            content: ""; 
-            position: absolute; 
-            inset: 0; 
-            background: radial-gradient(circle at center, rgba(0,0,0,0.2), rgba(0,0,0,0.9)); 
-            z-index: 1; 
-        }
+        body::after { content: ""; position: absolute; inset: 0; background: radial-gradient(circle at center, rgba(0,0,0,0.1), rgba(0,0,0,0.9)); z-index: 1; }
 
-        .main-container { 
-            position: relative; 
-            z-index: 10; 
-            width: 100%; 
-            max-width: 1200px; 
-            padding: 20px;
-        }
+        .main-container { position: relative; z-index: 10; width: 100%; max-width: 1100px; padding: 10px; display: flex; flex-direction: column; height: 95vh; justify-content: center; }
         
         .catalog-card {
             background: linear-gradient(145deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.01) 100%);
-            backdrop-filter: blur(20px);
-            border: 1px solid rgba(255,255,255,0.1);
-            transition: all 0.5s cubic-bezier(0.23, 1, 0.32, 1);
-            cursor: pointer;
-            position: relative;
-            overflow: hidden;
+            backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.1);
+            transition: all 0.5s cubic-bezier(0.23, 1, 0.32, 1); cursor: pointer;
+            position: relative; display: flex; flex-direction: column; height: 100%; overflow: hidden;
         }
+        .catalog-card:not(.locked-card):hover { transform: translateY(-8px) scale(1.02); border-color: rgba(255,255,255,0.4); box-shadow: 0 20px 40px rgba(0,0,0,0.4); }
 
-        .catalog-card:not(.coming-soon):hover {
-            background: rgba(255,255,255,0.08);
-            border-color: rgba(255,255,255,0.4);
-            transform: translateY(-15px) scale(1.02);
-            box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+        .badge-status {
+            position: absolute; top: 15px; right: 15px; padding: 4px 12px; border-radius: 8px;
+            font-size: 8px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px;
+            z-index: 50; box-shadow: 0 4px 10px rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1);
         }
+        .badge-red { background: #ef4444; color: white; }
+        .badge-yellow { background: #facc15; color: black; }
 
-        .catalog-card.coming-soon {
-            opacity: 0.5;
-            cursor: not-allowed;
-            filter: grayscale(0.5);
-        }
-
-        .badge-soon {
-            position: absolute;
-            top: 20px;
-            right: -35px;
-            background: #facc15;
-            color: black;
-            font-size: 9px;
-            font-weight: 900;
-            padding: 5px 40px;
-            transform: rotate(45deg);
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-        }
-
-        .icon-box {
-            width: 56px; height: 56px;
-            border-radius: 18px;
-            display: flex; align-items: center; justify-content: center;
-            margin-bottom: 24px;
-            transition: all 0.3s;
-        }
-
-        .catalog-card:not(.coming-soon):hover .icon-box {
-            transform: rotate(-10deg) scale(1.1);
-        }
+        .catalog-card.locked-card { opacity: 0.4; cursor: not-allowed; filter: grayscale(0.8); }
+        .icon-box { width: 48px; height: 48px; border-radius: 14px; display: flex; align-items: center; justify-content: center; margin-bottom: 16px; }
 
         .btn-enter {
-            margin-top: auto;
-            padding: 12px;
-            background: rgba(255,255,255,0.05);
-            border: 1px solid rgba(255,255,255,0.1);
-            border-radius: 14px;
-            text-align: center;
-            font-size: 10px;
-            font-weight: 800;
-            letter-spacing: 2px;
-            color: white;
-            transition: all 0.3s;
-            margin-top: 30px;
+            margin-top: auto; padding: 10px; background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1); border-radius: 12px;
+            text-align: center; font-size: 9px; font-weight: 800; letter-spacing: 2px; color: white;
         }
+        .catalog-card:not(.locked-card):hover .btn-enter { background: white; color: black; }
 
-        .catalog-card:not(.coming-soon):hover .btn-enter {
-            background: white;
-            color: black;
+        /* CUSTOM MODAL STYLE */
+        #customModal {
+            display: none; position: fixed; inset: 0; z-index: 100;
+            background: rgba(0,0,0,0.8); backdrop-filter: blur(10px);
+            align-items: center; justify-content: center;
         }
+        .modal-content {
+            background: #1a1a1a; border: 1px solid rgba(255,255,255,0.1);
+            padding: 30px; border-radius: 24px; max-width: 400px; width: 90%; text-align: center;
+        }
+        .modal-btn {
+            width: 100%; padding: 12px; margin-top: 10px; border-radius: 12px;
+            font-weight: 800; font-size: 11px; text-transform: uppercase; letter-spacing: 1px;
+            transition: 0.3s;
+        }
+        .btn-wa { background: #25d366; color: white; }
+        .btn-code { background: white; color: black; }
+        .btn-close { color: rgba(255,255,255,0.4); font-size: 10px; margin-top: 15px; display: block; }
     </style>
 </head>
 <body>
 
-    <div class="main-container">
-        <div class="text-center mb-16">
-            <h1 class="text-5xl font-black italic text-white tracking-tighter mb-2">LIVE<span class="opacity-30 font-light">EDITOR</span></h1>
-            <p class="text-[10px] text-white/40 tracking-[0.5em] uppercase font-bold">Select Your Atmosphere Module</p>
-        </div>
-
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            
-            <div onclick="location.href='editor.html'" class="catalog-card p-8 rounded-[2.5rem] flex flex-col">
-                <div class="icon-box bg-cyan-500/20 border border-cyan-500/30 text-cyan-400">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-                </div>
-                <h3 class="text-white font-black text-xl uppercase tracking-wider mb-4">Custom Chat</h3>
-                <p class="text-white/40 text-xs leading-relaxed">
-                    Modul kustomisasi penuh. Ubah warna teks, latar belakang gradient, hingga opasitas pesan sesuai dengan identitas brand streaming Anda.
-                </p>
-                <div class="btn-enter uppercase">Buka Editor</div>
-            </div>
-
-            <div onclick="location.href='ornamen.html'" class="catalog-card p-8 rounded-[2.5rem] flex flex-col">
-                <div class="icon-box bg-purple-500/20 border border-purple-500/30 text-purple-400">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/></svg>
-                </div>
-                <h3 class="text-white font-black text-xl uppercase tracking-wider mb-4">Themes Ornamen</h3>
-                <p class="text-white/40 text-xs leading-relaxed">
-                    Sistem notifikasi interaktif untuk mendeteksi **Follower, Gift, Joined, dan Share**. Efek visual eksklusif yang muncul otomatis saat live.
-                </p>
-                <div class="btn-enter uppercase">Lihat Koleksi</div>
-            </div>
-
-            <div class="catalog-card p-8 rounded-[2.5rem] flex flex-col coming-soon">
-                <div class="badge-soon">Coming Soon</div>
-                <div class="icon-box bg-pink-500/20 border border-pink-500/30 text-pink-400">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 12a4 4 0 1 0 4 4V4a5 5 0 0 0 5 5"/></svg>
-                </div>
-                <h3 class="text-white font-black text-xl uppercase tracking-wider mb-4">Tikfinity Overlay</h3>
-                <p class="text-white/40 text-xs leading-relaxed">
-                    Integrasi khusus Tikfinity. Menampilkan widget interaktif, goal bar, dan alert khusus yang sinkron dengan dashboard Tikfinity Anda.
-                </p>
-                <div class="btn-enter uppercase opacity-50">Locked</div>
-            </div>
-
-            <div class="catalog-card p-8 rounded-[2.5rem] flex flex-col coming-soon">
-                <div class="badge-soon">Coming Soon</div>
-                <div class="icon-box bg-red-500/20 border border-red-500/30 text-red-400">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
-                </div>
-                <h3 class="text-white font-black text-xl uppercase tracking-wider mb-4">YT Music Overlay</h3>
-                <p class="text-white/40 text-xs leading-relaxed">
-                    Tampilkan lagu yang sedang diputar dari YouTube Music secara real-time dengan desain "Now Playing" yang estetik dan dinamis.
-                </p>
-                <div class="btn-enter uppercase opacity-50">Locked</div>
-            </div>
-
-            <div onclick="location.href='selector.html'" class="catalog-card p-8 rounded-[2.5rem] flex flex-col">
-                <div class="icon-box bg-emerald-500/20 border border-emerald-500/30 text-emerald-400">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><line x1="3" x2="21" y1="9" y2="9"/><line x1="9" x2="9" y1="21" y2="9"/></svg>
-                </div>
-                <h3 class="text-white font-black text-xl uppercase tracking-wider mb-4">Default Themes</h3>
-                <p class="text-white/40 text-xs leading-relaxed">
-                    Kembali ke dasar. Tema-tema minimalis yang sangat ringan, fokus pada keterbacaan tinggi tanpa banyak gangguan visual.
-                </p>
-                <div class="btn-enter uppercase">Gunakan Default</div>
-            </div>
-
-        </div>
-
-        <div class="mt-16 max-w-2xl mx-auto text-center border-t border-white/5 pt-10">
-            <p class="text-[10px] leading-tight tracking-[0.3em] text-red-500 font-black uppercase mb-3">
-                PERINGATAN KERAS: HAK CIPTA MUTLAK DEVELOPER
-            </p>
-            <p class="text-[9px] leading-relaxed tracking-widest text-white/40 font-bold uppercase">
-                DILARANG KERAS MEMPERJUALBELIKAN APLIKASI INI! DISTRIBUSI TANPA IZIN AKAN MENGAKIBATKAN PEMUTUSAN AKSES TOTAL PADA SELURUH MODUL. HARGAI KARYA DEVELOPER. TIDAK ADA KOMPROMI.
-            </p>
-            <div class="mt-8 opacity-20">
-                <p class="text-[9px] font-bold text-white tracking-[0.3em]">ENGINE V3.4 • DESIGNED BY YUSRIANTO LANA • 2026</p>
-            </div>
+    <div id="customModal">
+        <div class="modal-content">
+            <h2 class="text-white font-black text-xl mb-2">PREMIUM ACCESS</h2>
+            <p class="text-white/50 text-xs mb-6">Silakan pilih opsi untuk melanjutkan akses ke modul YT Music.</p>
+            <button onclick="redirectToWA()" class="modal-btn btn-wa">Hubungi Developer (Rp 50.000)</button>
+            <button onclick="askForCode()" class="modal-btn btn-code">Sudah Punya Kode</button>
+            <a href="#" onclick="closeModal()" class="btn-close uppercase tracking-widest">Tutup</a>
         </div>
     </div>
 
+    <div class="main-container">
+        <div class="text-center mb-10">
+            <h1 class="text-4xl font-black italic text-white tracking-tighter">LIVE<span class="opacity-30 font-light">EDITOR</span></h1>
+            <p class="text-[8px] text-white/40 uppercase font-bold tracking-[0.5em] mt-2">Engine V3.4 • Yusrianto Lana • 2026</p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div onclick="location.href='editor.html'" class="catalog-card p-6 rounded-[2rem]">
+                <div class="icon-box bg-cyan-500/20 text-cyan-400 border border-cyan-500/30">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                </div>
+                <h3 class="text-white font-black text-lg uppercase tracking-wider mb-2">Custom Chat</h3>
+                <p class="text-white/40 text-[10px]">Kustomisasi warna, gradient, dan opasitas chat sesukamu.</p>
+                <div class="btn-enter uppercase">Buka Editor</div>
+            </div>
+
+            <div onclick="location.href='ornamen.html'" class="catalog-card p-6 rounded-[2rem]">
+                <div class="icon-box bg-purple-500/20 text-purple-400 border border-purple-500/30">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/></svg>
+                </div>
+                <h3 class="text-white font-black text-lg uppercase tracking-wider mb-2">Themes Ornamen</h3>
+                <p class="text-white/40 text-[10px]">Notifikasi otomatis Follower, Gift, dan Share.</p>
+                <div class="btn-enter uppercase">Lihat Koleksi</div>
+            </div>
+
+            <div class="catalog-card p-6 rounded-[2rem] locked-card">
+                <div class="badge-status badge-red">Coming Soon</div>
+                <div class="icon-box bg-pink-500/20 text-pink-400">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 12a4 4 0 1 0 4 4V4a5 5 0 0 0 5 5"/></svg>
+                </div>
+                <h3 class="text-white font-black text-lg uppercase tracking-wider mb-2">Tikfinity Overlay</h3>
+                <p class="text-white/40 text-[10px]">Integrasi dashboard Tikfinity real-time.</p>
+                <div class="btn-enter uppercase opacity-50">Locked</div>
+            </div>
+
+            <div onclick="openModal()" class="catalog-card p-6 rounded-[2rem]">
+                <div class="badge-status badge-yellow">Special Access</div>
+                <div class="icon-box bg-red-500/20 text-red-400 border border-red-500/30">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
+                </div>
+                <h3 class="text-white font-black text-lg uppercase tracking-wider mb-2">YT Music Overlay</h3>
+                <p class="text-white/40 text-[10px]">Tampilkan judul lagu. Butuh kode akses (Rp 50rb).</p>
+                <div class="btn-enter uppercase">Dapatkan Akses</div>
+            </div>
+
+            <div onclick="location.href='selector.html'" class="catalog-card p-6 rounded-[2rem]">
+                <div class="icon-box bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><line x1="3" x2="21" y1="9" y2="9"/><line x1="9" x2="9" y1="21" y2="9"/></svg>
+                </div>
+                <h3 class="text-white font-black text-lg uppercase tracking-wider mb-2">Default Themes</h3>
+                <p class="text-white/40 text-[10px]">Tema minimalis dan super ringan.</p>
+                <div class="btn-enter uppercase">Gunakan Default</div>
+            </div>
+        </div>
+
+        <div class="warning-text mt-8 text-white uppercase font-bold opacity-30 text-[7px] text-center">
+            DILARANG KERAS MEMPERJUALBELIKAN APLIKASI INI TANPA IZIN DEVELOPER!
+        </div>
+    </div>
+
+    <script>
+        const WA_NUMBER = "6281343901082";
+        const MASTER_CODE = "webdev12345";
+        const modal = document.getElementById('customModal');
+
+        function openModal() { modal.style.display = 'flex'; }
+        function closeModal() { modal.style.display = 'none'; }
+
+        function redirectToWA() {
+            const msg = encodeURIComponent("Halo Brow, saya mau beli Kode Akses Premium untuk YT Music Overlay (WebdevOverlay). Harga Rp 50.000.");
+            window.open(`https://wa.me/${WA_NUMBER}?text=${msg}`, '_blank');
+        }
+
+        function askForCode() {
+            closeModal();
+            setTimeout(() => {
+                const code = prompt("MASUKKAN KODE AKSES PREMIUM:");
+                if (code && code.trim() === MASTER_CODE) {
+                    alert("AKSES DITERIMA!");
+                    window.location.href = "ytmusic_overlay.html";
+                } else if (code) {
+                    alert("KODE SALAH!");
+                }
+            }, 300);
+        }
+    </script>
 </body>
 </html>
