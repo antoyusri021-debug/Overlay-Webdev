@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap');
+        
+        body { 
+            margin: 0; 
+            padding: 10px; 
+            background: transparent; 
+            font-family: 'Inter', sans-serif; 
+            overflow: hidden; 
+        }
+
+        .music-player-container {
+            width: 320px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5));
+        }
+
+        /* INFO LAGU */
+        .song-info {
+            text-align: center;
+            width: 100%;
+            margin-bottom: 15px;
+        }
+
+        .title {
+            font-size: 16px; /* Ukuran sedikit diperbesar karena spektrum hilang */
+            font-weight: 700;
+            color: #ffffff;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            margin-bottom: 2px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.9);
+        }
+
+        .artist {
+            font-size: 11px;
+            font-weight: 600;
+            color: #d1d1f0;
+            text-transform: uppercase;
+            letter-spacing: 1.2px;
+            text-shadow: 1px 1px 3px rgba(0,0,0,0.8);
+        }
+
+        /* TOMBOL NAVIGASI */
+        .controls {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 30px;
+        }
+
+        .btn {
+            fill: #ffffff;
+            width: 22px;
+            height: 22px;
+            opacity: 0.9;
+        }
+
+        .btn-play {
+            width: 36px;
+            height: 36px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="music-player-container">
+    <div class="song-info">
+        <div id="title" class="title">Menunggu Musik...</div>
+        <div id="artist" class="artist">YouTube Music</div>
+    </div>
+
+    <div class="controls">
+        <svg class="btn" viewBox="0 0 24 24"><path d="M6 6h2v12H6zm3.5 6l8.5 6V6z"/></svg>
+        
+        <svg class="btn btn-play" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 14.5v-9l6 4.5-6 4.5z"/></svg>
+        
+        <svg class="btn" viewBox="0 0 24 24"><path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6z"/></svg>
+    </div>
+</div>
+
+<script>
+    const titleEle = document.getElementById('title');
+    const artistEle = document.getElementById('artist');
+
+    async function updateMusic() {
+        try {
+            const resp = await fetch('../judul_lagu.txt?t=' + Date.now());
+            if (resp.ok) {
+                const text = await resp.text();
+                const parts = text.split(' - ');
+                
+                const newTitle = (parts[0] || "Menunggu Musik...").trim();
+                const newArtist = (parts.length > 1 ? parts.slice(1).join(' - ') : "YouTube Music").trim();
+
+                // Update hanya jika ada perubahan teks
+                if (titleEle.innerText !== newTitle) {
+                    titleEle.innerText = newTitle;
+                    artistEle.innerText = newArtist;
+                }
+            }
+        } catch (e) { }
+    }
+
+    setInterval(updateMusic, 2000);
+    updateMusic();
+</script>
+
+</body>
+</html>
