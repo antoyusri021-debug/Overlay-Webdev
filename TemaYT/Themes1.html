@@ -12,6 +12,7 @@
             overflow: hidden; 
         }
 
+        /* CONTAINER UTAMA */
         .music-box {
             display: flex;
             align-items: center;
@@ -25,8 +26,18 @@
             height: 65px;
             box-sizing: border-box;
             box-shadow: 0 8px 25px rgba(0,0,0,0.5);
-            transition: all 0.3s ease-out; 
+            transition: all 0.5s ease-in-out; 
             overflow: hidden;
+            
+            /* EFEK SEMBUNYI OTOMATIS JIKA OFFLINE */
+            opacity: 0;
+            transform: translateY(20px);
+        }
+
+        /* KELAS UNTUK MENAMPILKAN BOX */
+        .music-box.active {
+            opacity: 1;
+            transform: translateY(0);
         }
 
         .left-section {
@@ -95,7 +106,7 @@
 </head>
 <body>
 
-<div class="music-box">
+<div id="main-container" class="music-box">
     <div class="left-section">
         <svg class="play-pause-icon" viewBox="0 0 24 24">
             <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 14.5v-9l6 4.5-6 4.5z"/>
@@ -109,44 +120,62 @@
     </div>
     
     <div class="info">
-        <div id="title" class="title">Menunggu Musik...</div>
-        <div id="artist" class="artist">YT MUSIC PREMIUM</div>
+        <div id="title" class="title">...</div>
+        <div id="artist" class="artist">YT MUSIC</div>
     </div>
 </div>
 
 <script>
+    const container = document.getElementById('main-container');
     const titleElement = document.getElementById('title');
     const artistElement = document.getElementById('artist');
 
     async function updateMusic() {
-    try {
-        // Kita paksa fetch ke localhost
-        const response = await fetch('http://localhost:8080/', { 
-            method: 'GET',
-            mode: 'cors',
-            cache: 'no-store' 
-        });
-        
-        const data = await response.json();
-        if (data.title) {
-            let parts = data.title.split(' - ');
-            document.getElementById('title').innerText = parts[0] || "Menunggu...";
-            document.getElementById('artist').innerText = parts[1] || "YouTube Music";
-        }
-    } catch (err) {
-        // Jika API gagal, coba baca file lokal (untuk user yang pakai Local File)
-        fetch('../judul_lagu.txt?t=' + Date.now())
-            .then(res => res.text())
-            .then(text => {
-                if(text) {
-                    let parts = text.split(' - ');
-                    document.getElementById('title').innerText = parts[0];
-                    document.getElementById('artist').innerText = parts[1] || "YouTube Music";
+        try {
+            // MODE API: Cek ke port 8080 aplikasi PowerShell
+            const response = await fetch('http://localhost:8080/', { 
+                method: 'GET',
+                mode: 'cors',
+                cache: 'no-store' 
+            });
+            
+            if (response.ok) {
+                const data = await response.json();
+                if (data.title && data.title !== "Menunggu Musik...") {
+                    showOverlay(data.title);
+                } else {
+                    hideOverlay();
                 }
-            }).catch(e => console.log("Offline"));
+            } else {
+                hideOverlay();
+            }
+        } catch (err) {
+            // MODE FILE: Jika API Gagal (Fallback untuk lokal)
+            fetch('../judul_lagu.txt?t=' + Date.now())
+                .then(res => res.text())
+                .then(text => {
+                    if (text && text.trim() !== "") {
+                        showOverlay(text);
+                    } else {
+                        hideOverlay();
+                    }
+                }).catch(() => hideOverlay());
+        }
     }
-}
-setInterval(updateMusic, 2000);
+
+    function showOverlay(fullText) {
+        let parts = fullText.split(' - ');
+        titleElement.innerText = parts[0] || "Unknown Title";
+        artistElement.innerText = parts[1] || "YouTube Music";
+        container.classList.add('active'); // Munculkan dengan animasi
+    }
+
+    function hideOverlay() {
+        container.classList.remove('active'); // Sembunyikan otomatis
+    }
+
+    setInterval(updateMusic, 2000);
+    updateMusic();
 </script>
 
 </body>
