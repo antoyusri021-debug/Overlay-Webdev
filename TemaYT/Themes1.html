@@ -119,45 +119,34 @@
     const artistElement = document.getElementById('artist');
 
     async function updateMusic() {
-        try {
-            // MODE 1: Coba ambil dari API Lokal (Port 8080) - Untuk link Online/GitHub
-            const response = await fetch('http://localhost:8080/', { mode: 'cors' });
-            if (response.ok) {
-                const data = await response.json();
-                processData(data.title);
-            }
-        } catch (err) {
-            // MODE 2: Cadangan ambil dari File (Mode Lokal/OBS File)
-            try {
-                const resFile = await fetch('../judul_lagu.txt?t=' + new Date().getTime());
-                if (resFile.ok) {
-                    const text = await resFile.text();
-                    processData(text);
-                }
-            } catch (fileErr) {
-                console.log("Menunggu aplikasi dijalankan...");
-            }
-        }
-    }
-
-    function processData(fullText) {
-        if (!fullText) return;
+    try {
+        // Kita paksa fetch ke localhost
+        const response = await fetch('http://localhost:8080/', { 
+            method: 'GET',
+            mode: 'cors',
+            cache: 'no-store' 
+        });
         
-        // Pisah judul dan artis (Asumsi format: Judul - Artis)
-        let parts = fullText.split(' - ');
-        let currentTitle = parts[0] || "Menunggu Musik...";
-        let currentArtist = parts.length > 1 ? parts.slice(1).join(' - ') : "YouTube Music";
-
-        // Update DOM jika ada perubahan
-        if (titleElement.innerText !== currentTitle.trim()) {
-            titleElement.innerText = currentTitle.trim();
-            artistElement.innerText = currentArtist.trim();
+        const data = await response.json();
+        if (data.title) {
+            let parts = data.title.split(' - ');
+            document.getElementById('title').innerText = parts[0] || "Menunggu...";
+            document.getElementById('artist').innerText = parts[1] || "YouTube Music";
         }
+    } catch (err) {
+        // Jika API gagal, coba baca file lokal (untuk user yang pakai Local File)
+        fetch('../judul_lagu.txt?t=' + Date.now())
+            .then(res => res.text())
+            .then(text => {
+                if(text) {
+                    let parts = text.split(' - ');
+                    document.getElementById('title').innerText = parts[0];
+                    document.getElementById('artist').innerText = parts[1] || "YouTube Music";
+                }
+            }).catch(e => console.log("Offline"));
     }
-
-    // Interval 2 detik biar nggak berat
-    setInterval(updateMusic, 2000);
-    updateMusic();
+}
+setInterval(updateMusic, 2000);
 </script>
 
 </body>
