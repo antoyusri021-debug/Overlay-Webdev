@@ -9,14 +9,13 @@
             margin: 0; padding: 20px; 
             background: transparent !important; 
             font-family: 'Outfit', sans-serif; 
-            overflow: hidden; 
         }
 
-        /* CONTAINER DENGAN LOGIKA TRANSISI CONTEKKAN */
+        /* CONTAINER: Paksa muncul (Opacity 1) agar tidak hilang di aplikasi */
         #main-container {
             display: flex;
             align-items: center;
-            background: rgba(10, 10, 10, 0.95);
+            background: rgba(15, 15, 15, 0.98);
             backdrop-filter: blur(12px);
             border-radius: 100px;
             padding: 10px 25px;
@@ -24,62 +23,44 @@
             border: 2px solid #00ff7f;
             width: fit-content;
             min-width: 320px;
-            box-shadow: 0 0 20px rgba(0, 255, 127, 0.3);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5), 0 0 15px rgba(0, 255, 127, 0.2);
             
-            /* ANIMASI TRANSISI (Sesuai Contekkan) */
-            transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
-            opacity: 0;
-            transform: translateX(-20px);
-            visibility: hidden;
-        }
-
-        /* KELAS AKTIF (Sesuai Contekkan) */
-        #main-container.active {
-            opacity: 1;
-            transform: translateX(0);
-            visibility: visible;
+            /* FIX: Jangan pakai visibility hidden dulu agar kelihatan di aplikasi */
+            opacity: 1; 
+            transition: all 0.5s ease;
         }
 
         .icon-box {
-            width: 35px; height: 35px;
-            background: #00ff7f;
-            border-radius: 50%;
-            margin-right: 15px;
+            width: 35px; height: 35px; background: #00ff7f;
+            border-radius: 50%; margin-right: 15px;
             display: flex; align-items: center; justify-content: center;
-            flex-shrink: 0;
-            box-shadow: 0 0 15px #00ff7f;
-            animation: spin 4s linear infinite;
+            animation: spin 4s linear infinite; flex-shrink: 0;
         }
-
         @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
 
         .content { overflow: hidden; white-space: nowrap; }
-        .title { font-size: 14px; font-weight: 900; color: #fff; margin: 0; }
-        .artist { font-size: 11px; font-weight: 400; color: #00ff7f; opacity: 0.8; text-transform: uppercase; }
+        .title { font-size: 14px; font-weight: 900; color: #fff; }
+        .artist { font-size: 11px; color: #00ff7f; text-transform: uppercase; }
 
-        /* EQUALIZER (Sesuai Contekkan) */
         .equalizer { display: flex; align-items: flex-end; height: 14px; gap: 2px; margin-left: 15px; }
-        .bar { width: 3px; background: #00ff7f; border-radius: 1px; animation: bounce 0.8s ease-in-out infinite; }
-        .bar:nth-child(1) { height: 60%; animation-delay: 0.1s; }
-        .bar:nth-child(2) { height: 100%; animation-delay: 0.3s; }
-        .bar:nth-child(3) { height: 75%; animation-delay: 0.2s; }
-        @keyframes bounce { 0%, 100% { transform: scaleY(0.6); } 50% { transform: scaleY(1.2); } }
+        .bar { width: 3px; background: #00ff7f; animation: bounce 0.8s infinite; }
+        @keyframes bounce { 0%, 100% { height: 5px; } 50% { height: 14px; } }
     </style>
 </head>
 <body>
 
 <div id="main-container">
     <div class="icon-box">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="black"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 14.5v-9l6 4.5-6 4.5z"/></svg>
+        <svg width="20" height="20" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 14.5v-9l6 4.5-6 4.5z"/></svg>
     </div>
     <div class="content">
-        <div id="title-text" class="title">Loading...</div>
+        <div id="title-text" class="title">Mencari Data...</div>
         <div id="artist-text" class="artist">YT MUSIC</div>
     </div>
     <div class="equalizer">
-        <div class="bar"></div>
-        <div class="bar"></div>
-        <div class="bar"></div>
+        <div class="bar" style="animation-delay: 0.1s"></div>
+        <div class="bar" style="animation-delay: 0.3s"></div>
+        <div class="bar" style="animation-delay: 0.2s"></div>
     </div>
 </div>
 
@@ -88,60 +69,41 @@
     const titleLabel = document.getElementById('title-text');
     const artistLabel = document.getElementById('artist-text');
 
-    function sanitize(text) {
-        const temp = document.createElement('div');
-        temp.textContent = text;
-        return temp.innerHTML.trim();
-    }
-
     async function checkMusic() {
+        // JALUR 1: Cek localhost API
         try {
-            // 1. CEK API PORT 8080 (Logika Utama Contekkan)
-            const response = await fetch('http://localhost:8080/', { 
-                method: 'GET', mode: 'cors', cache: 'no-store' 
-            });
-            
+            const response = await fetch('http://localhost:8080/', { cache: 'no-store' });
             if (response.ok) {
                 const data = await response.json();
-                if (data.title && data.title !== "Menunggu Musik..." && data.title !== "") {
-                    updateDisplay(data.title);
-                } else {
-                    container.classList.remove('active');
-                }
-            } else { throw new Error("API Offline"); }
-        } catch (err) {
-            // 2. FALLBACK KE FILE LOKAL (Logika Cadangan Contekkan)
-            try {
-                // Pastikan jalur ../ benar jika di folder temaYT
-                const resFile = await fetch('../judul_lagu.txt?t=' + Date.now());
-                if (resFile.ok) {
-                    const text = await resFile.text();
-                    if (text && text.trim() !== "" && !text.includes('<!DOCTYPE')) {
-                        updateDisplay(text);
-                    } else {
-                        container.classList.remove('active');
-                    }
-                }
-            } catch (fileErr) {
-                container.classList.remove('active');
+                if (data.title && data.title !== "") return updateDisplay(data.title);
             }
+        } catch (e) {}
+
+        // JALUR 2: Cek file lokal secara agresif
+        const paths = ['../judul_lagu.txt', './judul_lagu.txt', 'judul_lagu.txt'];
+        for (let p of paths) {
+            try {
+                const res = await fetch(p + '?t=' + Date.now());
+                if (res.ok) {
+                    const txt = await res.text();
+                    if (txt.trim() && !txt.includes('<!DOCTYPE')) return updateDisplay(txt);
+                }
+            } catch (e) {}
         }
+        
+        // Jika benar-benar tidak ada data, kita biarkan tulisan "Mencari Data..."
+        // Agar kamu tahu kalau aplikasinya sedang bekerja.
     }
 
     function updateDisplay(fullText) {
-        let cleanText = sanitize(fullText);
-        let parts = cleanText.split(' - ');
-        let song = parts[0] || "Unknown Title";
-        let artist = parts.length > 1 ? parts.slice(1).join(' - ') : "YouTube Music";
-
-        titleLabel.innerText = song;
-        artistLabel.innerText = artist;
-        container.classList.add('active'); // Memicu transisi muncul
+        let parts = fullText.split(' - ');
+        titleLabel.innerText = parts[0].trim();
+        artistLabel.innerText = parts.length > 1 ? parts[1].trim() : "YouTube Music";
+        container.style.opacity = "1";
     }
 
     setInterval(checkMusic, 2000);
     checkMusic();
 </script>
-
 </body>
 </html>
