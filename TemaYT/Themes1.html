@@ -4,204 +4,86 @@
     <meta charset="UTF-8">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
-        
-        body { 
-            margin: 0; 
-            padding: 20px; 
-            background: transparent; 
-            font-family: 'Inter', sans-serif; 
-            overflow: hidden; 
-        }
+        body { margin: 0; padding: 20px; background: transparent; font-family: 'Inter', sans-serif; overflow: hidden; }
 
-        /* CONTAINER UTAMA */
         #main-container {
-            display: flex;
-            align-items: center;
-            background: rgba(15, 15, 15, 0.95);
-            backdrop-filter: blur(12px);
-            border-radius: 12px;
-            padding: 10px 18px;
-            color: white;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            width: 340px; 
-            height: 65px;
-            box-sizing: border-box;
+            display: flex; align-items: center; background: rgba(15, 15, 15, 0.95);
+            backdrop-filter: blur(12px); border-radius: 12px; padding: 10px 18px;
+            color: white; border: 1px solid rgba(255, 255, 255, 0.1);
+            width: 340px; height: 65px; box-sizing: border-box;
             box-shadow: 0 8px 25px rgba(0,0,0,0.5);
-            
-            /* ANIMASI TRANSISI */
             transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
-            opacity: 0;
-            transform: translateX(-20px);
-            visibility: hidden;
+            opacity: 0; transform: translateX(-20px); visibility: hidden;
         }
 
-        /* KELAS SAAT AKTIF - HARUS ADA AGAR MUNCUL */
-        #main-container.active {
-            opacity: 1;
-            transform: translateX(0);
-            visibility: visible;
-        }
+        /* Ini yang membuat muncul */
+        #main-container.active { opacity: 1; transform: translateX(0); visibility: visible; }
 
-        .left-section {
-            display: flex;
-            align-items: center;
-            margin-right: 15px;
-            flex-shrink: 0;
-            gap: 12px;
-            border-right: 1px solid rgba(255, 255, 255, 0.1);
-            padding-right: 15px;
-        }
-
-        .play-pause-icon {
-            width: 22px; height: 22px;
-            fill: #ff0000; 
-        }
-
-        .equalizer {
-            display: flex;
-            align-items: flex-end;
-            height: 16px;
-            gap: 2px;
-        }
-        .bar {
-            width: 3px;
-            background: #ff0000;
-            border-radius: 1px;
-            animation: bounce 0.8s ease-in-out infinite;
-        }
+        .left-section { display: flex; align-items: center; margin-right: 15px; flex-shrink: 0; gap: 12px; border-right: 1px solid rgba(255, 255, 255, 0.1); padding-right: 15px; }
+        .play-pause-icon { width: 22px; height: 22px; fill: #ff0000; }
+        .equalizer { display: flex; align-items: flex-end; height: 16px; gap: 2px; }
+        .bar { width: 3px; background: #ff0000; border-radius: 1px; animation: bounce 0.8s ease-in-out infinite; }
         .bar:nth-child(1) { height: 60%; animation-delay: 0.1s; }
         .bar:nth-child(2) { height: 100%; animation-delay: 0.3s; }
         .bar:nth-child(3) { height: 75%; animation-delay: 0.2s; }
-
-        @keyframes bounce {
-            0%, 100% { transform: scaleY(0.6); }
-            50% { transform: scaleY(1.2); }
-        }
-
-        .info {
-            flex-grow: 1;
-            overflow: hidden;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-        }
-
-        .title {
-            font-size: 13px;
-            font-weight: 700;
-            color: #ffffff;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            margin-bottom: 2px;
-        }
-
-        .artist {
-            font-size: 10px;
-            font-weight: 400;
-            color: #aaaaaa;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
+        @keyframes bounce { 0%, 100% { transform: scaleY(0.6); } 50% { transform: scaleY(1.2); } }
+        .info { flex-grow: 1; overflow: hidden; display: flex; flex-direction: column; justify-content: center; }
+        .title { font-size: 13px; font-weight: 700; color: #ffffff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: 2px; }
+        .artist { font-size: 10px; font-weight: 400; color: #aaaaaa; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     </style>
 </head>
 <body>
-
-<div id="main-container">
-    <div class="left-section">
-        <svg class="play-pause-icon" viewBox="0 0 24 24">
-            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 14.5v-9l6 4.5-6 4.5z"/>
-        </svg>
-        <div class="equalizer">
-            <div class="bar"></div>
-            <div class="bar"></div>
-            <div class="bar"></div>
+    <div id="main-container">
+        <div class="left-section">
+            <svg class="play-pause-icon" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 14.5v-9l6 4.5-6 4.5z"/></svg>
+            <div class="equalizer"><div class="bar"></div><div class="bar"></div><div class="bar"></div></div>
+        </div>
+        <div class="info">
+            <div id="title-text" class="title">Memuat...</div>
+            <div id="artist-text" class="artist">YT MUSIC</div>
         </div>
     </div>
-    <div class="info">
-        <div id="title-text" class="title">Loading...</div>
-        <div id="artist-text" class="artist">YT MUSIC</div>
-    </div>
-</div>
 
-<script>
-    const container = document.getElementById('main-container');
-    const titleLabel = document.getElementById('title-text');
-    const artistLabel = document.getElementById('artist-text');
+    <script>
+        const container = document.getElementById('main-container');
+        const urlParams = new URLSearchParams(window.location.search);
+        const isPreview = urlParams.get('preview') === 'true';
 
-    const urlParams = new URLSearchParams(window.location.search);
-    const isPreview = urlParams.get('preview') === 'true';
-
-    function sanitize(text) {
-        const temp = document.createElement('div');
-        temp.textContent = text;
-        return temp.innerHTML.trim();
-    }
-
-    async function checkMusic() {
-        // Jika mode preview, jangan lakukan fetch, langsung tampilkan dummy
-        if (isPreview) {
-            updateDisplay("Judul Lagu Preview - Nama Artis");
-            return;
+        function updateDisplay(title, artist) {
+            document.getElementById('title-text').innerText = title;
+            document.getElementById('artist-text').innerText = artist;
+            container.classList.add('active'); // Paksa muncul
         }
 
-        try {
-            const response = await fetch('http://localhost:8080/', { 
-                method: 'GET',
-                mode: 'cors',
-                cache: 'no-store' 
-            });
-            
-            if (response.ok) {
-                const data = await response.json();
-                if (data.title && data.title !== "Menunggu Musik..." && data.title !== "") {
-                    updateDisplay(data.title);
-                } else {
-                    container.classList.remove('active');
-                }
-            } else {
-                throw new Error("Offline");
+        async function checkMusic() {
+            // JIKA MODE PREVIEW, LANGSUNG TAMPILKAN CONTOH
+            if (isPreview) {
+                updateDisplay("Contoh Judul Lagu", "Nama Artis Preview");
+                return;
             }
-        } catch (err) {
-            // Fallback ke file lokal
+
             try {
-                const resFile = await fetch('../judul_lagu.txt?t=' + Date.now());
-                if (resFile.ok) {
-                    const text = await resFile.text();
-                    if (text && text.trim() !== "" && !text.includes('<!DOCTYPE')) {
-                        updateDisplay(text);
-                    } else {
-                        container.classList.remove('active');
+                const response = await fetch('http://localhost:8080/');
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data.title) {
+                        let parts = data.title.split(' - ');
+                        updateDisplay(parts[0], parts[1] || "YT Music");
                     }
-                }
-            } catch (fileErr) {
-                container.classList.remove('active');
+                } else { throw new Error(); }
+            } catch (e) {
+                // Fallback file lokal
+                fetch('../judul_lagu.txt').then(r => r.text()).then(t => {
+                    if(t.trim()) {
+                        let parts = t.split(' - ');
+                        updateDisplay(parts[0], parts[1] || "YT Music");
+                    } else { container.classList.remove('active'); }
+                }).catch(() => container.classList.remove('active'));
             }
         }
-    }
 
-    function updateDisplay(fullText) {
-        let cleanText = sanitize(fullText);
-        let parts = cleanText.split(' - ');
-        let song = parts[0] || "Unknown Title";
-        let artist = parts.length > 1 ? parts.slice(1).join(' - ') : "YouTube Music";
-
-        titleLabel.innerText = song;
-        artistLabel.innerText = artist;
-        
-        // Memaksa container muncul
-        container.classList.add('active');
-    }
-
-    // Jalankan pengecekan
-    checkMusic();
-    
-    // Jika bukan preview, cek berkala tiap 2 detik
-    if (!isPreview) {
-        setInterval(checkMusic, 2000);
-    }
-</script>
-
+        checkMusic();
+        if (!isPreview) setInterval(checkMusic, 2000);
+    </script>
 </body>
 </html>
