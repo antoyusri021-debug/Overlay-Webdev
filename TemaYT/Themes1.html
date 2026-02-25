@@ -45,45 +45,52 @@
     </div>
 
     <script>
-        const container = document.getElementById('main-container');
-        const urlParams = new URLSearchParams(window.location.search);
-        const isPreview = urlParams.get('preview') === 'true';
+    const container = document.getElementById('main-container');
+    const titleLabel = document.getElementById('title-text');
+    const artistLabel = document.getElementById('artist-text');
+    const urlParams = new URLSearchParams(window.location.search);
+    const isPreview = urlParams.get('preview') === 'true';
 
-        function updateDisplay(title, artist) {
-            document.getElementById('title-text').innerText = title;
-            document.getElementById('artist-text').innerText = artist;
-            container.classList.add('active'); // Paksa muncul
+    function sanitize(text) {
+        const temp = document.createElement('div');
+        temp.textContent = text;
+        return temp.innerHTML.trim();
+    }
+
+    function updateDisplay(fullText) {
+        let cleanText = sanitize(fullText);
+        let parts = cleanText.split(' - ');
+        titleLabel.innerText = parts[0] || "Unknown Title";
+        artistLabel.innerText = parts.length > 1 ? parts.slice(1).join(' - ') : "YouTube Music";
+        container.classList.add('active');
+    }
+
+    async function checkMusic() {
+        if (isPreview) {
+            updateDisplay("Contoh Judul Lagu - Nama Artis Preview");
+            return;
         }
-
-        async function checkMusic() {
-            // JIKA MODE PREVIEW, LANGSUNG TAMPILKAN CONTOH
-            if (isPreview) {
-                updateDisplay("Contoh Judul Lagu", "Nama Artis Preview");
-                return;
-            }
-
-            try {
-                const response = await fetch('http://localhost:8080/');
-                if (response.ok) {
-                    const data = await response.json();
-                    if (data.title) {
-                        let parts = data.title.split(' - ');
-                        updateDisplay(parts[0], parts[1] || "YT Music");
-                    }
-                } else { throw new Error(); }
-            } catch (e) {
-                // Fallback file lokal
-                fetch('../judul_lagu.txt').then(r => r.text()).then(t => {
-                    if(t.trim()) {
-                        let parts = t.split(' - ');
-                        updateDisplay(parts[0], parts[1] || "YT Music");
-                    } else { container.classList.remove('active'); }
-                }).catch(() => container.classList.remove('active'));
-            }
+        try {
+            const response = await fetch('http://localhost:8080/', { cache: 'no-store' });
+            if (response.ok) {
+                const data = await response.json();
+                if (data.title && data.title !== "Menunggu Musik...") {
+                    updateDisplay(data.title);
+                } else { container.classList.remove('active'); }
+            } else { throw new Error(); }
+        } catch (err) {
+            // Fallback file lokal
+            fetch('../judul_lagu.txt?t=' + Date.now()).then(r => r.text()).then(text => {
+                if (text.trim() && !text.includes('<!DOCTYPE')) {
+                    updateDisplay(text);
+                } else { container.classList.remove('active'); }
+            }).catch(() => container.classList.remove('active'));
         }
+    }
 
-        checkMusic();
-        if (!isPreview) setInterval(checkMusic, 2000);
-    </script>
+    setInterval(checkMusic, 2000);
+    checkMusic();
+</script>
 </body>
 </html>
+
