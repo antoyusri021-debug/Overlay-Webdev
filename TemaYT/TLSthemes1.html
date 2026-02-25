@@ -6,108 +6,85 @@
         @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;800&display=swap');
         
         body { 
-            margin: 0; padding: 20px; background: transparent; 
-            font-family: 'Montserrat', sans-serif; overflow: hidden; 
+            margin: 0; padding: 10px; background: transparent; 
+            font-family: 'Montserrat', sans-serif;
         }
 
+        /* PAKSA MUNCUL DULU BIAR KELIHATAN DI APLIKASI */
         #main-container {
             display: flex; flex-direction: column;
-            background: linear-gradient(135deg, rgba(30, 30, 30, 0.98), rgba(10, 10, 10, 1));
-            backdrop-filter: blur(15px); border-radius: 20px;
-            padding: 18px; color: white; border: 1px solid rgba(255, 255, 255, 0.1);
-            width: 350px; height: auto; min-height: 125px;
-            box-sizing: border-box; box-shadow: 0 20px 50px rgba(0,0,0,0.5);
-            transition: all 0.6s ease-in-out;
-            opacity: 0; /* Default sembunyi, muncul kalau ada lagu */
-            transform: translateY(20px);
+            background: rgba(20, 20, 20, 0.95);
+            border-radius: 15px; padding: 15px; color: white;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            width: 330px; min-height: 110px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
         }
 
-        #main-container.active { opacity: 1; transform: translateY(0); }
-
-        .top-section { display: flex; align-items: center; margin-bottom: 15px; }
+        .top-section { display: flex; align-items: center; margin-bottom: 10px; }
         .visual-disk {
-            width: 45px; height: 45px; background: conic-gradient(#fff, #444, #fff);
-            border-radius: 50%; margin-right: 15px;
-            display: flex; align-items: center; justify-content: center;
-            animation: spin 3s linear infinite; border: 2px solid #333; flex-shrink: 0;
+            width: 40px; height: 40px; background: #444;
+            border-radius: 50%; margin-right: 12px;
+            animation: spin 3s linear infinite; flex-shrink: 0;
         }
         @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
 
-        .info { flex-grow: 1; overflow: hidden; margin-right: 10px; }
-        .title { font-size: 14px; font-weight: 800; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .artist { font-size: 10px; color: rgba(255,255,255,0.5); text-transform: uppercase; letter-spacing: 1px; }
+        .info { flex-grow: 1; overflow: hidden; }
+        .title { font-size: 14px; font-weight: 800; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .artist { font-size: 10px; color: #aaa; }
 
         .controls {
             display: flex; align-items: center; justify-content: space-between;
-            padding-top: 12px; border-top: 1px solid rgba(255,255,255,0.1);
+            padding-top: 10px; border-top: 1px solid rgba(255,255,255,0.1);
         }
-        .btn-group { display: flex; gap: 15px; align-items: center; }
-        .btn { fill: rgba(255,255,255,0.6); width: 16px; height: 16px; }
-        .btn-play { fill: #fff; width: 26px; height: 26px; background: rgba(255,255,255,0.1); border-radius: 50%; padding: 6px; }
+        .debug-msg { font-size: 9px; color: yellow; font-family: monospace; }
     </style>
 </head>
 <body>
 
 <div id="main-container">
     <div class="top-section">
-        <div class="visual-disk">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="black"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 14.5c-2.49 0-4.5-2.01-4.5-4.5S9.51 7.5 12 7.5s4.5 2.01 4.5 4.5-2.01 4.5-4.5 4.5z"/></svg>
-        </div>
+        <div class="visual-disk"></div>
         <div class="info">
-            <div id="title-text" class="title">Memuat Judul...</div>
-            <div id="artist-text" class="artist">Menunggu Artis...</div>
+            <div id="title-text" class="title">Checking File...</div>
+            <div id="artist-text" class="artist">Please Wait</div>
         </div>
     </div>
     <div class="controls">
-        <div class="btn-group">
-            <svg class="btn" viewBox="0 0 24 24"><path d="M6 6h2v12H6zm3.5 6l8.5 6V6z"/></svg>
-            <svg class="btn btn-play" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
-            <svg class="btn" viewBox="0 0 24 24"><path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z"/></svg>
-        </div>
-        <div style="font-size: 10px; color: rgba(255,255,255,0.3);">YT MUSIC PREM</div>
+        <div id="debug-info" class="debug-msg">Status: Booting...</div>
     </div>
 </div>
 
 <script>
-    const container = document.getElementById('main-container');
     const titleLabel = document.getElementById('title-text');
     const artistLabel = document.getElementById('artist-text');
+    const debugLabel = document.getElementById('debug-info');
 
-    async function updateMusic() {
+    async function checkFile() {
+        // Karena HTML di dalam folder 'temaYT', kita harus naik satu tingkat (../)
+        const targetFile = '../judul_lagu.txt';
+        
         try {
-            // Kita coba dua jalur sekaligus agar pasti ketemu filenya
-            const paths = ['../judul_lagu.txt', './judul_lagu.txt'];
-            let text = "";
-            let found = false;
-
-            for (let path of paths) {
-                try {
-                    const response = await fetch(path + '?t=' + Date.now());
-                    if (response.ok) {
-                        text = await response.text();
-                        if (text.trim() && !text.includes('<!DOCTYPE')) {
-                            found = true;
-                            break;
-                        }
-                    }
-                } catch(e) {}
-            }
-
-            if (found) {
-                let parts = text.split(' - ');
-                titleLabel.innerText = (parts[0] || "Unknown").trim();
-                artistLabel.innerText = (parts.length > 1 ? parts.slice(1).join(' - ') : "YouTube Music").trim();
-                container.classList.add('active');
+            const response = await fetch(targetFile + '?t=' + Date.now());
+            if (response.ok) {
+                const text = await response.text();
+                if (text.trim()) {
+                    let parts = text.split(' - ');
+                    titleLabel.innerText = parts[0].trim();
+                    artistLabel.innerText = parts.length > 1 ? parts[1].trim() : "YouTube Music";
+                    debugLabel.innerText = "Status: Berhasil Membaca";
+                } else {
+                    debugLabel.innerText = "Status: File Kosong";
+                }
             } else {
-                container.classList.remove('active');
+                debugLabel.innerText = "Status: File Tak Ditemukan (404)";
             }
         } catch (e) {
-            console.error("Gagal membaca file");
+            debugLabel.innerText = "Status: Error Fetching";
         }
     }
 
-    setInterval(updateMusic, 2000);
-    updateMusic();
+    setInterval(checkFile, 2000);
+    checkFile();
 </script>
 </body>
 </html>
