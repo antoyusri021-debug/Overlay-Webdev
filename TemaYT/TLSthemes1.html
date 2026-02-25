@@ -6,108 +6,52 @@
         @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;800&display=swap');
         
         body { 
-            margin: 0; 
-            padding: 20px; 
-            background: transparent; 
+            margin: 0; padding: 20px; 
+            background: transparent !important; 
             font-family: 'Montserrat', sans-serif; 
             overflow: hidden; 
         }
 
-        /* PREMIUM INTERACTIVE CONTAINER */
+        /* PAKSA RENDER: Gunakan background solid dulu jika di TikTok masih transparan */
         #main-container {
             display: flex;
             flex-direction: column;
-            background: linear-gradient(135deg, rgba(30, 30, 30, 0.98), rgba(10, 10, 10, 1));
-            backdrop-filter: blur(15px);
+            background: #111111; /* Warna solid agar TikTok tidak bingung */
+            background: linear-gradient(135deg, rgba(30, 30, 30, 1), rgba(10, 10, 10, 1));
             border-radius: 20px;
             padding: 18px;
             color: white;
             border: 1px solid rgba(255, 255, 255, 0.1);
-            
             width: 350px; 
-            height: auto; /* Agar tidak kepotong */
-            min-height: 125px;
+            height: auto;
+            min-height: 120px;
             box-sizing: border-box;
             box-shadow: 0 20px 50px rgba(0,0,0,0.5);
             
-            /* ANIMASI TRANSISI SESUAI CONTOH */
-            transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
-            opacity: 0;
-            transform: translateX(-20px);
-            visibility: hidden;
-        }
-
-        #main-container.active {
-            opacity: 1;
+            /* TikTok Fix: Jangan pakai visibility:hidden di awal */
+            opacity: 1; 
             transform: translateX(0);
-            visibility: visible;
+            transition: all 0.5s ease;
         }
 
-        /* TOP SECTION */
-        .top-section {
-            display: flex;
-            align-items: center;
-            margin-bottom: 15px;
-        }
-
+        .top-section { display: flex; align-items: center; margin-bottom: 15px; }
         .visual-disk {
             width: 45px; height: 45px;
             background: conic-gradient(#fff, #444, #fff);
-            border-radius: 50%;
-            margin-right: 15px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            animation: spin 3s linear infinite;
-            border: 2px solid #333;
-            flex-shrink: 0;
+            border-radius: 50%; margin-right: 15px;
+            animation: spin 3s linear infinite; border: 2px solid #333; flex-shrink: 0;
         }
-
         @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
 
-        .info { flex-grow: 1; overflow: hidden; margin-right: 10px; }
+        .info { flex-grow: 1; overflow: hidden; }
+        .title { font-size: 14px; font-weight: 800; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .artist { font-size: 10px; color: #00ff7f; text-transform: uppercase; }
 
-        .title {
-            font-size: 14px; font-weight: 800; color: #fff;
-            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-        }
-
-        .artist {
-            font-size: 10px; color: rgba(255,255,255,0.5);
-            text-transform: uppercase; letter-spacing: 1px;
-        }
-
-        /* BOTTOM SECTION */
         .controls {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding-top: 12px;
-            border-top: 1px solid rgba(255,255,255,0.1);
+            display: flex; align-items: center; justify-content: space-between;
+            padding-top: 12px; border-top: 1px solid rgba(255,255,255,0.1);
         }
-
-        .btn-group { display: flex; gap: 15px; align-items: center; }
-
-        .btn { fill: rgba(255,255,255,0.6); width: 16px; height: 16px; }
-        .btn-play {
-            fill: #fff; width: 26px; height: 26px;
-            background: rgba(255,255,255,0.1);
-            border-radius: 50%; padding: 6px;
-        }
-
-        /* EQUALIZER ANIMATION */
-        .vol-anim {
-            display: flex; gap: 2px;
-            align-items: flex-end; height: 18px;
-        }
-        .v-bar {
-            width: 3px; background: #fff;
-            animation: bounce 0.8s ease-in-out infinite;
-        }
-        @keyframes bounce {
-            0%, 100% { transform: scaleY(0.6); }
-            50% { transform: scaleY(1.2); }
-        }
+        .btn-play { fill: #fff; width: 26px; height: 26px; background: rgba(255,255,255,0.1); border-radius: 50%; padding: 6px; }
     </style>
 </head>
 <body>
@@ -118,78 +62,46 @@
             <svg width="20" height="20" viewBox="0 0 24 24" fill="black"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 14.5c-2.49 0-4.5-2.01-4.5-4.5S9.51 7.5 12 7.5s4.5 2.01 4.5 4.5-2.01 4.5-4.5 4.5z"/></svg>
         </div>
         <div class="info">
-            <div id="title-text" class="title">Syncing...</div>
-            <div id="artist-text" class="artist">YouTube Music</div>
-        </div>
-        <div class="vol-anim">
-            <div class="v-bar" style="animation-delay: 0.1s"></div>
-            <div class="v-bar" style="animation-delay: 0.3s"></div>
-            <div class="v-bar" style="animation-delay: 0.2s"></div>
+            <div id="title-text" class="title">Menunggu Musik...</div>
+            <div id="artist-text" class="artist">YT MUSIC PREMIUM</div>
         </div>
     </div>
-
     <div class="controls">
-        <div class="btn-group">
-            <svg class="btn" viewBox="0 0 24 24"><path d="M6 6h2v12H6zm3.5 6l8.5 6V6z"/></svg>
-            <svg class="btn btn-play" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
-            <svg class="btn" viewBox="0 0 24 24"><path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z"/></svg>
-        </div>
-        <div style="font-size: 10px; color: rgba(255,255,255,0.3); font-weight: 600;">PREMIUM</div>
+        <svg class="btn-play" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+        <div id="debug-log" style="font-size: 8px; color: rgba(255,255,255,0.2);">MODE: LOCAL SCAN</div>
     </div>
 </div>
 
 <script>
-    const container = document.getElementById('main-container');
     const titleLabel = document.getElementById('title-text');
     const artistLabel = document.getElementById('artist-text');
+    const debugLog = document.getElementById('debug-log');
 
-    function sanitize(text) {
-        const temp = document.createElement('div');
-        temp.textContent = text;
-        return temp.innerHTML.trim();
-    }
-
-    async function checkMusic() {
+    async function syncTikTok() {
+        // TikTok Fix: Pakai Jalur Relatif Langsung
+        const filePath = '../judul_lagu.txt';
+        
         try {
-            // 1. Coba API Port 8080 (Logika contekkan)
-            const response = await fetch('http://localhost:8080/', { 
-                method: 'GET', mode: 'cors', cache: 'no-store' 
-            });
+            // Coba akses file lokal
+            const response = await fetch(filePath + '?t=' + Date.now());
             if (response.ok) {
-                const data = await response.json();
-                if (data.title && data.title !== "Menunggu Musik..." && data.title !== "") {
-                    updateDisplay(data.title);
-                } else { container.classList.remove('active'); }
-            } else { throw new Error("API Offline"); }
-        } catch (err) {
-            // 2. Fallback ke file lokal (Logika contekkan)
-            try {
-                // Menggunakan ../ karena file HTML di folder 'temaYT'
-                const resFile = await fetch('../judul_lagu.txt?t=' + Date.now());
-                if (resFile.ok) {
-                    const text = await resFile.text();
-                    if (text && text.trim() !== "" && !text.includes('<!DOCTYPE')) {
-                        updateDisplay(text);
-                    } else { container.classList.remove('active'); }
+                const text = await response.text();
+                if (text.trim() && !text.includes('<!DOCTYPE')) {
+                    let parts = text.split(' - ');
+                    titleLabel.innerText = parts[0].trim();
+                    artistLabel.innerText = parts.length > 1 ? parts[1].trim() : "YouTube Music";
+                    debugLog.innerText = "STATUS: CONNECTED";
                 }
-            } catch (fErr) { container.classList.remove('active'); }
+            } else {
+                debugLog.innerText = "STATUS: FILE NOT FOUND";
+            }
+        } catch (e) {
+            debugLog.innerText = "TIKTOK BLOCKED: USE LOCAL FILE LINK";
         }
     }
 
-    function updateDisplay(fullText) {
-        let cleanText = sanitize(fullText);
-        let parts = cleanText.split(' - ');
-        let song = parts[0] || "Unknown Title";
-        let artist = parts.length > 1 ? parts.slice(1).join(' - ') : "YouTube Music";
-
-        titleLabel.innerText = song.trim();
-        artistLabel.innerText = artist.trim();
-        container.classList.add('active');
-    }
-
-    setInterval(checkMusic, 2000);
-    checkMusic();
+    setInterval(syncTikTok, 2000);
+    syncTikTok();
 </script>
-
 </body>
 </html>
