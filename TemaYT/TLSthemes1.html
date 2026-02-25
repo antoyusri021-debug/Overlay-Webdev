@@ -3,88 +3,56 @@
 <head>
     <meta charset="UTF-8">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;800&display=swap');
-        
-        body { 
-            margin: 0; padding: 10px; background: transparent; 
-            font-family: 'Montserrat', sans-serif;
-        }
-
-        /* PAKSA MUNCUL DULU BIAR KELIHATAN DI APLIKASI */
+        @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap');
+        body { margin: 0; padding: 15px; background: transparent; font-family: 'Montserrat', sans-serif; }
         #main-container {
-            display: flex; flex-direction: column;
-            background: rgba(20, 20, 20, 0.95);
-            border-radius: 15px; padding: 15px; color: white;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            width: 330px; min-height: 110px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            background: rgba(15, 15, 15, 0.95); border-radius: 15px; padding: 15px; color: white;
+            border: 1px solid rgba(255, 255, 255, 0.1); width: 330px; box-shadow: 0 10px 30px rgba(0,0,0,0.8);
+            display: flex; flex-direction: column; gap: 10px;
         }
-
-        .top-section { display: flex; align-items: center; margin-bottom: 10px; }
-        .visual-disk {
-            width: 40px; height: 40px; background: #444;
-            border-radius: 50%; margin-right: 12px;
-            animation: spin 3s linear infinite; flex-shrink: 0;
-        }
-        @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-
-        .info { flex-grow: 1; overflow: hidden; }
-        .title { font-size: 14px; font-weight: 800; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .artist { font-size: 10px; color: #aaa; }
-
-        .controls {
-            display: flex; align-items: center; justify-content: space-between;
-            padding-top: 10px; border-top: 1px solid rgba(255,255,255,0.1);
-        }
-        .debug-msg { font-size: 9px; color: yellow; font-family: monospace; }
+        .title { font-size: 14px; font-weight: 700; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .artist { font-size: 11px; color: #00ff7f; }
+        .debug-msg { font-size: 8px; color: #555; font-family: monospace; border-top: 1px solid #333; padding-top: 5px; }
     </style>
 </head>
 <body>
-
-<div id="main-container">
-    <div class="top-section">
-        <div class="visual-disk"></div>
+    <div id="main-container">
         <div class="info">
-            <div id="title-text" class="title">Checking File...</div>
-            <div id="artist-text" class="artist">Please Wait</div>
+            <div id="title-text" class="title">Menunggu Data Lokal...</div>
+            <div id="artist-text" class="artist">Buka File dari Folder PC</div>
         </div>
+        <div id="debug-info" class="debug-msg">Status: Scanning Local Drive...</div>
     </div>
-    <div class="controls">
-        <div id="debug-info" class="debug-msg">Status: Booting...</div>
-    </div>
-</div>
 
 <script>
     const titleLabel = document.getElementById('title-text');
     const artistLabel = document.getElementById('artist-text');
     const debugLabel = document.getElementById('debug-info');
 
-    async function checkFile() {
-        // Karena HTML di dalam folder 'temaYT', kita harus naik satu tingkat (../)
-        const targetFile = '../judul_lagu.txt';
-        
+    async function updateFromLocal() {
+        // Karena HTML di 'temaYT', kita naik satu tingkat ke folder 'APPSWEB' tempat judul_lagu.txt berada
+        const localPath = '../judul_lagu.txt';
+
         try {
-            const response = await fetch(targetFile + '?t=' + Date.now());
+            const response = await fetch(localPath + '?t=' + Date.now());
             if (response.ok) {
                 const text = await response.text();
-                if (text.trim()) {
+                if (text.trim() && !text.includes('<!DOCTYPE')) {
                     let parts = text.split(' - ');
                     titleLabel.innerText = parts[0].trim();
                     artistLabel.innerText = parts.length > 1 ? parts[1].trim() : "YouTube Music";
-                    debugLabel.innerText = "Status: Berhasil Membaca";
-                } else {
-                    debugLabel.innerText = "Status: File Kosong";
+                    debugLabel.innerText = "LOKAL KONEK: " + new Date().toLocaleTimeString();
                 }
             } else {
-                debugLabel.innerText = "Status: File Tak Ditemukan (404)";
+                debugLabel.innerText = "ERROR 404: File Tak Ditemukan di " + localPath;
             }
         } catch (e) {
-            debugLabel.innerText = "Status: Error Fetching";
+            debugLabel.innerText = "KEAMANAN BLOKIR: Gunakan File Lokal, Jangan Link GitHub!";
         }
     }
 
-    setInterval(checkFile, 2000);
-    checkFile();
+    setInterval(updateFromLocal, 2000);
+    updateFromLocal();
 </script>
 </body>
 </html>
