@@ -2,87 +2,107 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>YT MUSIC PREMIUM - Atmosphere V3.4 | Seller Edition</title>
+    <title>YT MUSIC PREMIUM - Atmosphere V3.4</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
     <style>
         :root { --primary: #facc15; --bg-dark: #050505; --card-bg: #0d0d0d; --border-color: rgba(255, 255, 255, 0.05); }
         body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg-dark); color: white; min-height: 100vh; overflow: hidden; margin: 0; }
-        .glow-bg { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: radial-gradient(circle at 50% -20%, rgba(250, 204, 21, 0.05) 0%, transparent 50%); pointer-events: none; z-index: -1; }
-        .container-wide { width: 95%; max-width: 1400px; margin: 0 auto; padding: 40px 0; }
-        .main-card { background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 24px; display: grid; grid-template-columns: 380px 1fr; gap: 0; box-shadow: 0 40px 100px rgba(0,0,0,0.5); height: 780px; position: relative; z-index: 1; }
-        .side-panel { padding: 40px; border-right: 1px solid var(--border-color); background: rgba(255, 255, 255, 0.01); display: flex; flex-direction: column; overflow-y: auto; }
-        .preview-panel { padding: 40px; background: #000; display: flex; flex-direction: column; position: relative; border-radius: 0 24px 24px 0; overflow: hidden; }
-        .viewport-preview { flex-grow: 1; background: #050505; border: 1px solid rgba(255,255,255,0.05); border-radius: 20px; position: relative; overflow: hidden; display: flex; align-items: center; justify-content: center; }
-        iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none; display: none; }
-        
-        /* Tambahan agar select terlihat jelas */
-        select { width: 100%; background: #111 !important; border: 1px solid rgba(255,255,255,0.1) !important; color: #fff !important; padding: 14px 18px; border-radius: 12px; font-size: 13px; outline: none; }
+        .main-card { background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 24px; display: grid; grid-template-columns: 380px 1fr; height: 780px; box-shadow: 0 40px 100px rgba(0,0,0,0.5); }
+        .side-panel { padding: 40px; border-right: 1px solid var(--border-color); overflow-y: auto; display: flex; flex-direction: column; }
+        .section-box { background: rgba(255, 255, 255, 0.03); border: 1px solid var(--border-color); border-radius: 16px; padding: 24px; margin-bottom: 24px; }
+        .label-premium { font-size: 11px; font-weight: 800; color: var(--primary); text-transform: uppercase; letter-spacing: 2px; margin-bottom: 12px; display: block; }
+        select { width: 100%; background: #111; border: 1px solid rgba(255,255,255,0.1); color: #fff; padding: 14px; border-radius: 12px; font-size: 13px; }
+        .btn-generate { background: var(--primary); color: black; font-weight: 800; width: 100%; padding: 16px; border-radius: 12px; font-size: 12px; text-transform: uppercase; margin-top: 10px; cursor: pointer; }
+        .btn-download { background: white; color: black; font-weight: 800; width: 100%; padding: 12px; border-radius: 12px; font-size: 11px; text-transform: uppercase; display: flex; align-items: center; justify-content: center; gap: 8px; text-decoration: none; }
+        iframe { width: 100%; height: 100%; border: none; display: none; }
     </style>
 </head>
 <body onclick="window.focus()">
-    <div class="glow-bg"></div>
-    <div class="container-wide">
-        <div class="flex justify-between items-center mb-10">
-            <div class="flex items-center gap-3">
-                <div class="w-8 h-8 bg-yellow-400 rounded-lg flex items-center justify-center"><span class="text-black font-black text-xl">Y</span></div>
-                <h1 class="text-3xl font-black tracking-tighter uppercase italic">YT Music <span class="text-yellow-400">Premium</span></h1>
-            </div>
-        </div>
-
+    <div class="p-10">
         <div class="main-card">
             <div class="side-panel">
-                <div class="bg-white/5 border border-white/10 rounded-xl p-6 mb-6">
-                    <span class="text-yellow-400 text-[10px] font-bold uppercase tracking-widest block mb-4">01. Pilih Tema</span>
+                <div class="section-box">
+                    <span class="label-premium">01. Konfigurasi Tema</span>
                     <select id="theme-select">
                         <option value="" disabled selected>-- PILIH TEMA --</option>
                         <option value="Themes1">AKATSUKI ITACHI (PREMIUM)</option>
                         <option value="Themes2">CLEAN CAPSULE (MINIMAL)</option>
+                        <option value="Themes3">VINTAGE STYLE (RETRO)</option>
                     </select>
                 </div>
 
-                <div class="mt-auto p-4 bg-yellow-400/5 border border-yellow-400/10 rounded-xl">
-                    <p class="text-[10px] text-yellow-400 font-bold uppercase">Tips:</p>
-                    <p class="text-[9px] opacity-60">Setelah pilih tema, tekan <span class="text-white font-bold">SPASI</span> pada keyboard untuk preview.</p>
+                <div class="section-box">
+                    <span class="label-premium">02. Finalisasi Link</span>
+                    <button onclick="generateOBS()" class="btn-generate">Generate Link Overlay</button>
+                    <div id="result-box" class="hidden mt-4 p-3 bg-white/5 border border-white/10 rounded-xl">
+                        <input id="final-link" readonly type="text" class="bg-transparent text-[10px] w-full text-white/60 mb-2 outline-none">
+                        <button onclick="copyNow()" class="bg-yellow-400 text-black px-3 py-1 rounded-lg text-[9px] font-black w-full">COPY LINK</button>
+                    </div>
+                </div>
+
+                <div class="section-box">
+                    <span class="label-premium">03. Support Software</span>
+                    <a href="https://github.com/antoyusri021-debug/Overlay-Webdev/raw/main/TemaYT/ytmusik.zip" class="btn-download">
+                        DOWNLOAD (.ZIP)
+                    </a>
+                </div>
+
+                <div class="mt-auto text-[9px] opacity-40 font-bold uppercase">
+                    Pilih Tema & Tekan SPASI untuk Preview
                 </div>
             </div>
 
-            <div class="preview-panel">
-                <div id="active-tag" class="hidden mb-4 px-4 py-1 bg-yellow-400/10 border border-yellow-400/20 rounded-full self-start">
+            <div class="p-10 bg-black flex flex-direction-column relative">
+                <div id="active-tag" class="hidden absolute top-5 left-5 px-4 py-1 bg-yellow-400/10 border border-yellow-400/20 rounded-full z-10">
                     <span class="text-[9px] text-yellow-400 font-bold uppercase" id="current-theme-name"></span>
                 </div>
-                
-                <div class="viewport-preview">
+                <div class="w-full h-full border border-white/5 rounded-3xl overflow-hidden flex items-center justify-center relative">
                     <div id="placeholder-ui" class="text-center">
-                        <h2 class="text-[12px] font-black uppercase tracking-[0.4em] text-white/30">Engine Ready</h2>
-                        <p class="text-[9px] font-bold text-yellow-400 mt-2 uppercase animate-pulse">Pilih Tema & Tap SPASI</p>
+                        <h2 class="text-white/20 font-black uppercase tracking-widest">Preview Area</h2>
                     </div>
-                    <iframe id="main-preview" src=""></iframe>
+                    <iframe id="main-preview"></iframe>
                 </div>
             </div>
         </div>
     </div>
 
     <script>
+        function generateOBS() {
+            const theme = document.getElementById('theme-select').value;
+            if(!theme) return alert("Pilih tema dulu!");
+            const link = document.getElementById('final-link');
+            link.value = `https://antoyusri021-debug.github.io/Overlay-Webdev/TemaYT/${theme}.html`;
+            document.getElementById('result-box').classList.remove('hidden');
+        }
+
+        function copyNow() {
+            const input = document.getElementById('final-link');
+            input.select();
+            document.execCommand('copy');
+            alert("Link Disalin!");
+        }
+
         window.addEventListener('keydown', (e) => {
             if (e.code === "Space") {
                 e.preventDefault();
                 const theme = document.getElementById('theme-select').value;
-                if(!theme) return alert("Pilih tema dulu!");
+                if(!theme) return;
                 
                 const iframe = document.getElementById('main-preview');
                 const placeholder = document.getElementById('placeholder-ui');
-                
+                const tag = document.getElementById('active-tag');
+                const tagName = document.getElementById('current-theme-name');
+
                 placeholder.style.display = 'none';
                 iframe.style.display = 'block';
+                tag.classList.remove('hidden');
+                tagName.innerText = theme;
                 
-                // PASTIKAN URL MENGARAH KE FILE TEMA DENGAN BENAR
-                // Tambahkan ?preview=true agar skrip di atas tahu ini cuma review
+                // Gunakan path relatif jika dijalankan lokal, atau path lengkap GitHub
                 iframe.src = `./TemaYT/${theme}.html?preview=true&v=${Math.random()}`;
             }
         });
     </script>
 </body>
 </html>
-
