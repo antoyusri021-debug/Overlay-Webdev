@@ -13,12 +13,11 @@
             overflow: hidden; 
         }
 
-        /* CONTAINER POTRET PREMIUM */
-        .portrait-card {
+        /* CONTAINER POTRET PREMIUM DENGAN LOGIKA AKTIF */
+        #main-container {
             display: flex;
             flex-direction: column;
             align-items: center;
-            /* Gradasi Gelap Mewah */
             background: linear-gradient(145deg, rgba(28, 28, 28, 0.95), rgba(15, 15, 15, 0.98));
             backdrop-filter: blur(20px);
             border-radius: 24px;
@@ -30,13 +29,25 @@
             width: 200px; 
             height: 260px;
             box-sizing: border-box;
-            
             box-shadow: 0 15px 40px rgba(0,0,0,0.7);
             position: relative;
+
+            /* ANIMASI TRANSISI AUTO-HIDE */
+            transition: all 0.7s cubic-bezier(0.17, 0.67, 0.83, 0.67);
+            opacity: 0;
+            transform: scale(0.8) translateY(20px);
+            visibility: hidden;
+        }
+
+        /* KELAS AKTIF */
+        #main-container.active {
+            opacity: 1;
+            transform: scale(1) translateY(0);
+            visibility: visible;
         }
 
         /* AKSEN GLOW DI ATAS */
-        .portrait-card::before {
+        #main-container::before {
             content: "";
             position: absolute;
             top: 0; left: 50%;
@@ -44,10 +55,9 @@
             width: 60px; height: 4px;
             background: #ff0000;
             border-radius: 0 0 10px 10px;
-            box-shadow: 0 0 15px rgba(255, 0, 0, 0.5);
+            box-shadow: 0 0 15px rgba(255, 0, 0, 0.6);
         }
 
-        /* BAGIAN VISUAL */
         .visual-area {
             margin-top: 10px;
             margin-bottom: 25px;
@@ -64,18 +74,25 @@
             padding: 10px;
             box-shadow: 0 5px 15px rgba(255, 0, 0, 0.4);
             margin-bottom: 15px;
+            animation: pulse-red 2s infinite;
         }
 
-        /* EQUALIZER MINIMALIS */
+        @keyframes pulse-red {
+            0% { transform: scale(1); box-shadow: 0 5px 15px rgba(255, 0, 0, 0.4); }
+            50% { transform: scale(1.05); box-shadow: 0 5px 25px rgba(255, 0, 0, 0.6); }
+            100% { transform: scale(1); box-shadow: 0 5px 15px rgba(255, 0, 0, 0.4); }
+        }
+
+        /* EQUALIZER */
         .eq-container {
             display: flex;
             align-items: flex-end;
-            gap: 3px;
-            height: 18px;
+            gap: 4px;
+            height: 20px;
         }
         .bar {
             width: 4px;
-            background: rgba(255, 255, 255, 0.3);
+            background: rgba(255, 255, 255, 0.2);
             border-radius: 2px;
             animation: bounce 0.8s ease-in-out infinite;
         }
@@ -84,35 +101,36 @@
         .bar:nth-child(3) { height: 70%; animation-delay: 0.2s; }
 
         @keyframes bounce {
-            0%, 100% { transform: scaleY(0.5); opacity: 0.5; }
-            50% { transform: scaleY(1); opacity: 1; }
+            0%, 100% { transform: scaleY(0.5); opacity: 0.4; }
+            50% { transform: scaleY(1.2); opacity: 1; }
         }
 
         /* INFO LAGU */
         .info {
             width: 100%;
             text-align: center;
+            overflow: hidden;
         }
 
         .title {
             font-size: 15px;
             font-weight: 700;
             color: #ffffff;
-            margin-bottom: 5px;
-            /* Limit 2 baris */
+            margin-bottom: 8px;
             display: -webkit-box;
             -webkit-line-clamp: 2;
             -webkit-box-orient: vertical;
             overflow: hidden;
             line-height: 1.3;
+            padding: 0 5px;
         }
 
         .artist {
-            font-size: 11px;
-            font-weight: 400;
-            color: rgba(255, 255, 255, 0.5);
+            font-size: 10px;
+            font-weight: 600;
+            color: rgba(255, 255, 255, 0.4);
             text-transform: uppercase;
-            letter-spacing: 1px;
+            letter-spacing: 1.5px;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
@@ -121,7 +139,7 @@
 </head>
 <body>
 
-<div class="portrait-card">
+<div id="main-container">
     <div class="visual-area">
         <svg class="play-btn-main" viewBox="0 0 24 24">
             <path d="M8 5v14l11-7z"/>
@@ -135,32 +153,76 @@
     </div>
     
     <div class="info">
-        <div id="title" class="title">Menunggu Musik...</div>
-        <div id="artist" class="artist">YT MUSIC</div>
+        <div id="title-text" class="title">Syncing...</div>
+        <div id="artist-text" class="artist">YouTube Music</div>
     </div>
 </div>
 
 <script>
-    async function updateFromFile() {
-        try {
-            const response = await fetch('../judul_lagu.txt?t=' + new Date().getTime());
-            if (response.ok) {
-                const fullText = await response.text();
-                const titleElement = document.getElementById('title');
-                const artistElement = document.getElementById('artist');
-                
-                let parts = fullText.split(' - ');
-                let currentTitle = parts[0] || "Menunggu Musik...";
-                let currentArtist = parts.length > 1 ? parts.slice(1).join(' - ') : "YouTube Music";
+    const container = document.getElementById('main-container');
+    const titleLabel = document.getElementById('title-text');
+    const artistLabel = document.getElementById('artist-text');
 
-                if (titleElement.innerText !== currentTitle.trim()) {
-                    titleElement.innerText = currentTitle.trim();
-                    artistElement.innerText = currentArtist.trim();
-                }
-            }
-        } catch (err) { }
+    function sanitize(text) {
+        const temp = document.createElement('div');
+        temp.textContent = text;
+        return temp.innerHTML.trim();
     }
-    setInterval(updateFromFile, 2000);
+
+    async function checkMusic() {
+        try {
+            // 1. STRATEGI UTAMA: API Desktop (Port 8080)
+            const response = await fetch('http://localhost:8080/', { 
+                method: 'GET',
+                mode: 'cors',
+                cache: 'no-store' 
+            });
+            
+            if (response.ok) {
+                const data = await response.json();
+                if (data.title && data.title !== "Menunggu Musik..." && data.title !== "") {
+                    updateDisplay(data.title);
+                } else {
+                    container.classList.remove('active');
+                }
+            } else { throw new Error("API Offline"); }
+        } catch (err) {
+            // 2. STRATEGI FALLBACK: File Lokal (judul_lagu.txt)
+            try {
+                const resFile = await fetch('../judul_lagu.txt?t=' + Date.now());
+                if (resFile.ok) {
+                    const text = await resFile.text();
+                    if (text && text.trim() !== "" && !text.includes('<!DOCTYPE')) {
+                        updateDisplay(text);
+                    } else {
+                        container.classList.remove('active');
+                    }
+                }
+            } catch (fileErr) {
+                container.classList.remove('active');
+            }
+        }
+    }
+
+    function updateDisplay(fullText) {
+        let cleanText = sanitize(fullText);
+        let parts = cleanText.split(' - ');
+        let song = parts[0] || "Unknown Title";
+        let artist = parts.length > 1 ? parts.slice(1).join(' - ') : "YouTube Music";
+
+        // Update konten hanya jika ada perubahan
+        if (titleLabel.innerText !== song.trim()) {
+            titleLabel.innerText = song.trim();
+            artistLabel.innerText = artist.trim();
+        }
+        
+        // Tampilkan widget
+        container.classList.add('active');
+    }
+
+    // Cek setiap 2 detik
+    setInterval(checkMusic, 2000);
+    checkMusic();
 </script>
 
 </body>
