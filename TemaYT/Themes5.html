@@ -2,219 +2,212 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WEBDEV - Atmosphere V3.4 (Selection Gate)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;700;800&display=swap" rel="stylesheet">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Plus+Jakarta+Sans:wght@400;700&display=swap');
-        
         body { 
-            margin: 0; 
-            padding: 30px; 
-            background: transparent; 
-            font-family: 'Plus Jakarta Sans', sans-serif; 
-            overflow: hidden; 
-        }
-
-        /* NEON BORDER ANIMATION CONTAINER */
-        #main-container {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            height: 100vh; display: flex; align-items: center; justify-content: center;
+            overflow: hidden; margin: 0; background: #0a0a0a;
+            background-image: url('indexbg.jpg'); background-size: cover; background-position: center;
             position: relative;
-            display: flex;
-            align-items: center;
-            background: rgba(10, 10, 10, 0.9);
-            border-radius: 15px;
-            padding: 2px; /* Ruang untuk border glow */
-            width: 340px; 
-            height: 70px;
-            box-sizing: border-box;
-            
-            /* ANIMASI TRANSISI */
-            transition: all 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            opacity: 0;
-            transform: scale(0.5) rotate(-5deg);
-            visibility: hidden;
-            overflow: hidden;
         }
+        body::after { content: ""; position: absolute; inset: 0; background: radial-gradient(circle at center, rgba(0,0,0,0.1), rgba(0,0,0,0.9)); z-index: 1; }
 
-        #main-container.active {
-            opacity: 1;
-            transform: scale(1) rotate(0deg);
-            visibility: visible;
+        .main-container { position: relative; z-index: 10; width: 100%; max-width: 1100px; padding: 10px; display: flex; flex-direction: column; height: 95vh; justify-content: center; }
+        
+        .catalog-card {
+            background: linear-gradient(145deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.01) 100%);
+            backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.1);
+            transition: all 0.5s cubic-bezier(0.23, 1, 0.32, 1); cursor: pointer;
+            position: relative; display: flex; flex-direction: column; height: 100%; overflow: hidden;
         }
+        .catalog-card:not(.locked-card):hover { transform: translateY(-8px) scale(1.02); border-color: rgba(255,255,255,0.4); box-shadow: 0 20px 40px rgba(0,0,0,0.4); }
 
-        /* ANIMASI GARIS BERPUTAR (Running Border) */
-        #main-container::before {
-            content: '';
-            position: absolute;
-            top: -50%; left: -50%;
-            width: 200%; height: 200%;
-            background: conic-gradient(#ff0000, #ff8800, #ff0000, transparent 40%);
-            animation: rotate-border 4s linear infinite;
-            z-index: 0;
+        .badge-status {
+            position: absolute; top: 15px; right: 15px; padding: 4px 12px; border-radius: 8px;
+            font-size: 8px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px;
+            z-index: 50; box-shadow: 0 4px 10px rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1);
         }
+        .badge-red { background: #ef4444; color: white; }
+        .badge-yellow { background: #facc15; color: black; }
 
-        @keyframes rotate-border {
-            from { transform: rotate(0deg); }
-            to { transform: rotate(360deg); }
-        }
+        .catalog-card.locked-card { opacity: 0.4; cursor: not-allowed; filter: grayscale(0.8); }
+        .icon-box { width: 48px; height: 48px; border-radius: 14px; display: flex; align-items: center; justify-content: center; margin-bottom: 16px; }
 
-        /* LAYER DALAM (Inner Card) */
-        .inner-content {
-            position: relative;
-            background: #0a0a0a;
-            border-radius: 13px;
-            width: 100%; height: 100%;
-            z-index: 1;
-            display: flex;
-            align-items: center;
-            padding: 0 15px;
+        .btn-enter {
+            margin-top: auto; padding: 10px; background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1); border-radius: 12px;
+            text-align: center; font-size: 9px; font-weight: 800; letter-spacing: 2px; color: white;
         }
+        .catalog-card:not(.locked-card):hover .btn-enter { background: white; color: black; }
 
-        /* LOGO BOX DENGAN EFEK GLOW */
-        .logo-container {
-            width: 40px; height: 40px;
-            background: #1a1a1a;
-            border-radius: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-right: 15px;
-            box-shadow: 0 0 15px rgba(255, 0, 0, 0.3);
-            border: 1px solid rgba(255, 0, 0, 0.5);
+        /* MODAL DENGAN INPUT FORM */
+        #customModal {
+            display: none; position: fixed; inset: 0; z-index: 100;
+            background: rgba(0,0,0,0.85); backdrop-filter: blur(15px);
+            align-items: center; justify-content: center;
         }
+        .modal-content {
+            background: #151515; border: 1px solid rgba(255,255,255,0.1);
+            padding: 35px; border-radius: 28px; max-width: 400px; width: 90%; text-align: center;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        }
+        .modal-btn {
+            width: 100%; padding: 14px; margin-top: 10px; border-radius: 14px;
+            font-weight: 800; font-size: 11px; text-transform: uppercase; letter-spacing: 1px;
+            transition: 0.3s;
+        }
+        .btn-wa { background: #25d366; color: white; }
+        .btn-wa:hover { background: #1eb954; transform: scale(1.02); }
+        
+        .btn-verify { background: white; color: black; }
+        .btn-verify:hover { background: #e5e5e5; }
 
-        .yt-svg {
-            width: 20px; fill: #ff0000;
-            filter: drop-shadow(0 0 5px #ff0000);
+        .input-code {
+            width: 100%; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);
+            color: white; padding: 12px; border-radius: 12px; text-align: center;
+            font-weight: 700; font-size: 14px; margin-bottom: 10px; outline: none;
+            transition: 0.3s;
         }
+        .input-code:focus { border-color: #facc15; background: rgba(255,255,255,0.1); }
 
-        /* TEXT STYLING */
-        .info {
-            flex-grow: 1;
-            overflow: hidden;
-        }
-
-        .title {
-            font-family: 'Orbitron', sans-serif; /* Font futuristik */
-            font-size: 13px;
-            font-weight: 700;
-            color: #ffffff;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            margin-bottom: 3px;
-        }
-
-        .artist {
-            font-size: 10px;
-            color: #ff8800; /* Warna Oranye Neon */
-            font-weight: 700;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            opacity: 0.8;
-        }
-
-        /* VISUALIZER KECIL */
-        .visualizer {
-            display: flex;
-            align-items: center;
-            gap: 2px;
-            margin-left: 10px;
-        }
-
-        .v-bar {
-            width: 2px; height: 15px;
-            background: #ff0000;
-            animation: v-move 0.6s ease-in-out infinite;
-        }
-        .v-bar:nth-child(2) { animation-delay: 0.2s; height: 22px; }
-        .v-bar:nth-child(3) { animation-delay: 0.4s; }
-
-        @keyframes v-move {
-            0%, 100% { transform: scaleY(0.4); }
-            50% { transform: scaleY(1); }
-        }
+        .btn-close { color: rgba(255,255,255,0.4); font-size: 10px; margin-top: 20px; display: inline-block; text-decoration: none; }
     </style>
 </head>
 <body>
 
-<div id="main-container">
-    <div class="inner-content">
-        <div class="logo-container">
-            <svg class="yt-svg" viewBox="0 0 24 24">
-                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 14.5v-9l6 4.5-6 4.5z"/>
-            </svg>
-        </div>
-        
-        <div class="info">
-            <div id="title-text" class="title">System Booting...</div>
-            <div id="artist-text" class="artist">NEON INTERFACE</div>
-        </div>
+    <div id="customModal">
+        <div class="modal-content">
+            <h2 class="text-white font-black text-2xl mb-2 italic">PREMIUM ACCESS</h2>
+            <p class="text-white/50 text-[10px] mb-8 uppercase tracking-widest">YT Music Engine V3.4</p>
+            
+            <button onclick="redirectToWA()" class="modal-btn btn-wa mb-6">Hubungi Developer (Rp 50.000)</button>
+            
+            <div class="border-t border-white/10 pt-6">
+                <p class="text-white/40 text-[9px] mb-3 uppercase font-bold tracking-tighter">Sudah punya kode akses?</p>
+                <input type="text" id="accessCodeField" class="input-code" placeholder="ENTER PREMIUM CODE">
+                <button onclick="checkAccessCode()" class="modal-btn btn-verify">Verifikasi Kode</button>
+            </div>
 
-        <div class="visualizer">
-            <div class="v-bar"></div>
-            <div class="v-bar"></div>
-            <div class="v-bar"></div>
+            <a href="javascript:void(0)" onclick="closeModal()" class="btn-close uppercase tracking-[0.3em] font-bold">Tutup</a>
         </div>
     </div>
-</div>
 
-<script>
-    const container = document.getElementById('main-container');
-    const titleLabel = document.getElementById('title-text');
-    const artistLabel = document.getElementById('artist-text');
+    <div class="main-container">
+        <div class="text-center mb-10">
+            <h1 class="text-4xl font-black italic text-white tracking-tighter">LIVE<span class="opacity-30 font-light">EDITOR</span></h1>
+            <p class="text-[8px] text-white/40 uppercase font-bold tracking-[0.5em] mt-2">Engine V3.4 • Yusrianto Lana • 2026</p>
+        </div>
 
-    function sanitize(text) {
-        const temp = document.createElement('div');
-        temp.textContent = text;
-        return temp.innerHTML.trim();
-    }
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div onclick="location.href='editor.html'" class="catalog-card p-6 rounded-[2rem]">
+                <div class="icon-box bg-cyan-500/20 text-cyan-400 border border-cyan-500/30">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                </div>
+                <h3 class="text-white font-black text-lg uppercase tracking-wider mb-2">Custom Chat</h3>
+                <p class="text-white/40 text-[10px]">Kustomisasi warna, gradient, dan opasitas chat sesukamu.</p>
+                <div class="btn-enter uppercase">Buka Editor</div>
+            </div>
 
-    async function checkMusic() {
-        try {
-            // Cek API Lokal
-            const response = await fetch('http://localhost:8080/', { 
-                method: 'GET', mode: 'cors', cache: 'no-store' 
-            });
+            <div onclick="location.href='ornamen.html'" class="catalog-card p-6 rounded-[2rem]">
+                <div class="icon-box bg-purple-500/20 text-purple-400 border border-purple-500/30">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/></svg>
+                </div>
+                <h3 class="text-white font-black text-lg uppercase tracking-wider mb-2">Themes Ornamen</h3>
+                <p class="text-white/40 text-[10px]">Notifikasi otomatis Follower, Gift, dan Share.</p>
+                <div class="btn-enter uppercase">Lihat Koleksi</div>
+            </div>
+
+            <div class="catalog-card p-6 rounded-[2rem] locked-card">
+                <div class="badge-status badge-red">Coming Soon</div>
+                <div class="icon-box bg-pink-500/20 text-pink-400">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 12a4 4 0 1 0 4 4V4a5 5 0 0 0 5 5"/></svg>
+                </div>
+                <h3 class="text-white font-black text-lg uppercase tracking-wider mb-2">Tikfinity Overlay</h3>
+                <p class="text-white/40 text-[10px]">Integrasi dashboard Tikfinity real-time.</p>
+                <div class="btn-enter uppercase opacity-50">Locked</div>
+            </div>
+
+            <div onclick="openModal()" class="catalog-card p-6 rounded-[2rem]">
+                <div class="badge-status badge-yellow">Special Access</div>
+                <div class="icon-box bg-red-500/20 text-red-400 border border-red-500/30">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
+                </div>
+                <h3 class="text-white font-black text-lg uppercase tracking-wider mb-2">YT Music Overlay</h3>
+                <p class="text-white/40 text-[10px]">Tampilkan judul lagu. Butuh kode akses (Rp 50rb).</p>
+                <div class="btn-enter uppercase">Dapatkan Akses</div>
+            </div>
+
+            <div onclick="location.href='selector.html'" class="catalog-card p-6 rounded-[2rem]">
+                <div class="icon-box bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><line x1="3" x2="21" y1="9" y2="9"/><line x1="9" x2="9" y1="21" y2="9"/></svg>
+                </div>
+                <h3 class="text-white font-black text-lg uppercase tracking-wider mb-2">Default Themes</h3>
+                <p class="text-white/40 text-[10px]">Tema minimalis dan super ringan.</p>
+                <div class="btn-enter uppercase">Gunakan Default</div>
+            </div>
             
-            if (response.ok) {
-                const data = await response.json();
-                if (data.title && data.title !== "Menunggu Musik..." && data.title !== "") {
-                    updateDisplay(data.title);
-                } else {
-                    container.classList.remove('active');
-                }
-            } else { throw new Error(); }
-        } catch (err) {
-            // Fallback File Lokal
-            try {
-                const resFile = await fetch('../judul_lagu.txt?t=' + Date.now());
-                if (resFile.ok) {
-                    const text = await resFile.text();
-                    if (text && text.trim() !== "" && !text.includes('<!DOCTYPE')) {
-                        updateDisplay(text);
-                    } else { container.classList.remove('active'); }
-                }
-            } catch (fErr) { container.classList.remove('active'); }
+            <a href="https://github.com/antoyusri021-debug/Overlay-Webdev/raw/main/TemaYT/ytmusik.zip" download class="catalog-card p-6 rounded-[2rem] no-underline">
+                <div class="icon-box bg-blue-500/20 text-blue-400 border border-blue-500/30">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                </div>
+                <h3 class="text-white font-black text-lg uppercase tracking-wider mb-2">Support Software</h3>
+                <p class="text-white/40 text-[10px]">Download file .zip untuk YT Music Engine.</p>
+                <div class="btn-enter uppercase">Download File</div>
+            </a>
+        </div>
+
+        <div class="warning-text mt-8 text-white uppercase font-bold opacity-30 text-[7px] text-center">
+            DILARANG KERAS MEMPERJUALBELIKAN APLIKASI INI TANPA IZIN DEVELOPER!
+        </div>
+    </div>
+
+    <script>
+        const WA_NUMBER = "6281343901082";
+        const MASTER_CODE = "webdev12345";
+        const modal = document.getElementById('customModal');
+        const codeField = document.getElementById('accessCodeField');
+
+        function openModal() { 
+            modal.style.display = 'flex'; 
+            codeField.focus();
         }
-    }
 
-    function updateDisplay(fullText) {
-        let cleanText = sanitize(fullText);
-        let parts = cleanText.split(' - ');
-        let song = parts[0] || "Unknown Track";
-        let artist = parts.length > 1 ? parts.slice(1).join(' - ') : "YT Music";
-
-        if (titleLabel.innerText !== song.trim()) {
-            titleLabel.innerText = song.trim();
-            artistLabel.innerText = artist.trim();
+        function closeModal() { 
+            modal.style.display = 'none'; 
+            codeField.value = "";
         }
-        container.classList.add('active');
-    }
 
-    setInterval(checkMusic, 2000);
-    checkMusic();
-</script>
+        function redirectToWA() {
+            const msg = encodeURIComponent("Halo Brow, saya mau beli Kode Akses Premium untuk YT Music Overlay (WebdevOverlay). Harga Rp 50.000.");
+            window.open(`https://wa.me/${WA_NUMBER}?text=${msg}`, '_blank');
+        }
 
+        function checkAccessCode() {
+            const code = codeField.value.trim();
+            
+            if (code === MASTER_CODE) {
+                alert("AKSES DITERIMA! Selamat menikmati fitur Premium.");
+                closeModal(); 
+                window.location.href = "ytmusic_overlay.html";
+            } else if (code === "") {
+                alert("Silakan masukkan kode terlebih dahulu.");
+            } else {
+                alert("KODE SALAH! Hubungi developer jika Anda belum memiliki kode.");
+                codeField.value = "";
+                codeField.focus();
+            }
+        }
+
+        // Support tombol 'Enter' pada input keyboard
+        codeField.addEventListener("keyup", function(event) {
+            if (event.key === "Enter") {
+                checkAccessCode();
+            }
+        });
+    </script>
 </body>
 </html>
