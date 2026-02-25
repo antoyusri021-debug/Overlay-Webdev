@@ -11,7 +11,6 @@
             font-family: 'Plus Jakarta Sans', sans-serif;
             height: 100vh; display: flex; align-items: center; justify-content: center;
             overflow: hidden; margin: 0; background: #0a0a0a;
-            /* Pastikan file indexbg.jpg ada di folder yang sama di GitHub */
             background-image: url('indexbg.jpg'); background-size: cover; background-position: center;
             position: relative;
         }
@@ -45,7 +44,7 @@
         }
         .catalog-card:not(.locked-card):hover .btn-enter { background: white; color: black; }
 
-        /* MODAL */
+        /* MODAL DENGAN INPUT FORM */
         #customModal {
             display: none; position: fixed; inset: 0; z-index: 100;
             background: rgba(0,0,0,0.85); backdrop-filter: blur(15px);
@@ -54,6 +53,7 @@
         .modal-content {
             background: #151515; border: 1px solid rgba(255,255,255,0.1);
             padding: 35px; border-radius: 28px; max-width: 400px; width: 90%; text-align: center;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
         }
         .modal-btn {
             width: 100%; padding: 14px; margin-top: 10px; border-radius: 14px;
@@ -70,6 +70,7 @@
             width: 100%; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);
             color: white; padding: 12px; border-radius: 12px; text-align: center;
             font-weight: 700; font-size: 14px; margin-bottom: 10px; outline: none;
+            transition: 0.3s;
         }
         .input-code:focus { border-color: #facc15; background: rgba(255,255,255,0.1); }
 
@@ -83,7 +84,7 @@
             <h2 class="text-white font-black text-2xl mb-2 italic">PREMIUM ACCESS</h2>
             <p class="text-white/50 text-[10px] mb-8 uppercase tracking-widest">YT Music Engine V3.4</p>
             
-            <button onclick="redirectToWA()" class="modal-btn btn-wa mb-6">Dapatkan kode akses (Rp 150.000)</button>
+            <button onclick="redirectToWA()" class="modal-btn btn-wa mb-6">Hubungi Developer (Rp 50.000)</button>
             
             <div class="border-t border-white/10 pt-6">
                 <p class="text-white/40 text-[9px] mb-3 uppercase font-bold tracking-tighter">Sudah punya kode akses?</p>
@@ -102,7 +103,7 @@
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            <div onclick="window.location.href='editor.html'" class="catalog-card p-6 rounded-[2rem]">
+            <div onclick="location.href='editor.html'" class="catalog-card p-6 rounded-[2rem]">
                 <div class="icon-box bg-cyan-500/20 text-cyan-400 border border-cyan-500/30">
                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
                 </div>
@@ -111,7 +112,7 @@
                 <div class="btn-enter uppercase">Buka Editor</div>
             </div>
 
-            <div onclick="window.location.href='ornamen.html'" class="catalog-card p-6 rounded-[2rem]">
+            <div onclick="location.href='ornamen.html'" class="catalog-card p-6 rounded-[2rem]">
                 <div class="icon-box bg-purple-500/20 text-purple-400 border border-purple-500/30">
                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/></svg>
                 </div>
@@ -136,11 +137,11 @@
                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
                 </div>
                 <h3 class="text-white font-black text-lg uppercase tracking-wider mb-2">YT Music Overlay</h3>
-                <p class="text-white/40 text-[10px]">Tampilkan judul lagu. Butuh kode akses (Rp 150rb).</p>
+                <p class="text-white/40 text-[10px]">Tampilkan judul lagu. Butuh kode akses (Rp 50rb).</p>
                 <div class="btn-enter uppercase">Dapatkan Akses</div>
             </div>
 
-            <div onclick="window.location.href='selector.html'" class="catalog-card p-6 rounded-[2rem]">
+            <div onclick="location.href='selector.html'" class="catalog-card p-6 rounded-[2rem]">
                 <div class="icon-box bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><line x1="3" x2="21" y1="9" y2="9"/><line x1="9" x2="9" y1="21" y2="9"/></svg>
                 </div>
@@ -149,6 +150,14 @@
                 <div class="btn-enter uppercase">Gunakan Default</div>
             </div>
             
+            <a href="https://github.com/antoyusri021-debug/Overlay-Webdev/raw/main/TemaYT/ytmusik.zip" download class="catalog-card p-6 rounded-[2rem] no-underline">
+                <div class="icon-box bg-blue-500/20 text-blue-400 border border-blue-500/30">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                </div>
+                <h3 class="text-white font-black text-lg uppercase tracking-wider mb-2">Support Software</h3>
+                <p class="text-white/40 text-[10px]">Download file .zip untuk YT Music Engine.</p>
+                <div class="btn-enter uppercase">Download File</div>
+            </a>
         </div>
 
         <div class="warning-text mt-8 text-white uppercase font-bold opacity-30 text-[7px] text-center">
@@ -173,7 +182,7 @@
         }
 
         function redirectToWA() {
-            const msg = encodeURIComponent("Halo Brow, saya mau beli Kode Akses Premium untuk YT Music Overlay (WebdevOverlay). Harga Rp 150.000.");
+            const msg = encodeURIComponent("Halo Brow, saya mau beli Kode Akses Premium untuk YT Music Overlay (WebdevOverlay). Harga Rp 50.000.");
             window.open(`https://wa.me/${WA_NUMBER}?text=${msg}`, '_blank');
         }
 
@@ -183,7 +192,6 @@
             if (code === MASTER_CODE) {
                 alert("AKSES DITERIMA! Selamat menikmati fitur Premium.");
                 closeModal(); 
-                // Pastikan file ytmusic_overlay.html benar-benar ada di GitHub
                 window.location.href = "ytmusic_overlay.html";
             } else if (code === "") {
                 alert("Silakan masukkan kode terlebih dahulu.");
@@ -194,8 +202,12 @@
             }
         }
 
-        // Support tombol 'Enter'
+        // Support tombol 'Enter' pada input keyboard
         codeField.addEventListener("keyup", function(event) {
             if (event.key === "Enter") {
                 checkAccessCode();
             }
+        });
+    </script>
+</body>
+</html>
