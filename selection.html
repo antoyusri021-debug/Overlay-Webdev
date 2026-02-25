@@ -84,7 +84,7 @@
             <h2 class="text-white font-black text-2xl mb-2 italic">PREMIUM ACCESS</h2>
             <p class="text-white/50 text-[10px] mb-8 uppercase tracking-widest">YT Music Engine V3.4</p>
             
-            <button onclick="redirectToWA()" class="modal-btn btn-wa mb-6">Hubungi Developer (Rp 50.000)</button>
+            <button onclick="redirectToWA()" class="modal-btn btn-wa mb-6">Dapatkan kode akses cuman (Rp 150.000)</button>
             
             <div class="border-t border-white/10 pt-6">
                 <p class="text-white/40 text-[9px] mb-3 uppercase font-bold tracking-tighter">Sudah punya kode akses?</p>
@@ -137,7 +137,7 @@
                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
                 </div>
                 <h3 class="text-white font-black text-lg uppercase tracking-wider mb-2">YT Music Overlay</h3>
-                <p class="text-white/40 text-[10px]">Tampilkan judul lagu. Butuh kode akses (Rp 50rb).</p>
+                <p class="text-white/40 text-[10px]">Tampilkan judul lagu. Butuh kode akses (Rp 150rb).</p>
                 <div class="btn-enter uppercase">Dapatkan Akses</div>
             </div>
 
@@ -150,14 +150,6 @@
                 <div class="btn-enter uppercase">Gunakan Default</div>
             </div>
             
-            <a href="https://github.com/antoyusri021-debug/Overlay-Webdev/raw/main/TemaYT/ytmusik.zip" download class="catalog-card p-6 rounded-[2rem] no-underline">
-                <div class="icon-box bg-blue-500/20 text-blue-400 border border-blue-500/30">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-                </div>
-                <h3 class="text-white font-black text-lg uppercase tracking-wider mb-2">Support Software</h3>
-                <p class="text-white/40 text-[10px]">Download file .zip untuk YT Music Engine.</p>
-                <div class="btn-enter uppercase">Download File</div>
-            </a>
         </div>
 
         <div class="warning-text mt-8 text-white uppercase font-bold opacity-30 text-[7px] text-center">
@@ -182,7 +174,7 @@
         }
 
         function redirectToWA() {
-            const msg = encodeURIComponent("Halo Brow, saya mau beli Kode Akses Premium untuk YT Music Overlay (WebdevOverlay). Harga Rp 50.000.");
+            const msg = encodeURIComponent("Halo Brow, saya mau beli Kode Akses Premium untuk YT Music Overlay (WebdevOverlay). Harga Rp 150.000.");
             window.open(`https://wa.me/${WA_NUMBER}?text=${msg}`, '_blank');
         }
 
@@ -202,7 +194,6 @@
             }
         }
 
-        // Support tombol 'Enter' pada input keyboard
         codeField.addEventListener("keyup", function(event) {
             if (event.key === "Enter") {
                 checkAccessCode();
