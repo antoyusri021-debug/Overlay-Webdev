@@ -35,7 +35,7 @@
             visibility: hidden;
         }
 
-        /* KELAS SAAT AKTIF */
+        /* KELAS SAAT AKTIF - HARUS ADA AGAR MUNCUL */
         #main-container.active {
             opacity: 1;
             transform: translateX(0);
@@ -130,7 +130,6 @@
     const titleLabel = document.getElementById('title-text');
     const artistLabel = document.getElementById('artist-text');
 
-    // Ambil parameter dari URL
     const urlParams = new URLSearchParams(window.location.search);
     const isPreview = urlParams.get('preview') === 'true';
 
@@ -141,9 +140,9 @@
     }
 
     async function checkMusic() {
-        // JIKA MODE PREVIEW AKTIF, JANGAN CEK API/FILE
+        // Jika mode preview, jangan lakukan fetch, langsung tampilkan dummy
         if (isPreview) {
-            updateDisplay("Contoh Judul Lagu - Artis Preview");
+            updateDisplay("Judul Lagu Preview - Nama Artis");
             return;
         }
 
@@ -162,9 +161,10 @@
                     container.classList.remove('active');
                 }
             } else {
-                throw new Error("API Offline");
+                throw new Error("Offline");
             }
         } catch (err) {
+            // Fallback ke file lokal
             try {
                 const resFile = await fetch('../judul_lagu.txt?t=' + Date.now());
                 if (resFile.ok) {
@@ -189,14 +189,18 @@
 
         titleLabel.innerText = song;
         artistLabel.innerText = artist;
+        
+        // Memaksa container muncul
         container.classList.add('active');
     }
 
-    // Interval hanya jalan jika bukan preview
+    // Jalankan pengecekan
+    checkMusic();
+    
+    // Jika bukan preview, cek berkala tiap 2 detik
     if (!isPreview) {
         setInterval(checkMusic, 2000);
     }
-    checkMusic();
 </script>
 
 </body>
