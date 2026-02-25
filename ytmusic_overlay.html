@@ -118,11 +118,12 @@
             const theme = document.getElementById('theme-select').value;
             if(!theme) return alert("Pilih tema dulu!");
             const link = document.getElementById('final-link');
+            // Link asli tanpa preview untuk di-copy ke OBS
             link.value = `https://antoyusri021-debug.github.io/Overlay-Webdev/TemaYT/${theme}.html`;
             document.getElementById('result-box').classList.remove('hidden');
             window.focus();
         }
-
+    
         function copyNow() {
             const input = document.getElementById('final-link');
             input.select();
@@ -130,7 +131,7 @@
             alert("Link Berhasil Disalin!");
             window.focus();
         }
-
+    
         window.addEventListener('keydown', (e) => {
             if (e.code === "Space") {
                 e.preventDefault();
@@ -142,17 +143,18 @@
                 const tag = document.getElementById('active-tag');
                 const tagName = document.getElementById('current-theme-name');
                 const themeText = document.getElementById('theme-select').options[document.getElementById('theme-select').selectedIndex].text;
-
+    
                 placeholder.style.display = 'none';
                 iframe.style.display = 'block';
                 tag.classList.remove('hidden');
                 tagName.innerText = themeText;
                 
-                // Anti-cache & Anti-leak CSS text
-                iframe.src = `https://antoyusri021-debug.github.io/Overlay-Webdev/TemaYT/${theme}.html?v=${Math.random()}`;
+                // TAMBAHKAN &preview=true AGAR LANGSUNG MUNCUL DI WADAH
+                iframe.src = `https://antoyusri021-debug.github.io/Overlay-Webdev/TemaYT/${theme}.html?preview=true&v=${Math.random()}`;
                 window.focus();
             }
         });
     </script>
 </body>
 </html>
+
