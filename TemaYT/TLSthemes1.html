@@ -10,7 +10,6 @@
             font-family: 'Montserrat', sans-serif; overflow: hidden; 
         }
 
-        /* CONTAINER TETAP MUNCUL UNTUK TESTING */
         #main-container {
             display: flex; flex-direction: column;
             background: linear-gradient(135deg, rgba(30, 30, 30, 0.98), rgba(10, 10, 10, 1));
@@ -19,9 +18,11 @@
             width: 350px; height: auto; min-height: 125px;
             box-sizing: border-box; box-shadow: 0 20px 50px rgba(0,0,0,0.5);
             transition: all 0.6s ease-in-out;
-            opacity: 1; /* Kita buat 1 dulu biar kelihatan pas ngetes */
-            transform: translateY(0);
+            opacity: 0; /* Default sembunyi, muncul kalau ada lagu */
+            transform: translateY(20px);
         }
+
+        #main-container.active { opacity: 1; transform: translateY(0); }
 
         .top-section { display: flex; align-items: center; margin-bottom: 15px; }
         .visual-disk {
@@ -53,8 +54,8 @@
             <svg width="20" height="20" viewBox="0 0 24 24" fill="black"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 14.5c-2.49 0-4.5-2.01-4.5-4.5S9.51 7.5 12 7.5s4.5 2.01 4.5 4.5-2.01 4.5-4.5 4.5z"/></svg>
         </div>
         <div class="info">
-            <div id="title-text" class="title">Menunggu Data...</div>
-            <div id="artist-text" class="artist">Cek Folder Anda</div>
+            <div id="title-text" class="title">Memuat Judul...</div>
+            <div id="artist-text" class="artist">Menunggu Artis...</div>
         </div>
     </div>
     <div class="controls">
@@ -63,7 +64,7 @@
             <svg class="btn btn-play" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
             <svg class="btn" viewBox="0 0 24 24"><path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z"/></svg>
         </div>
-        <div style="font-size: 10px; color: rgba(255,255,255,0.3);">YTMUSIC PREM</div>
+        <div style="font-size: 10px; color: rgba(255,255,255,0.3);">YT MUSIC PREM</div>
     </div>
 </div>
 
@@ -74,27 +75,34 @@
 
     async function updateMusic() {
         try {
-            // FIX: Gunakan "../" karena judul_lagu.txt ada di luar folder temaYT
-            const response = await fetch('../judul_lagu.txt?t=' + Date.now());
-            
-            if (response.ok) {
-                const text = await response.text();
-                if (text.trim() && !text.includes('<!DOCTYPE')) {
-                    let parts = text.split(' - ');
-                    titleLabel.innerText = (parts[0] || "Unknown").trim();
-                    artistLabel.innerText = (parts.length > 1 ? parts.slice(1).join(' - ') : "YouTube Music").trim();
-                    container.style.opacity = "1";
-                } else {
-                    // Jika file kosong, kita sembunyikan
-                    container.style.opacity = "0";
-                }
+            // Kita coba dua jalur sekaligus agar pasti ketemu filenya
+            const paths = ['../judul_lagu.txt', './judul_lagu.txt'];
+            let text = "";
+            let found = false;
+
+            for (let path of paths) {
+                try {
+                    const response = await fetch(path + '?t=' + Date.now());
+                    if (response.ok) {
+                        text = await response.text();
+                        if (text.trim() && !text.includes('<!DOCTYPE')) {
+                            found = true;
+                            break;
+                        }
+                    }
+                } catch(e) {}
+            }
+
+            if (found) {
+                let parts = text.split(' - ');
+                titleLabel.innerText = (parts[0] || "Unknown").trim();
+                artistLabel.innerText = (parts.length > 1 ? parts.slice(1).join(' - ') : "YouTube Music").trim();
+                container.classList.add('active');
             } else {
-                titleLabel.innerText = "File Tidak Ditemukan";
-                artistLabel.innerText = "Cek Jalur File: ../judul_lagu.txt";
+                container.classList.remove('active');
             }
         } catch (e) {
-            titleLabel.innerText = "Error Reading File";
-            artistLabel.innerText = e.message;
+            console.error("Gagal membaca file");
         }
     }
 
