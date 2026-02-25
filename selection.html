@@ -23,7 +23,7 @@
             backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.1);
             transition: all 0.5s cubic-bezier(0.23, 1, 0.32, 1); cursor: pointer;
             position: relative; display: flex; flex-direction: column; height: 100%; overflow: hidden;
-            z-index: 20; /* Pastikan card berada di atas background */
+            pointer-events: auto !important; /* Memaksa agar bisa diklik */
         }
         .catalog-card:not(.locked-card):hover { transform: translateY(-8px) scale(1.02); border-color: rgba(255,255,255,0.4); box-shadow: 0 20px 40px rgba(0,0,0,0.4); }
 
@@ -35,64 +35,57 @@
         .badge-red { background: #ef4444; color: white; }
         .badge-yellow { background: #facc15; color: black; }
 
-        .catalog-card.locked-card { opacity: 0.4; cursor: not-allowed; filter: grayscale(0.8); }
+        .catalog-card.locked-card { opacity: 0.4; cursor: not-allowed; filter: grayscale(0.8); pointer-events: none; }
         .icon-box { width: 48px; height: 48px; border-radius: 14px; display: flex; align-items: center; justify-content: center; margin-bottom: 16px; }
 
         .btn-enter {
             margin-top: auto; padding: 10px; background: rgba(255,255,255,0.05);
             border: 1px solid rgba(255,255,255,0.1); border-radius: 12px;
             text-align: center; font-size: 9px; font-weight: 800; letter-spacing: 2px; color: white;
+            pointer-events: none; /* Biar kliknya lari ke card induk */
         }
         .catalog-card:not(.locked-card):hover .btn-enter { background: white; color: black; }
 
-        /* MODAL FIX UNTUK DESKTOP APP */
+        /* MODAL - DIBUAT SANGAT PRIORITAS */
         #customModal {
             display: none; position: fixed; inset: 0; 
-            z-index: 9999; /* Z-index sangat tinggi agar tidak tertutup elemen lain */
-            background: rgba(0,0,0,0.9); backdrop-filter: blur(20px);
+            z-index: 999999 !important; /* Paling atas di atas segalanya */
+            background: rgba(0,0,0,0.95); backdrop-filter: blur(25px);
             align-items: center; justify-content: center;
         }
         .modal-content {
-            background: #151515; border: 1px solid rgba(255,255,255,0.2);
-            padding: 35px; border-radius: 28px; max-width: 400px; width: 90%; text-align: center;
-            box-shadow: 0 0 50px rgba(0,0,0,1);
+            background: #111; border: 1px solid rgba(255,255,255,0.2);
+            padding: 40px; border-radius: 30px; max-width: 400px; width: 90%; text-align: center;
         }
         .modal-btn {
-            width: 100%; padding: 14px; margin-top: 10px; border-radius: 14px;
-            font-weight: 800; font-size: 11px; text-transform: uppercase; letter-spacing: 1px;
-            transition: 0.3s; cursor: pointer;
+            width: 100%; padding: 15px; margin-top: 12px; border-radius: 15px;
+            font-weight: 800; font-size: 11px; text-transform: uppercase; border: none; cursor: pointer;
         }
-        .btn-wa { background: #25d366; color: white; border: none; }
-        .btn-wa:hover { background: #1eb954; transform: scale(1.02); }
-        
-        .btn-verify { background: white; color: black; border: none; }
-        .btn-verify:hover { background: #e5e5e5; }
+        .btn-wa { background: #25d366; color: white; }
+        .btn-verify { background: white; color: black; }
 
         .input-code {
-            width: 100%; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);
-            color: white; padding: 12px; border-radius: 12px; text-align: center;
-            font-weight: 700; font-size: 14px; margin-bottom: 10px; outline: none;
+            width: 100%; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2);
+            color: white; padding: 14px; border-radius: 12px; text-align: center; margin-bottom: 10px;
         }
-
-        .btn-close { color: rgba(255,255,255,0.4); font-size: 10px; margin-top: 20px; display: inline-block; text-decoration: none; cursor: pointer; }
+        .btn-close { color: rgba(255,255,255,0.4); margin-top: 25px; cursor: pointer; display: block; font-size: 10px; font-weight: bold; }
     </style>
 </head>
 <body>
 
     <div id="customModal">
         <div class="modal-content">
-            <h2 class="text-white font-black text-2xl mb-2 italic">PREMIUM ACCESS</h2>
-            <p class="text-white/50 text-[10px] mb-8 uppercase tracking-widest">YT Music Engine V3.4</p>
+            <h2 class="text-white font-black text-2xl mb-1 italic">PREMIUM ACCESS</h2>
+            <p class="text-white/50 text-[10px] mb-8 uppercase tracking-[0.2em]">YT Music Engine V3.4</p>
             
-            <button type="button" onclick="redirectToWA()" class="modal-btn btn-wa mb-6">Dapatkan kode akses (Rp 150.000)</button>
+            <button id="buyBtn" class="modal-btn btn-wa">Beli Kode Akses (Rp 150.000)</button>
             
-            <div class="border-t border-white/10 pt-6">
-                <p class="text-white/40 text-[9px] mb-3 uppercase font-bold tracking-tighter">Sudah punya kode akses?</p>
-                <input type="text" id="accessCodeField" class="input-code" placeholder="ENTER PREMIUM CODE">
-                <button type="button" onclick="checkAccessCode()" class="modal-btn btn-verify">Verifikasi Kode</button>
+            <div class="border-t border-white/10 mt-8 pt-6">
+                <input type="text" id="accessCodeField" class="input-code" placeholder="ENTER CODE">
+                <button id="verifyBtn" class="modal-btn btn-verify">Verifikasi</button>
             </div>
 
-            <div onclick="closeModal()" class="btn-close uppercase tracking-[0.3em] font-bold">Tutup</div>
+            <span id="closeModalBtn" class="btn-close uppercase tracking-widest">KEMBALI</span>
         </div>
     </div>
 
@@ -103,107 +96,101 @@
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            <div onclick="goToPage('editor.html')" class="catalog-card p-6 rounded-[2rem]">
+            <div class="catalog-card p-6 rounded-[2rem]" id="btn-editor">
                 <div class="icon-box bg-cyan-500/20 text-cyan-400 border border-cyan-500/30">
                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
                 </div>
-                <h3 class="text-white font-black text-lg uppercase tracking-wider mb-2">Custom Chat</h3>
-                <p class="text-white/40 text-[10px]">Kustomisasi warna, gradient, dan opasitas chat sesukamu.</p>
+                <h3 class="text-white font-black text-lg uppercase mb-2">Custom Chat</h3>
+                <p class="text-white/40 text-[10px]">Kustomisasi warna, gradient, dan opasitas.</p>
                 <div class="btn-enter uppercase">Buka Editor</div>
             </div>
 
-            <div onclick="goToPage('ornamen.html')" class="catalog-card p-6 rounded-[2rem]">
+            <div class="catalog-card p-6 rounded-[2rem]" id="btn-ornamen">
                 <div class="icon-box bg-purple-500/20 text-purple-400 border border-purple-500/30">
                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/></svg>
                 </div>
-                <h3 class="text-white font-black text-lg uppercase tracking-wider mb-2">Themes Ornamen</h3>
-                <p class="text-white/40 text-[10px]">Notifikasi otomatis Follower, Gift, dan Share.</p>
+                <h3 class="text-white font-black text-lg uppercase mb-2">Themes Ornamen</h3>
+                <p class="text-white/40 text-[10px]">Follower, Gift, dan Share otomatis.</p>
                 <div class="btn-enter uppercase">Lihat Koleksi</div>
             </div>
 
             <div class="catalog-card p-6 rounded-[2rem] locked-card">
                 <div class="badge-status badge-red">Coming Soon</div>
-                <div class="icon-box bg-pink-500/20 text-pink-400">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 12a4 4 0 1 0 4 4V4a5 5 0 0 0 5 5"/></svg>
-                </div>
-                <h3 class="text-white font-black text-lg uppercase tracking-wider mb-2">Tikfinity Overlay</h3>
-                <p class="text-white/40 text-[10px]">Integrasi dashboard Tikfinity real-time.</p>
+                <div class="icon-box bg-pink-500/20 text-pink-400"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 12a4 4 0 1 0 4 4V4a5 5 0 0 0 5 5"/></svg></div>
+                <h3 class="text-white font-black text-lg uppercase mb-2">Tikfinity Overlay</h3>
                 <div class="btn-enter uppercase opacity-50">Locked</div>
             </div>
 
-            <div id="ytMusicBtn" onclick="openModal()" class="catalog-card p-6 rounded-[2rem]">
+            <div class="catalog-card p-6 rounded-[2rem]" id="btn-premium">
                 <div class="badge-status badge-yellow">Special Access</div>
                 <div class="icon-box bg-red-500/20 text-red-400 border border-red-500/30">
                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
                 </div>
-                <h3 class="text-white font-black text-lg uppercase tracking-wider mb-2">YT Music Overlay</h3>
-                <p class="text-white/40 text-[10px]">Tampilkan judul lagu. Butuh kode akses (Rp 150rb).</p>
+                <h3 class="text-white font-black text-lg uppercase mb-2">YT Music Overlay</h3>
+                <p class="text-white/40 text-[10px]">Tampilkan judul lagu (Rp 150rb).</p>
                 <div class="btn-enter uppercase">Dapatkan Akses</div>
             </div>
 
-            <div onclick="goToPage('selector.html')" class="catalog-card p-6 rounded-[2rem]">
+            <div class="catalog-card p-6 rounded-[2rem]" id="btn-default">
                 <div class="icon-box bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><line x1="3" x2="21" y1="9" y2="9"/><line x1="9" x2="9" y1="21" y2="9"/></svg>
                 </div>
-                <h3 class="text-white font-black text-lg uppercase tracking-wider mb-2">Default Themes</h3>
-                <p class="text-white/40 text-[10px]">Tema minimalis dan super ringan.</p>
+                <h3 class="text-white font-black text-lg uppercase mb-2">Default Themes</h3>
+                <p class="text-white/40 text-[10px]">Tema minimalis ringan.</p>
                 <div class="btn-enter uppercase">Gunakan Default</div>
             </div>
-            
-        </div>
-
-        <div class="warning-text mt-8 text-white uppercase font-bold opacity-30 text-[7px] text-center">
-            DILARANG KERAS MEMPERJUALBELIKAN APLIKASI INI TANPA IZIN DEVELOPER!
         </div>
     </div>
 
     <script>
-        const WA_NUMBER = "6281343901082";
-        const MASTER_CODE = "webdev12345";
-        const modal = document.getElementById('customModal');
-        const codeField = document.getElementById('accessCodeField');
+        // Gunakan DOMContentLoaded agar script jalan setelah semua elemen siap
+        document.addEventListener('DOMContentLoaded', () => {
+            
+            const WA_NUMBER = "6281343901082";
+            const MASTER_CODE = "webdev12345";
+            
+            const modal = document.getElementById('customModal');
+            const codeField = document.getElementById('accessCodeField');
 
-        // Fungsi navigasi yang lebih aman untuk Desktop App
-        function goToPage(url) {
-            window.location.href = url;
-        }
+            // Navigasi Biasa
+            document.getElementById('btn-editor').onclick = () => window.location.href = 'editor.html';
+            document.getElementById('btn-ornamen').onclick = () => window.location.href = 'ornamen.html';
+            document.getElementById('btn-default').onclick = () => window.location.href = 'selector.html';
 
-        function openModal() { 
-            console.log("Membuka Modal..."); // Debugging console
-            modal.style.display = 'flex'; 
-            codeField.focus();
-        }
-
-        function closeModal() { 
-            modal.style.display = 'none'; 
-            codeField.value = "";
-        }
-
-        function redirectToWA() {
-            const msg = encodeURIComponent("Halo Brow, saya mau beli Kode Akses Premium untuk YT Music Overlay (WebdevOverlay). Harga Rp 150.000.");
-            window.open(`https://wa.me/${WA_NUMBER}?text=${msg}`, '_blank');
-        }
-
-        function checkAccessCode() {
-            const code = codeField.value.trim();
-            if (code === MASTER_CODE) {
-                alert("AKSES DITERIMA! Selamat menikmati fitur Premium.");
-                closeModal(); 
-                window.location.href = "ytmusic_overlay.html";
-            } else if (code === "") {
-                alert("Silakan masukkan kode terlebih dahulu.");
-            } else {
-                alert("KODE SALAH! Hubungi developer jika Anda belum memiliki kode.");
-                codeField.value = "";
+            // Fungsi Buka Modal (YT Music)
+            document.getElementById('btn-premium').addEventListener('click', (e) => {
+                e.preventDefault();
+                console.log("Klik Premium Terdeteksi");
+                modal.style.display = 'flex';
                 codeField.focus();
-            }
-        }
+            });
 
-        // Event listener tambahan untuk memastikan input Enter bekerja
-        codeField.addEventListener("keypress", function(e) {
-            if (e.key === "Enter") {
-                checkAccessCode();
-            }
+            // Tutup Modal
+            document.getElementById('closeModalBtn').onclick = () => {
+                modal.style.display = 'none';
+                codeField.value = "";
+            };
+
+            // Beli via WA
+            document.getElementById('buyBtn').onclick = () => {
+                const msg = encodeURIComponent("Halo Brow, saya mau beli Kode Akses Premium YT Music Overlay.");
+                window.open(`https://wa.me/${WA_NUMBER}?text=${msg}`, '_blank');
+            };
+
+            // Verifikasi Kode
+            document.getElementById('verifyBtn').onclick = () => {
+                const code = codeField.value.trim();
+                if (code === MASTER_CODE) {
+                    alert("AKSES DITERIMA!");
+                    window.location.href = "ytmusic_overlay.html";
+                } else {
+                    alert("KODE SALAH!");
+                    codeField.value = "";
+                }
+            };
+
+            // Support Enter
+            codeField.onkeyup = (e) => { if (e.key === 'Enter') document.getElementById('verifyBtn').click(); };
         });
     </script>
 </body>
