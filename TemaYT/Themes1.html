@@ -130,9 +130,7 @@
     const titleLabel = document.getElementById('title-text');
     const artistLabel = document.getElementById('artist-text');
 
-    // Cek apakah dipanggil lewat wadah (Preview Mode)
-    const isPreview = window.location.search.includes('v=');
-
+    // Fungsi pembersih teks agar tidak ada kode HTML/CSS yang ikut nampil
     function sanitize(text) {
         const temp = document.createElement('div');
         temp.textContent = text;
@@ -140,13 +138,8 @@
     }
 
     async function checkMusic() {
-        // Jika sedang di-preview di wadah, tampilkan teks contoh dan berhenti cek API
-        if (isPreview) {
-            updateDisplay("Contoh Judul Lagu - Nama Artis Preview");
-            return; 
-        }
-
         try {
+            // 1. Cek via API (Port 8080)
             const response = await fetch('http://localhost:8080/', { 
                 method: 'GET',
                 mode: 'cors',
@@ -161,9 +154,10 @@
                     container.classList.remove('active');
                 }
             } else {
-                throw new Error("Offline");
+                throw new Error("API Offline");
             }
         } catch (err) {
+            // 2. Fallback ke file lokal jika API gagal
             try {
                 const resFile = await fetch('../judul_lagu.txt?t=' + Date.now());
                 if (resFile.ok) {
@@ -181,7 +175,9 @@
     }
 
     function updateDisplay(fullText) {
+        // Bersihkan teks dari karakter aneh
         let cleanText = sanitize(fullText);
+        
         let parts = cleanText.split(' - ');
         let song = parts[0] || "Unknown Title";
         let artist = parts.length > 1 ? parts.slice(1).join(' - ') : "YouTube Music";
@@ -191,14 +187,10 @@
         container.classList.add('active');
     }
 
-    // Hanya jalanin interval kalau BUKAN sedang preview
-    if (!isPreview) {
-        setInterval(checkMusic, 2000);
-    }
-    
-    // Jalankan sekali saat load
+    setInterval(checkMusic, 2000);
     checkMusic();
 </script>
 
 </body>
 </html>
+
