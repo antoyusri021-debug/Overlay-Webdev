@@ -69,26 +69,20 @@
             if (e.code === "Space") {
                 e.preventDefault();
                 const theme = document.getElementById('theme-select').value;
-                if(!theme) return alert("Pilih tema dulu di menu kiri!");
+                if(!theme) return alert("Pilih tema dulu!");
                 
                 const iframe = document.getElementById('main-preview');
                 const placeholder = document.getElementById('placeholder-ui');
-                const tag = document.getElementById('active-tag');
-                const tagName = document.getElementById('current-theme-name');
-                const themeText = document.getElementById('theme-select').options[document.getElementById('theme-select').selectedIndex].text;
-
+                
                 placeholder.style.display = 'none';
                 iframe.style.display = 'block';
-                tag.classList.remove('hidden');
-                tagName.innerText = themeText;
                 
-                // PANGGIL DENGAN PREVIEW=TRUE
-                // Ganti URL di bawah ini dengan lokasi folder kamu jika berbeda
-                const url = `https://antoyusri021-debug.github.io/Overlay-Webdev/TemaYT/${theme}.html?preview=true&v=${Math.random()}`;
-                console.log("Loading Preview: " + url);
-                iframe.src = url;
+                // PASTIKAN URL MENGARAH KE FILE TEMA DENGAN BENAR
+                // Tambahkan ?preview=true agar skrip di atas tahu ini cuma review
+                iframe.src = `./TemaYT/${theme}.html?preview=true&v=${Math.random()}`;
             }
         });
     </script>
 </body>
 </html>
+
