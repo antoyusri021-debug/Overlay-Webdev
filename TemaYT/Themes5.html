@@ -3,114 +3,217 @@
 <head>
     <meta charset="UTF-8">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Plus+Jakarta+Sans:wght@400;700&display=swap');
         
         body { 
             margin: 0; 
-            padding: 10px; 
+            padding: 30px; 
             background: transparent; 
-            font-family: 'Inter', sans-serif; 
+            font-family: 'Plus Jakarta Sans', sans-serif; 
             overflow: hidden; 
         }
 
-        .music-player-container {
-            width: 320px;
+        /* NEON BORDER ANIMATION CONTAINER */
+        #main-container {
+            position: relative;
             display: flex;
-            flex-direction: column;
             align-items: center;
-            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5));
+            background: rgba(10, 10, 10, 0.9);
+            border-radius: 15px;
+            padding: 2px; /* Ruang untuk border glow */
+            width: 340px; 
+            height: 70px;
+            box-sizing: border-box;
+            
+            /* ANIMASI TRANSISI */
+            transition: all 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            opacity: 0;
+            transform: scale(0.5) rotate(-5deg);
+            visibility: hidden;
+            overflow: hidden;
         }
 
-        /* INFO LAGU */
-        .song-info {
-            text-align: center;
-            width: 100%;
-            margin-bottom: 15px;
+        #main-container.active {
+            opacity: 1;
+            transform: scale(1) rotate(0deg);
+            visibility: visible;
+        }
+
+        /* ANIMASI GARIS BERPUTAR (Running Border) */
+        #main-container::before {
+            content: '';
+            position: absolute;
+            top: -50%; left: -50%;
+            width: 200%; height: 200%;
+            background: conic-gradient(#ff0000, #ff8800, #ff0000, transparent 40%);
+            animation: rotate-border 4s linear infinite;
+            z-index: 0;
+        }
+
+        @keyframes rotate-border {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        /* LAYER DALAM (Inner Card) */
+        .inner-content {
+            position: relative;
+            background: #0a0a0a;
+            border-radius: 13px;
+            width: 100%; height: 100%;
+            z-index: 1;
+            display: flex;
+            align-items: center;
+            padding: 0 15px;
+        }
+
+        /* LOGO BOX DENGAN EFEK GLOW */
+        .logo-container {
+            width: 40px; height: 40px;
+            background: #1a1a1a;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 15px;
+            box-shadow: 0 0 15px rgba(255, 0, 0, 0.3);
+            border: 1px solid rgba(255, 0, 0, 0.5);
+        }
+
+        .yt-svg {
+            width: 20px; fill: #ff0000;
+            filter: drop-shadow(0 0 5px #ff0000);
+        }
+
+        /* TEXT STYLING */
+        .info {
+            flex-grow: 1;
+            overflow: hidden;
         }
 
         .title {
-            font-size: 16px; /* Ukuran sedikit diperbesar karena spektrum hilang */
+            font-family: 'Orbitron', sans-serif; /* Font futuristik */
+            font-size: 13px;
             font-weight: 700;
             color: #ffffff;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
-            margin-bottom: 2px;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.9);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 3px;
         }
 
         .artist {
-            font-size: 11px;
-            font-weight: 600;
-            color: #d1d1f0;
-            text-transform: uppercase;
-            letter-spacing: 1.2px;
-            text-shadow: 1px 1px 3px rgba(0,0,0,0.8);
+            font-size: 10px;
+            color: #ff8800; /* Warna Oranye Neon */
+            font-weight: 700;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            opacity: 0.8;
         }
 
-        /* TOMBOL NAVIGASI */
-        .controls {
+        /* VISUALIZER KECIL */
+        .visualizer {
             display: flex;
             align-items: center;
-            justify-content: center;
-            gap: 30px;
+            gap: 2px;
+            margin-left: 10px;
         }
 
-        .btn {
-            fill: #ffffff;
-            width: 22px;
-            height: 22px;
-            opacity: 0.9;
+        .v-bar {
+            width: 2px; height: 15px;
+            background: #ff0000;
+            animation: v-move 0.6s ease-in-out infinite;
         }
+        .v-bar:nth-child(2) { animation-delay: 0.2s; height: 22px; }
+        .v-bar:nth-child(3) { animation-delay: 0.4s; }
 
-        .btn-play {
-            width: 36px;
-            height: 36px;
+        @keyframes v-move {
+            0%, 100% { transform: scaleY(0.4); }
+            50% { transform: scaleY(1); }
         }
     </style>
 </head>
 <body>
 
-<div class="music-player-container">
-    <div class="song-info">
-        <div id="title" class="title">Menunggu Musik...</div>
-        <div id="artist" class="artist">YouTube Music</div>
-    </div>
+<div id="main-container">
+    <div class="inner-content">
+        <div class="logo-container">
+            <svg class="yt-svg" viewBox="0 0 24 24">
+                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 14.5v-9l6 4.5-6 4.5z"/>
+            </svg>
+        </div>
+        
+        <div class="info">
+            <div id="title-text" class="title">System Booting...</div>
+            <div id="artist-text" class="artist">NEON INTERFACE</div>
+        </div>
 
-    <div class="controls">
-        <svg class="btn" viewBox="0 0 24 24"><path d="M6 6h2v12H6zm3.5 6l8.5 6V6z"/></svg>
-        
-        <svg class="btn btn-play" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 14.5v-9l6 4.5-6 4.5z"/></svg>
-        
-        <svg class="btn" viewBox="0 0 24 24"><path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6z"/></svg>
+        <div class="visualizer">
+            <div class="v-bar"></div>
+            <div class="v-bar"></div>
+            <div class="v-bar"></div>
+        </div>
     </div>
 </div>
 
 <script>
-    const titleEle = document.getElementById('title');
-    const artistEle = document.getElementById('artist');
+    const container = document.getElementById('main-container');
+    const titleLabel = document.getElementById('title-text');
+    const artistLabel = document.getElementById('artist-text');
 
-    async function updateMusic() {
-        try {
-            const resp = await fetch('../judul_lagu.txt?t=' + Date.now());
-            if (resp.ok) {
-                const text = await resp.text();
-                const parts = text.split(' - ');
-                
-                const newTitle = (parts[0] || "Menunggu Musik...").trim();
-                const newArtist = (parts.length > 1 ? parts.slice(1).join(' - ') : "YouTube Music").trim();
-
-                // Update hanya jika ada perubahan teks
-                if (titleEle.innerText !== newTitle) {
-                    titleEle.innerText = newTitle;
-                    artistEle.innerText = newArtist;
-                }
-            }
-        } catch (e) { }
+    function sanitize(text) {
+        const temp = document.createElement('div');
+        temp.textContent = text;
+        return temp.innerHTML.trim();
     }
 
-    setInterval(updateMusic, 2000);
-    updateMusic();
+    async function checkMusic() {
+        try {
+            // Cek API Lokal
+            const response = await fetch('http://localhost:8080/', { 
+                method: 'GET', mode: 'cors', cache: 'no-store' 
+            });
+            
+            if (response.ok) {
+                const data = await response.json();
+                if (data.title && data.title !== "Menunggu Musik..." && data.title !== "") {
+                    updateDisplay(data.title);
+                } else {
+                    container.classList.remove('active');
+                }
+            } else { throw new Error(); }
+        } catch (err) {
+            // Fallback File Lokal
+            try {
+                const resFile = await fetch('../judul_lagu.txt?t=' + Date.now());
+                if (resFile.ok) {
+                    const text = await resFile.text();
+                    if (text && text.trim() !== "" && !text.includes('<!DOCTYPE')) {
+                        updateDisplay(text);
+                    } else { container.classList.remove('active'); }
+                }
+            } catch (fErr) { container.classList.remove('active'); }
+        }
+    }
+
+    function updateDisplay(fullText) {
+        let cleanText = sanitize(fullText);
+        let parts = cleanText.split(' - ');
+        let song = parts[0] || "Unknown Track";
+        let artist = parts.length > 1 ? parts.slice(1).join(' - ') : "YT Music";
+
+        if (titleLabel.innerText !== song.trim()) {
+            titleLabel.innerText = song.trim();
+            artistLabel.innerText = artist.trim();
+        }
+        container.classList.add('active');
+    }
+
+    setInterval(checkMusic, 2000);
+    checkMusic();
 </script>
 
 </body>
