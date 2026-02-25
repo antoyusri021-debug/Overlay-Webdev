@@ -3,105 +3,108 @@
 <head>
     <meta charset="UTF-8">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;800&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;700;900&display=swap');
         
         body { 
             margin: 0; padding: 20px; 
             background: transparent !important; 
-            font-family: 'Montserrat', sans-serif; 
+            font-family: 'Outfit', sans-serif; 
             overflow: hidden; 
         }
 
-        /* PAKSA RENDER: Gunakan background solid dulu jika di TikTok masih transparan */
+        /* NEON GLASS CONTAINER */
         #main-container {
             display: flex;
-            flex-direction: column;
-            background: #111111; /* Warna solid agar TikTok tidak bingung */
-            background: linear-gradient(135deg, rgba(30, 30, 30, 1), rgba(10, 10, 10, 1));
-            border-radius: 20px;
-            padding: 18px;
+            align-items: center;
+            background: rgba(10, 10, 10, 0.9);
+            backdrop-filter: blur(10px);
+            border-radius: 100px; /* Model Pill */
+            padding: 10px 25px;
             color: white;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            width: 350px; 
-            height: auto;
-            min-height: 120px;
-            box-sizing: border-box;
-            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+            border: 2px solid rgba(0, 255, 127, 0.3);
+            width: fit-content;
+            min-width: 300px;
+            max-width: 450px;
+            box-shadow: 0 0 20px rgba(0, 255, 127, 0.2);
             
-            /* TikTok Fix: Jangan pakai visibility:hidden di awal */
-            opacity: 1; 
-            transform: translateX(0);
+            /* Paksa Muncul agar tidak Blank di TLS */
+            opacity: 1 !important;
+            visibility: visible !important;
             transition: all 0.5s ease;
         }
 
-        .top-section { display: flex; align-items: center; margin-bottom: 15px; }
-        .visual-disk {
-            width: 45px; height: 45px;
-            background: conic-gradient(#fff, #444, #fff);
-            border-radius: 50%; margin-right: 15px;
-            animation: spin 3s linear infinite; border: 2px solid #333; flex-shrink: 0;
+        .icon-box {
+            width: 35px; height: 35px;
+            background: #00ff7f;
+            border-radius: 50%;
+            margin-right: 15px;
+            display: flex; align-items: center; justify-content: center;
+            flex-shrink: 0;
+            box-shadow: 0 0 15px #00ff7f;
         }
+
+        .music-icon { fill: #000; width: 20px; height: 20px; }
+
+        .content { overflow: hidden; white-space: nowrap; }
+
+        .title { 
+            font-size: 15px; font-weight: 900; color: #fff; 
+            margin: 0; padding: 0;
+            overflow: hidden; text-overflow: ellipsis;
+        }
+
+        .artist { 
+            font-size: 11px; font-weight: 400; color: #00ff7f; 
+            margin: 0; padding: 0; opacity: 0.8;
+            text-transform: uppercase; letter-spacing: 1px;
+        }
+
+        /* Animasi cakram berputar pelan */
+        .rotating { animation: spin 4s linear infinite; }
         @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-
-        .info { flex-grow: 1; overflow: hidden; }
-        .title { font-size: 14px; font-weight: 800; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .artist { font-size: 10px; color: #00ff7f; text-transform: uppercase; }
-
-        .controls {
-            display: flex; align-items: center; justify-content: space-between;
-            padding-top: 12px; border-top: 1px solid rgba(255,255,255,0.1);
-        }
-        .btn-play { fill: #fff; width: 26px; height: 26px; background: rgba(255,255,255,0.1); border-radius: 50%; padding: 6px; }
     </style>
 </head>
 <body>
 
 <div id="main-container">
-    <div class="top-section">
-        <div class="visual-disk">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="black"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 14.5c-2.49 0-4.5-2.01-4.5-4.5S9.51 7.5 12 7.5s4.5 2.01 4.5 4.5-2.01 4.5-4.5 4.5z"/></svg>
-        </div>
-        <div class="info">
-            <div id="title-text" class="title">Menunggu Musik...</div>
-            <div id="artist-text" class="artist">YT MUSIC PREMIUM</div>
-        </div>
+    <div class="icon-box rotating">
+        <svg class="music-icon" viewBox="0 0 24 24">
+            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 14.5c-2.49 0-4.5-2.01-4.5-4.5S9.51 7.5 12 7.5s4.5 2.01 4.5 4.5-2.01 4.5-4.5 4.5z"/>
+        </svg>
     </div>
-    <div class="controls">
-        <svg class="btn-play" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
-        <div id="debug-log" style="font-size: 8px; color: rgba(255,255,255,0.2);">MODE: LOCAL SCAN</div>
+    <div class="content">
+        <div id="title-text" class="title">Menunggu Musik...</div>
+        <div id="artist-text" class="artist">YT Music Premium</div>
     </div>
 </div>
 
 <script>
     const titleLabel = document.getElementById('title-text');
     const artistLabel = document.getElementById('artist-text');
-    const debugLog = document.getElementById('debug-log');
 
-    async function syncTikTok() {
-        // TikTok Fix: Pakai Jalur Relatif Langsung
-        const filePath = '../judul_lagu.txt';
+    async function updateMusic() {
+        // Path sejajar karena file ada di APPSWEB
+        // Jika ditaruh di temaYT, ganti jadi '../judul_lagu.txt'
+        const paths = ['../judul_lagu.txt', 'judul_lagu.txt'];
         
-        try {
-            // Coba akses file lokal
-            const response = await fetch(filePath + '?t=' + Date.now());
-            if (response.ok) {
-                const text = await response.text();
-                if (text.trim() && !text.includes('<!DOCTYPE')) {
-                    let parts = text.split(' - ');
-                    titleLabel.innerText = parts[0].trim();
-                    artistLabel.innerText = parts.length > 1 ? parts[1].trim() : "YouTube Music";
-                    debugLog.innerText = "STATUS: CONNECTED";
+        for (let p of paths) {
+            try {
+                const response = await fetch(p + '?cache=' + Date.now());
+                if (response.ok) {
+                    const text = await response.text();
+                    if (text.trim() && !text.includes('<!DOCTYPE')) {
+                        let parts = text.split(' - ');
+                        titleLabel.innerText = parts[0].trim();
+                        artistLabel.innerText = parts.length > 1 ? parts[1].trim() : "YouTube Music";
+                        return; // Berhenti jika sudah ketemu
+                    }
                 }
-            } else {
-                debugLog.innerText = "STATUS: FILE NOT FOUND";
-            }
-        } catch (e) {
-            debugLog.innerText = "TIKTOK BLOCKED: USE LOCAL FILE LINK";
+            } catch (e) {}
         }
     }
 
-    setInterval(syncTikTok, 2000);
-    syncTikTok();
+    setInterval(updateMusic, 2000);
+    updateMusic();
 </script>
 </body>
 </html>
