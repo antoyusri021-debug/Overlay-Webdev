@@ -3,126 +3,211 @@
 <head>
     <meta charset="UTF-8">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;700;800&display=swap');
         
         body { 
             margin: 0; 
-            padding: 20px; 
+            padding: 30px; 
             background: transparent; 
-            font-family: 'Inter', sans-serif; 
+            font-family: 'Plus Jakarta Sans', sans-serif; 
             overflow: hidden; 
         }
 
-        /* CONTAINER TEMA PUTIH TRANSPARAN (LIGHT GLASS) */
-        .player-card {
+        /* AURORA GLASS CONTAINER */
+        #main-container {
             display: flex;
             align-items: center;
-            background: rgba(255, 255, 255, 0.85); /* Putih transparan */
-            backdrop-filter: blur(15px); /* Efek blur kaca */
-            border-radius: 12px;
-            padding: 10px 18px;
-            color: #1a1a1a; /* Teks jadi gelap agar kontras */
-            border: 1px solid rgba(255, 255, 255, 0.4);
+            background: rgba(255, 255, 255, 0.07);
+            backdrop-filter: blur(25px) saturate(180%);
+            -webkit-backdrop-filter: blur(25px) saturate(180%);
+            border-radius: 20px;
+            padding: 12px 20px;
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.15);
             
-            width: 320px; 
-            height: 65px;
+            width: 350px; 
+            height: 75px;
             box-sizing: border-box;
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.4);
             
-            box-shadow: 0 8px 32px rgba(0,0,0,0.15); /* Shadow lebih lembut */
+            /* ANIMASI TRANSISI PREMIUM */
+            transition: all 0.8s cubic-bezier(0.22, 1, 0.36, 1);
+            opacity: 0;
+            transform: translateY(20px) scale(0.95);
+            visibility: hidden;
+            position: relative;
             overflow: hidden;
-            transition: all 0.5s ease;
         }
 
-        /* TOMBOL KONTROL */
-        .controls {
+        /* EFEK CAHAYA AURORA DI BELAKANG (Bikin Mewah) */
+        #main-container::after {
+            content: "";
+            position: absolute;
+            top: -50%; left: -50%;
+            width: 200%; height: 200%;
+            background: radial-gradient(circle, rgba(255, 0, 0, 0.15) 0%, transparent 50%);
+            animation: aurora-move 10s linear infinite;
+            z-index: -1;
+        }
+
+        @keyframes aurora-move {
+            0% { transform: translate(0, 0); }
+            50% { transform: translate(-10%, -10%); }
+            100% { transform: translate(0, 0); }
+        }
+
+        #main-container.active {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+            visibility: visible;
+        }
+
+        /* ICON AREA */
+        .icon-box {
+            width: 45px;
+            height: 45px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 14px;
             display: flex;
             align-items: center;
-            gap: 12px;
+            justify-content: center;
             margin-right: 15px;
-            padding-right: 15px;
-            border-right: 1px solid rgba(0, 0, 0, 0.1); /* Garis pembatas gelap tipis */
             flex-shrink: 0;
+            border: 1px solid rgba(255, 255, 255, 0.1);
         }
 
-        .btn-icon {
-            width: 14px; height: 14px;
-            fill: rgba(0, 0, 0, 0.4); /* Ikon jadi gelap transparan */
+        .yt-logo {
+            width: 24px;
+            height: 24px;
+            fill: #ff4747;
+            filter: drop-shadow(0 0 5px rgba(255, 71, 71, 0.6));
         }
 
-        .btn-play {
-            width: 26px; height: 26px;
-            fill: #ff0000; /* Tetap merah YouTube agar ikonik */
-        }
-
-        /* AREA TEKS */
+        /* TEXT INFO */
         .info {
             flex-grow: 1;
             overflow: hidden;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
         }
 
         .title {
-            font-size: 13px;
-            font-weight: 700;
-            color: #1a1a1a; /* Judul hitam pekat */
+            font-size: 14px;
+            font-weight: 800;
+            color: #ffffff;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
-            width: 100%;
             margin-bottom: 2px;
+            letter-spacing: -0.2px;
         }
 
         .artist {
-            font-size: 10px;
+            font-size: 11px;
             font-weight: 500;
-            color: rgba(0, 0, 0, 0.6); /* Artis abu-abu gelap */
+            color: rgba(255, 255, 255, 0.5);
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
-            width: 100%;
+        }
+
+        /* MINIMALIST WAVE ANIMATION */
+        .wave-container {
+            display: flex;
+            gap: 3px;
+            margin-left: 10px;
+        }
+
+        .dot {
+            width: 4px;
+            height: 4px;
+            background: #ff4747;
+            border-radius: 50%;
+            animation: wave-dot 1.2s ease-in-out infinite;
+        }
+        .dot:nth-child(2) { animation-delay: 0.2s; }
+        .dot:nth-child(3) { animation-delay: 0.4s; }
+
+        @keyframes wave-dot {
+            0%, 100% { transform: translateY(0); opacity: 0.3; }
+            50% { transform: translateY(-10px); opacity: 1; }
         }
     </style>
 </head>
 <body>
 
-<div class="player-card">
-    <div class="controls">
-        <svg class="btn-icon" viewBox="0 0 24 24"><path d="M6 6h2v12H6zm3.5 6l8.5 6V6z"/></svg>
-        <svg class="btn-play" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 14.5v-9l6 4.5-6 4.5z"/></svg>
-        <svg class="btn-icon" viewBox="0 0 24 24"><path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z"/></svg>
+<div id="main-container">
+    <div class="icon-box">
+        <svg class="yt-logo" viewBox="0 0 24 24">
+            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 14.5v-9l6 4.5-6 4.5z"/>
+        </svg>
     </div>
     
     <div class="info">
-        <div id="title" class="title">Menunggu Musik...</div>
-        <div id="artist" class="artist">YouTube Music</div>
+        <div id="title-text" class="title">Loading Stream...</div>
+        <div id="artist-text" class="artist">YT MUSIC PREMIUM</div>
+    </div>
+
+    <div class="wave-container">
+        <div class="dot"></div>
+        <div class="dot"></div>
+        <div class="dot"></div>
     </div>
 </div>
 
 <script>
-    async function updateFromFile() {
-        try {
-            const response = await fetch('../judul_lagu.txt?t=' + new Date().getTime());
-            if (response.ok) {
-                const fullText = await response.text();
-                const titleElement = document.getElementById('title');
-                const artistElement = document.getElementById('artist');
-                
-                let parts = fullText.split(' - ');
-                let currentTitle = parts[0] || "Menunggu Musik...";
-                let currentArtist = parts.length > 1 ? parts.slice(1).join(' - ') : "YouTube Music";
+    const container = document.getElementById('main-container');
+    const titleLabel = document.getElementById('title-text');
+    const artistLabel = document.getElementById('artist-text');
 
-                if (titleElement.innerText !== currentTitle.trim()) {
-                    titleElement.innerText = currentTitle.trim();
-                    artistElement.innerText = currentArtist.trim();
+    function sanitize(text) {
+        const temp = document.createElement('div');
+        temp.textContent = text;
+        return temp.innerHTML.trim();
+    }
+
+    async function checkMusic() {
+        try {
+            // Cek API Port 8080
+            const response = await fetch('http://localhost:8080/', { 
+                method: 'GET', mode: 'cors', cache: 'no-store' 
+            });
+            
+            if (response.ok) {
+                const data = await response.json();
+                if (data.title && data.title !== "Menunggu Musik..." && data.title !== "") {
+                    updateDisplay(data.title);
+                } else {
+                    container.classList.remove('active');
                 }
-            }
+            } else { throw new Error(); }
         } catch (err) {
-            console.log("Mencari data lagu...");
+            // Fallback File Lokal
+            try {
+                const resFile = await fetch('../judul_lagu.txt?t=' + Date.now());
+                if (resFile.ok) {
+                    const text = await resFile.text();
+                    if (text && text.trim() !== "" && !text.includes('<!DOCTYPE')) {
+                        updateDisplay(text);
+                    } else { container.classList.remove('active'); }
+                }
+            } catch (fErr) { container.classList.remove('active'); }
         }
     }
-    setInterval(updateFromFile, 2000);
+
+    function updateDisplay(fullText) {
+        let cleanText = sanitize(fullText);
+        let parts = cleanText.split(' - ');
+        let song = parts[0] || "Unknown Track";
+        let artist = parts.length > 1 ? parts.slice(1).join(' - ') : "YouTube Music";
+
+        if (titleLabel.innerText !== song.trim()) {
+            titleLabel.innerText = song.trim();
+            artistLabel.innerText = artist.trim();
+        }
+        container.classList.add('active');
+    }
+
+    setInterval(checkMusic, 2000);
+    checkMusic();
 </script>
 
 </body>
