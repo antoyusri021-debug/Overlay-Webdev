@@ -17,24 +17,35 @@
     "Cyberpunk Neon Night": "https://antoyusri021-debug.github.io/Overlay-Webdev/Cyberpunk-Neon-Night/Cyberpunk-Neon-Night.html",
     "Barista Overlay Tyo": "https://antoyusri021-debug.github.io/Overlay-Webdev/Barista-Overlay-Custom-Bean/Barista-Overlay-Custom-Bean.html",
     "Iphone Style": "https://antoyusri021-debug.github.io/Overlay-Webdev/iPhone-Style-Fix/iPhone-Style-Fix.html",
-    "iOS Chat Overlay *": "https://antoyusri021-debug.github.io/Overlay-Webdev/Dynamic iOS Chat Overlay/Clean-capsule.html",
-    "iOS Style Chat - Dark Mode Theme *": "https://antoyusri021-debug.github.io/Overlay-Webdev/iOS Style Chat - Dark Mode Theme/Clean-capsule.html",
-    "iOS Style Chat with Behind Animation *": "https://antoyusri021-debug.github.io/Overlay-Webdev/iOS Style Chat with Behind Animation/Clean-capsule.html",
-    "Retro Pop-up Fixed - Chat Sync *": "https://antoyusri021-debug.github.io/Overlay-Webdev/Retro Pop-up Fixed - Chat Sync/Clean-capsule.html",
-    "Overlay Fifine": "https://antoyusri021-debug.github.io/Overlay-Webdev/fifine/fifine_.html",
     "TheNinjaBone": "https://antoyusri021-debug.github.io/Overlay-Webdev/TheNinjaBone/Border-radius.html",
     "Golden Capsul Potret": "https://antoyusri021-debug.github.io/Overlay-Webdev/goldencapsulpotret/goldencapsulpotret.html"
   },
   "join_themes": {
     "Black Cat Join": "https://antoyusri021-debug.github.io/Overlay-Webdev/overlayjoin/catblackshdows/catblack.html",
-    "Minimalis": "https://antoyusri021-debug.github.io/Overlay-Webdev/overlayjoin/minimalis/minimalis.html"
+    "Minimalis Join": "https://antoyusri021-debug.github.io/Overlay-Webdev/overlayjoin/minimalis/minimalis.html"
   },
   "follow_themes": {
     "Black Cat Follow": "https://antoyusri021-debug.github.io/Overlay-Webdev/overlayfollow/catblaksound/sudahfollow.html"
   },
   "gif_themes": {
-    "Box White": "https://antoyusri021-debug.github.io/Overlay-Webdev/overlaygif/boxwite/box-white.html",
-    "Box Radius White": "https://antoyusri021-debug.github.io/Overlay-Webdev/overlaygif/boxwitespotlight/pro-spotlight-voice-white.html",
-    "Simple Fantasy": "https://antoyusri021-debug.github.io/Overlay-Webdev/overlaygif/simplefantasi/StyleFantasyMagic.html"
+    "Box White Gift": "https://antoyusri021-debug.github.io/Overlay-Webdev/overlaygif/boxwite/box-white.html",
+    "Box Radius White Gift": "https://antoyusri021-debug.github.io/Overlay-Webdev/overlaygif/boxwitespotlight/pro-spotlight-voice-white.html",
+    "Simple Fantasy Gift": "https://antoyusri021-debug.github.io/Overlay-Webdev/overlaygif/simplefantasi/StyleFantasyMagic.html"
+  },
+  "share_themes": {
+    "Default Share": "https://antoyusri021-debug.github.io/Overlay-Webdev/share/default.html"
+  },
+  "music_themes": {
+    "Atmosphere Style 1": "https://antoyusri021-debug.github.io/Overlay-Webdev/TemaYT/Themes1.html",
+    "Atmosphere Style 2": "https://antoyusri021-debug.github.io/Overlay-Webdev/TemaYT/Themes2.html",
+    "Atmosphere Style 3": "https://antoyusri021-debug.github.io/Overlay-Webdev/TemaYT/Themes3.html",
+    "Atmosphere Style 4": "https://antoyusri021-debug.github.io/Overlay-Webdev/TemaYT/Themes4.html",
+    "Atmosphere Style 5": "https://antoyusri021-debug.github.io/Overlay-Webdev/TemaYT/Themes5.html",
+    "TLS Music Overlay": "https://antoyusri021-debug.github.io/Overlay-Webdev/TemaYT/TLSthemes1.html"
+  },
+  "fixed_themes": {
+    "iOS Chat Overlay (Fixed)": "https://antoyusri021-debug.github.io/Overlay-Webdev/Dynamic%20iOS%20Chat%20Overlay/Clean-capsule.html",
+    "iOS Style Dark (Fixed)": "https://antoyusri021-debug.github.io/Overlay-Webdev/iOS%20Style%20Chat%20-%20Dark%20Mode%20Theme/Clean-capsule.html",
+    "Retro Pop-up (Fixed)": "https://antoyusri021-debug.github.io/Overlay-Webdev/Retro%20Pop-up%20Fixed%20-%20Chat%20Sync/Clean-capsule.html"
   }
 }
