@@ -11,21 +11,22 @@
     "iOS Chat Overlay (Full Mod)": "https://antoyusri021-debug.github.io/Overlay-Webdev/Dynamic%20iOS%20Chat%20Overlay/Clean-capsule.html",
     "iOS Style Dark (Full Mod)": "https://antoyusri021-debug.github.io/Overlay-Webdev/iOS%20Style%20Chat%20-%20Dark%20Mode%20Theme/Clean-capsule.html"
   },
+  
   "join_themes": {
     "Black Cat Join": "https://antoyusri021-debug.github.io/Overlay-Webdev/overlayjoin/catblackshdows/catblack.html",
     "Minimalis Join": "https://antoyusri021-debug.github.io/Overlay-Webdev/overlayjoin/minimalis/minimalis.html"
   },
   "follow_themes": {
-    "Black Cat Follow": "https://antoyusri021-debug.github.io/Overlay-Webdev/overlayfollow/catblaksound/sudahfollow.html"
+    "Black Cat Follow": "https://antoyusri021-debug.github.io/Overlay-Webdev/overlayfollow/catblaksound/sudahfollow.html",
+    "Kece Follow": "https://antoyusri021-debug.github.io/Overlay-Webdev/overlayfollow/KeceFollow/kecefollow.html"
   },
   "gif_themes": {
-    "Box White Gift": "https://antoyusri021-debug.github.io/Overlay-Webdev/overlaygif/boxwite/box-white.html",
-    "Box Radius White Gift": "https://antoyusri021-debug.github.io/Overlay-Webdev/overlaygif/boxwitespotlight/pro-spotlight-voice-white.html",
-    "Simple Fantasy Gift": "https://antoyusri021-debug.github.io/Overlay-Webdev/overlaygif/simplefantasi/StyleFantasyMagic.html"
+    "Box White Gift": "https://antoyusri021-debug.github.io/Overlay-Webdev/overlaygif/MonoGlitch/MonoGlitch.html"
   },
   "share_themes": {
     "Default Share": "https://antoyusri021-debug.github.io/Overlay-Webdev/share/default.html"
   },
+  
   "music_themes": {
     "Atmosphere Style 1": "https://antoyusri021-debug.github.io/Overlay-Webdev/TemaYT/Themes1.html",
     "Atmosphere Style 2": "https://antoyusri021-debug.github.io/Overlay-Webdev/TemaYT/Themes2.html",
@@ -34,6 +35,7 @@
     "Atmosphere Style 5": "https://antoyusri021-debug.github.io/Overlay-Webdev/TemaYT/Themes5.html",
     "TLS Music Overlay": "https://antoyusri021-debug.github.io/Overlay-Webdev/TemaYT/TLSthemes1.html"
   },
+  
   "fixed_themes": {
     "Akatsuki Itachi": "https://antoyusri021-debug.github.io/Overlay-Webdev/Akatsuki-uciha/akatsuki-itachi.html",
     "Clean Capsule BG Black": "https://antoyusri021-debug.github.io/Overlay-Webdev/Clean-capsule-bg-hitam/Border-radius.html",
