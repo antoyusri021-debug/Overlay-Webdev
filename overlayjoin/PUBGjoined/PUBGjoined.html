@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PUBG Tactical Welcome Overlay - V1.0</title>
+    <style>
+        /* Menggunakan font Teko biar serasi dengan chat overlay */
+        @import url('https://fonts.googleapis.com/css2?family=Teko:wght@400;600;700&family=Oswald:wght@700&display=swap');
+
+        :root {
+            --pubg-accent: #ffb400; /* Kuning Oranye PUBG */
+            --bg-dark: rgba(15, 15, 15, 0.95);
+        }
+
+        body { 
+            background: transparent; 
+            margin: 0;
+            overflow: hidden;
+            height: 100vh;
+            display: flex;
+            justify-content: flex-start; 
+            align-items: center;      
+            padding-left: 50px;
+            font-family: 'Teko', sans-serif;
+            text-transform: uppercase;
+        }
+
+        .welcome-content {
+            display: flex;
+            align-items: center;
+            opacity: 0;
+            transform: translateX(-50px) skew(-5deg);
+            transition: all 0.5s cubic-bezier(0.19, 1, 0.22, 1);
+        }
+
+        .welcome-content.show {
+            opacity: 1;
+            transform: translateX(0) skew(-5deg);
+        }
+
+        /* ICON CONTAINER TACTICAL */
+        .icon-container {
+            width: 70px;
+            height: 70px;
+            background: var(--pubg-accent);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 2;
+            position: relative;
+            border: 2px solid #000;
+            box-shadow: 5px 5px 0px rgba(0,0,0,0.3);
+        }
+
+        .icon-img {
+            width: 75%;
+            height: 75%;
+            object-fit: contain;
+            filter: drop-shadow(0px 2px 2px rgba(0,0,0,0.5));
+        }
+
+        /* TEXT BOX PUBG STYLE */
+        .text-box {
+            background: var(--bg-dark);
+            padding: 10px 40px 10px 30px;
+            margin-left: -5px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-right: 5px solid var(--pubg-accent);
+            position: relative;
+            min-width: 250px;
+            box-shadow: 10px 10px 20px rgba(0,0,0,0.4);
+            clip-path: polygon(0 0, 100% 0, 100% 75%, 95% 100%, 0 100%);
+        }
+
+        /* Ornamen Siku */
+        .text-box::after {
+            content: "";
+            position: absolute;
+            top: 5px; right: 5px;
+            width: 10px; height: 10px;
+            border-top: 2px solid var(--pubg-accent);
+            border-right: 2px solid var(--pubg-accent);
+            opacity: 0.5;
+        }
+
+        .user-name {
+            color: var(--pubg-accent);
+            font-size: 32px; 
+            font-weight: 700;
+            margin: 0;
+            line-height: 1;
+            letter-spacing: 1px;
+            text-shadow: 2px 2px 0px #000;
+        }
+
+        .welcome-msg {
+            color: #ffffff;
+            font-size: 18px;
+            font-weight: 400;
+            letter-spacing: 2px;
+            margin-top: -2px;
+            opacity: 0.9;
+        }
+
+        /* Progress Bar ala Loading Game */
+        .line-loader {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            height: 4px;
+            background: var(--pubg-accent);
+            width: 0%;
+        }
+
+        .welcome-content.show .line-loader {
+            animation: progress 5.5s linear forwards;
+        }
+
+        @keyframes progress {
+            to { width: 100%; }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="output"></div>
+    <audio id="welcome-sound"></audio>
+
+    <script>
+        const urlParams = new URLSearchParams(window.location.search);
+        const sessionID = urlParams.get('session') || 'TESTROOM';
+        const password = urlParams.get('password') || "false";
+
+        // ASSETS (Tetap sesuai request lo)
+        const soundFile = "welcome.mp3"; 
+        const iconFile = "kabuto.png"; 
+
+        let chatQueue = [];
+        let isShowing = false;
+        const hasGreeted = new Set();
+
+        function playWelcomeSound() {
+            const audio = document.getElementById('welcome-sound');
+            audio.src = soundFile;
+            audio.volume = 0.6; // Sedikit lebih kencang buat vibe PUBG
+            audio.play().catch(e => console.log("Audio unlock required"));
+        }
+
+        function connectToNinja() {
+            const iframe = document.createElement("iframe");
+            iframe.src = `https://vdo.socialstream.ninja/?ln&password=${password}&salt=vdo.ninja&label=overlay&exclude=${sessionID}&scene&novideo&noaudio&cleanoutput&chat=1&room=${sessionID}`;
+            iframe.style.display = "none";
+            document.body.appendChild(iframe);
+
+            window.addEventListener("message", function (e) {
+                if (e.source != iframe.contentWindow) return;
+                if (e.data?.dataReceived?.overlayNinja) {
+                    let res = e.data.dataReceived.overlayNinja;
+                    let name = res.chatname || res.chatname_clean;
+                    
+                    if (name && !hasGreeted.has(name.toLowerCase())) {
+                        if (name.toLowerCase() !== "vdo.ninja") {
+                            hasGreeted.add(name.toLowerCase());
+                            chatQueue.push(name);
+                            if (!isShowing) processQueue();
+                        }
+                    }
+                }
+            });
+        }
+
+        function processQueue() {
+            if (isShowing || chatQueue.length === 0) return;
+            isShowing = true;
+            render(chatQueue.shift());
+        }
+
+        function render(userName) {
+            const output = document.getElementById('output');
+            output.innerHTML = `
+                <div class="welcome-content">
+                    <div class="icon-container">
+                        <img src="${iconFile}" class="icon-img" onerror="this.src='https://cdn-icons-png.flaticon.com/512/824/824481.png'">
+                    </div>
+                    <div class="text-box">
+                        <div class="user-name">${userName}</div>
+                        <div class="welcome-msg">Has Joined The Battle</div>
+                        <div class="line-loader"></div>
+                    </div>
+                </div>
+            `;
+            
+            const content = document.querySelector('.welcome-content');
+            playWelcomeSound();
+            
+            setTimeout(() => { if(content) content.classList.add('show'); }, 100);
+
+            // Hilang setelah 6 detik
+            setTimeout(() => {
+                if(content) {
+                    content.style.opacity = "0";
+                    content.style.transform = "translateX(30px) skew(-5deg)";
+                    content.style.filter = "blur(10px)";
+                }
+                setTimeout(() => {
+                    output.innerHTML = '';
+                    isShowing = false;
+                    processQueue();
+                }, 600);
+            }, 6000); 
+        }
+
+        // --- TES TEMA DENGAN SPASI ---
+        window.addEventListener('keydown', (e) => {
+            if (e.code === "Space") {
+                const testNames = ["Chicken_Dinner", "Pochinki_Lord", "AirDrop_Hunter", "Buggy_Driver"];
+                const randomName = testNames[Math.floor(Math.random() * testNames.length)];
+                
+                chatQueue.push(randomName);
+                if (!isShowing) processQueue();
+            }
+        });
+
+        window.onload = connectToNinja;
+
+        window.addEventListener('click', () => {
+            const audio = document.getElementById('welcome-sound');
+            audio.play().then(() => audio.pause());
+        }, { once: true });
+    </script>
+</body>
+</html>
