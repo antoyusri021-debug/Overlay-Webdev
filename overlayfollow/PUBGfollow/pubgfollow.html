@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PUBG Tactical Follower - Thank You Edition</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Teko:wght@400;600;700&family=Oswald:wght@700&display=swap');
+
+        :root {
+            --pubg-yellow: #ffb400;
+            --carbon: #111;
+            --bg-glass: rgba(10, 10, 10, 0.95);
+        }
+
+        body { 
+            background: transparent !important; 
+            font-family: 'Teko', sans-serif; 
+            margin: 0;
+            overflow: hidden;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+            text-transform: uppercase;
+        }
+
+        #container {
+            padding-left: 100px;
+        }
+
+        .follower-card {
+            display: flex;
+            align-items: flex-end; 
+            position: relative;
+            opacity: 0;
+            transform: translateX(-50px);
+            transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .follower-card.show {
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+        .avatar-frame {
+            width: 320px;
+            height: 320px;
+            background: var(--carbon);
+            border: 6px solid var(--pubg-yellow);
+            position: relative;
+            z-index: 20;
+            box-shadow: 0 0 30px rgba(255, 180, 0, 0.2), 20px 0 50px rgba(0,0,0,0.5);
+        }
+
+        .avatar-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+
+        .info-box {
+            background: var(--bg-glass);
+            height: 140px; 
+            padding: 0 50px 0 60px;
+            margin-left: -30px; 
+            margin-bottom: 25px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            border-top: 4px solid var(--pubg-yellow);
+            border-right: 15px solid var(--pubg-yellow);
+            position: relative;
+            min-width: 480px;
+            clip-path: polygon(0 0, 100% 0, 92% 100%, 0% 100%);
+        }
+
+        .status-tag {
+            background: var(--pubg-yellow);
+            color: #000;
+            font-size: 22px;
+            font-weight: 800;
+            padding: 0 15px;
+            width: fit-content;
+            margin-bottom: 2px;
+            letter-spacing: 2px;
+        }
+
+        .follower-name {
+            color: #fff;
+            font-size: 52px;
+            font-weight: 700;
+            line-height: 0.8;
+            letter-spacing: 1px;
+            text-shadow: 3px 3px 0px rgba(0,0,0,0.8);
+        }
+
+        .sub-text {
+            color: var(--pubg-yellow);
+            font-size: 24px;
+            letter-spacing: 2px;
+            margin-top: 5px;
+            font-weight: 600;
+        }
+
+        .follower-card.show .avatar-frame {
+            animation: yellow-glow 2s infinite ease-in-out;
+        }
+
+        @keyframes yellow-glow {
+            0% { border-color: var(--pubg-yellow); }
+            50% { border-color: #fff; box-shadow: 0 0 40px rgba(255, 255, 255, 0.4); }
+            100% { border-color: var(--pubg-yellow); }
+        }
+
+        .fade-out {
+            opacity: 0 !important;
+            transform: translateX(100px) scale(0.9) !important;
+            filter: blur(10px);
+            transition: all 0.6s ease-in !important;
+        }
+    </style>
+</head>
+<body>
+    <div id="container"></div>
+    <audio id="follow-sound" preload="auto"></audio>
+
+    <script>
+        const urlParams = new URLSearchParams(window.location.search);
+        const roomID = urlParams.get('session') || urlParams.get('room') || 'TESTROOM';
+        const password = urlParams.get('password') || "false";
+        
+        const soundFile = "follow.mp3";
+        const container = document.getElementById('container');
+        let isProcessing = false;
+        let queue = [];
+
+        // DAFTAR UCAPAN KECE TERIMA KASIH
+        const coolMessages = [
+            "MAKASIH SUDAH JOIN SQUAD, BROW!",
+            "RESPECT! THANKS FOR THE FOLLOW!",
+            "AUTO MASUK TEAM ELITE!",
+            "MANTAP! THANKS SUDAH FOLLOW!",
+            "SQUAD KITA MAKIN KUAT, BROW!",
+            "TENGKYU SUDAH MENDARAT DI SINI!",
+            "SIAP TEMPUR! THANKS FOLLOWNYA!",
+            "WELCOME TO THE WINNER CIRCLE!"
+        ];
+
+        function playFollowSound() {
+            const audio = document.getElementById('follow-sound');
+            audio.src = soundFile;
+            audio.volume = 0.8;
+            audio.play().catch(e => {});
+        }
+
+        function renderFollower(name, img) {
+            const userImg = img && img !== "" ? img : `https://api.dicebear.com/7.x/initials/svg?seed=${name}`;
+            // Ambil ucapan random
+            const randomMsg = coolMessages[Math.floor(Math.random() * coolMessages.length)];
+            
+            const card = document.createElement('div');
+            card.className = 'follower-card';
+            card.innerHTML = `
+                <div class="avatar-frame">
+                    <img src="${userImg}" class="avatar-img" onerror="this.src='https://via.placeholder.com/320?text=SOLDIER'">
+                </div>
+                <div class="info-box">
+                    <div class="status-tag">NEW FOLLOWER</div>
+                    <div class="follower-name">${name}</div>
+                    <div class="sub-text">${randomMsg}</div>
+                </div>
+            `;
+
+            container.innerHTML = ''; 
+            container.appendChild(card);
+            
+            setTimeout(() => card.classList.add('show'), 100);
+            playFollowSound();
+
+            setTimeout(() => {
+                card.classList.add('fade-out');
+                setTimeout(() => {
+                    card.remove();
+                    isProcessing = false;
+                    processQueue();
+                }, 700);
+            }, 7000);
+        }
+
+        function processQueue() {
+            if (isProcessing || queue.length === 0) return;
+            isProcessing = true;
+            const item = queue.shift();
+            renderFollower(item.name, item.img);
+        }
+
+        function createIframe() {
+            const iframe = document.createElement("iframe");
+            iframe.src = `https://vdo.socialstream.ninja/?ln&password=${password}&notmobile&salt=vdo.ninja&label=overlay&exclude=${roomID}&scene&novideo&noaudio&cleanoutput&includeavatars=1&chat=1&system=1&events=1&room=${roomID}`;
+            iframe.style.display = "none";
+            document.body.appendChild(iframe);
+
+            window.addEventListener("message", function (e) {
+                if (e.source != iframe.contentWindow) return;
+                const res = e.data.dataReceived?.overlayNinja;
+                if (!res) return;
+
+                let isFollow = false;
+                let name = res.chatname || res.chatname_clean;
+                let avatar = res.avatar || res.user_img || "";
+
+                if (res.event === 'follow' || res.type === 'follow') isFollow = true;
+                let msg = (res.text || "").toLowerCase();
+                if (msg.includes("followed") || msg.includes("mengikuti")) isFollow = true;
+
+                if (isFollow && name) {
+                    queue.push({ name: name, img: avatar });
+                    if (!isProcessing) processQueue();
+                }
+            });
+        }
+
+        window.addEventListener('keydown', (e) => {
+            if (e.code === "Space") {
+                queue.push({ 
+                    name: "BROW_GOKIL", 
+                    img: "https://i.pravatar.cc/320?u="+Math.random() 
+                });
+                if (!isProcessing) processQueue();
+            }
+        });
+
+        window.onload = createIframe;
+        window.addEventListener('click', () => {
+            const audio = document.getElementById('follow-sound');
+            audio.play().then(() => audio.pause());
+        }, { once: true });
+    </script>
+</body>
+</html>
