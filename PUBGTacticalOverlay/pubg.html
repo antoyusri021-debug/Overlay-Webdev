@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PUBG Tactical Overlay - V5.2 Avatar Visible</title>
+    <style>
+/* ===============================
+   THEME: ULTIMATE PUBG (FIXED AVATAR)
+   STATUS: FIELD READY
+================================ */
+@import url('https://fonts.googleapis.com/css2?family=Teko:wght@500;700&family=Oswald:wght@700&display=swap');
+
+:root {
+    --bg-color: rgba(15, 15, 15, 0.9);
+    --pubg-accent: #ffb400; 
+    --user-color: #ffffff;
+    --chat-color: #ffffff;
+    --font-size: 26px;
+    --radius: 0px; 
+    --avt-radius: 4px; 
+}
+
+body { 
+    background: transparent !important; 
+    font-family: 'Teko', sans-serif; 
+    margin: 0;
+    overflow: hidden;
+}
+
+#container {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    height: 100vh;
+    padding-left: 20px; /* Reset padding biar ga kejauhan */
+}
+
+/* Wrapper buat nampung Avatar + Message secara horizontal */
+.message-content-wrapper {
+    display: flex;
+    align-items: flex-end; /* Avatar nempel bawah */
+    gap: 10px;
+    margin-top: 45px;
+}
+
+.avatar-box {
+    width: 85px;
+    height: 85px;
+    flex-shrink: 0;
+    position: relative;
+    z-index: 100;
+}
+
+.avatar {
+    width: 100%;
+    height: 100%;
+    border-radius: var(--avt-radius);
+    border: 3px solid var(--pubg-accent);
+    background: #222;
+    object-fit: cover;
+    box-shadow: 5px 5px 15px rgba(0,0,0,0.5);
+}
+
+.message {
+    position: relative;
+    display: flex; 
+    flex-direction: column;
+    justify-content: center;
+    padding: 12px 20px; 
+    background: var(--bg-color); 
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-left: 6px solid var(--pubg-accent);
+    width: 450px; 
+    min-height: 90px;      
+    box-sizing: border-box;
+    clip-path: polygon(0 0, 100% 0, 100% 80%, 94% 100%, 0 100%);
+    box-shadow: 10px 10px 20px rgba(0,0,0,0.4);
+}
+
+/* Tactical Siku */
+.message::before {
+    content: "";
+    position: absolute;
+    top: 5px; right: 5px;
+    width: 12px; height: 12px;
+    border-top: 2px solid var(--pubg-accent);
+    border-right: 2px solid var(--pubg-accent);
+    opacity: 0.8;
+}
+
+.username-container {
+    position: absolute;
+    top: -34px; left: 0px;
+    display: flex;
+    align-items: center;
+}
+
+.level-tag {
+    background: #000;
+    color: var(--pubg-accent);
+    border: 1px solid var(--pubg-accent);
+    font-family: 'Oswald', sans-serif;
+    padding: 1px 8px;
+    font-size: 14px;
+    font-weight: bold;
+}
+
+.username {
+    background: var(--pubg-accent);
+    padding: 3px 25px 3px 12px;
+    color: #000 !important;
+    font-size: 20px; 
+    font-weight: 700;
+    text-transform: uppercase;
+    clip-path: polygon(0 0, 88% 0, 100% 100%, 0 100%);
+}
+
+.text { 
+    font-size: var(--font-size); 
+    font-weight: 500; 
+    color: var(--chat-color) !important;
+    line-height: 1.1;
+    text-transform: uppercase;
+    display: -webkit-box;
+    -webkit-line-clamp: 2; 
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.8);
+}
+
+/* --- ANIMATIONS --- */
+.message-wrapper { opacity: 0; transition: all 0.4s cubic-bezier(0.19, 1, 0.22, 1); }
+.anim-fade-in.show { opacity: 1; transform: scale(1); }
+.anim-fade-in { transform: scale(0.8); }
+.anim-slide-left.show { opacity: 1; transform: translateX(0); }
+.anim-slide-left { transform: translateX(-100px); }
+.anim-slide-up.show { opacity: 1; transform: translateY(0); }
+.anim-slide-up { transform: translateY(50px); }
+.anim-bounce.show { opacity: 1; transform: scale(1); }
+.anim-bounce { transform: scale(0.5); }
+.message-wrapper.hide { opacity: 0; transform: translateX(50px); filter: blur(5px); }
+    </style>
+</head>
+<body>
+    <div id="container"><div id="output"></div></div>
+
+    <script>
+        const urlParams = new URLSearchParams(window.location.search);
+        const roomID = urlParams.get('session') || 'TESTROOM';
+        const password = urlParams.get('password') || "false";
+        let showDuration = parseInt(urlParams.get('showtime') || urlParams.get('timer') || '10000'); 
+        let selectedAnim = urlParams.get('anim') || 'slide-left';
+
+        function hexToRgba(hex, alpha) {
+            if (!hex) return `rgba(15, 15, 15, ${alpha})`;
+            if (!hex.startsWith('#')) hex = '#' + hex;
+            let r = parseInt(hex.slice(1, 3), 16),
+                g = parseInt(hex.slice(3, 5), 16),
+                b = parseInt(hex.slice(5, 7), 16);
+            return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+        }
+
+        function getAvtRadius(shape) {
+            if (shape === 'circle') return '50%';
+            if (shape === 'squircle') return '20%';
+            return '4px'; 
+        }
+
+        function applyUrlSettings() {
+            const root = document.documentElement;
+            if(urlParams.has('bg')) root.style.setProperty('--bg-color', hexToRgba(urlParams.get('bg'), urlParams.get('opac') || '0.9'));
+            if(urlParams.has('radius')) root.style.setProperty('--radius', urlParams.get('radius') + 'px');
+            if(urlParams.has('font')) root.style.setProperty('--font-size', urlParams.get('font') + 'px');
+            if(urlParams.has('ucolor')) root.style.setProperty('--pubg-accent', '#' + urlParams.get('ucolor'));
+            if(urlParams.has('tcolor')) root.style.setProperty('--chat-color', '#' + urlParams.get('tcolor'));
+            if(urlParams.has('avt')) root.style.setProperty('--avt-radius', getAvtRadius(urlParams.get('avt')));
+        }
+
+        window.addEventListener("message", (e) => {
+            if (e.data.type === 'UPDATE_STYLE') {
+                const root = document.documentElement;
+                root.style.setProperty('--bg-color', hexToRgba(e.data.bg, e.data.opac));
+                root.style.setProperty('--radius', e.data.radius + 'px');
+                root.style.setProperty('--font-size', e.data.font + 'px');
+                root.style.setProperty('--pubg-accent', e.data.uColor); 
+                root.style.setProperty('--chat-color', e.data.tColor);
+                if (e.data.avtShape) root.style.setProperty('--avt-radius', getAvtRadius(e.data.avtShape));
+                if (e.data.anim) selectedAnim = e.data.anim;
+                if (e.data.timer) showDuration = parseInt(e.data.timer);
+            }
+            if (e.data.type === 'TEST_CHAT') {
+                showMessage({ chatname: e.data.name, chatmessage: e.data.message });
+            }
+        });
+
+        function createIframe() {
+            var iframe = document.createElement("iframe");
+            iframe.src = `https://vdo.socialstream.ninja/?ln&password=${password}&notmobile&salt=vdo.ninja&label=overlay&exclude=${roomID}&scene&novideo&noaudio&cleanoutput&room=${roomID}`;
+            iframe.style.display = "none";
+            document.body.appendChild(iframe);
+            window.addEventListener("message", function (e) {
+                if (e.source != iframe.contentWindow) return;
+                if (e.data.dataReceived && e.data.dataReceived.overlayNinja) {
+                    let res = e.data.dataReceived.overlayNinja;
+                    if (res.chatmessage) showMessage(res);
+                }
+            });
+        }
+
+        let currentMessage = null;
+        let hideTimeout = null;
+
+        function showMessage(content) {
+            if (hideTimeout) clearTimeout(hideTimeout);
+            hideMessage(() => {
+                const output = document.getElementById('output');
+                const wrapper = document.createElement('div');
+                wrapper.className = `message-wrapper anim-${selectedAnim}`;
+                const avatarImg = content.chatimg || `https://api.dicebear.com/7.x/initials/svg?seed=${content.chatname}`;
+                
+                wrapper.innerHTML = `
+                    <div class="message-content-wrapper">
+                        <div class="avatar-box">
+                            <img class="avatar" src="${avatarImg}">
+                        </div>
+                        <div class="message">
+                            <div class="username-container">
+                                <div class="level-tag">PLAYER</div>
+                                <span class="username">${content.chatname}</span>
+                            </div>
+                            <div class="text">${content.chatmessage}</div>
+                        </div>
+                    </div>`;
+                output.appendChild(wrapper);
+                setTimeout(() => wrapper.classList.add('show'), 50);
+                currentMessage = wrapper;
+                if (showDuration > 0) hideTimeout = setTimeout(() => hideMessage(), showDuration);
+            });
+        }
+
+        function hideMessage(callback) {
+            if (currentMessage) {
+                currentMessage.classList.add('hide');
+                setTimeout(() => {
+                    if (currentMessage?.parentNode) currentMessage.parentNode.removeChild(currentMessage);
+                    currentMessage = null;
+                    if (callback) callback();
+                }, 400);
+            } else if (callback) callback();
+        }
+
+        applyUrlSettings();
+        createIframe();
+    </script>
+</body>
+</html>
