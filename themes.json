@@ -14,14 +14,17 @@
   },
   
   "join_themes": {
-    "Black Cat Join": "https://antoyusri021-debug.github.io/Overlay-Webdev/overlayjoin/catblackshdows/catblack.html",
-    "Minimalis Join": "https://antoyusri021-debug.github.io/Overlay-Webdev/overlayjoin/minimalis/minimalis.html"
+    "Black Cat Joined": "https://antoyusri021-debug.github.io/Overlay-Webdev/overlayjoin/catblackshdows/catblack.html",
+    "Minimalis Joined": "https://antoyusri021-debug.github.io/Overlay-Webdev/overlayjoin/minimalis/minimalis.html",
+    "PUBG Joined": "https://antoyusri021-debug.github.io/Overlay-Webdev/overlayjoin/PUBGjoined/PUBGjoined.html"
   },
   "follow_themes": {
-    "Kece Follow": "https://antoyusri021-debug.github.io/Overlay-Webdev/overlayfollow/KeceFollow/kecefollow.html"
+    "Kece Follow": "https://antoyusri021-debug.github.io/Overlay-Webdev/overlayfollow/KeceFollow/kecefollow.html",
+    "PUBG Follow": "https://antoyusri021-debug.github.io/Overlay-Webdev/overlayfollow/PUBGfollow/pubgfollow.html"
   },
   "gif_themes": {
-    "Box White Gift": "https://antoyusri021-debug.github.io/Overlay-Webdev/overlaygif/MonoGlitch/MonoGlitch.html"
+    "Box White Gift": "https://antoyusri021-debug.github.io/Overlay-Webdev/overlaygif/MonoGlitch/MonoGlitch.html",
+    "PUBG Gif": "https://antoyusri021-debug.github.io/Overlay-Webdev/overlaygif/PUBGgif/PUBGgif.html"
   },
   "share_themes": {
     "Default Share": "https://antoyusri021-debug.github.io/Overlay-Webdev/share/default.html"
