@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Naruto Shinobi Gift - Sage Edition</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Teko:wght@400;600;700&family=Permanent+Marker&display=swap');
+
+        :root {
+            --naruto-orange: #ff6b00;
+            --sage-red: #d90429;
+            --konoha-blue: #1b263b;
+            --scroll-paper: #fcf4dd;
+        }
+
+        body { 
+            background: transparent !important; 
+            font-family: 'Teko', sans-serif; 
+            margin: 0;
+            overflow: hidden;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center; 
+            text-transform: uppercase;
+        }
+
+        #main-display { 
+            width: 100%;
+            display: flex;
+            justify-content: center;
+        }
+
+        .message-wrapper {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center; 
+            opacity: 0;
+            transform: scale(0.5) rotate(10deg);
+            transition: all 0.6s cubic-bezier(0.19, 1, 0.22, 1);
+        }
+
+        .message-wrapper.show {
+            opacity: 1;
+            transform: scale(1) rotate(0deg);
+        }
+
+        /* AVATAR DENGAN BINGKAI SEGEL (SEAL FRAME) */
+        .avatar-box {
+            width: 320px; 
+            height: 320px;
+            background: #fff;
+            border: 12px double var(--sage-red); /* Border ganda biar kayak segel */
+            border-radius: 50%; /* Bulat sempurna buat simbol Jutsu */
+            margin-bottom: 20px;
+            z-index: 10;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 0 50px rgba(217, 4, 41, 0.4), inset 0 0 30px rgba(0,0,0,0.2);
+        }
+
+        /* Efek Putaran Segel di belakang Avatar */
+        .avatar-box::before {
+            content: "";
+            position: absolute;
+            top: -10px; left: -10px; right: -10px; bottom: -10px;
+            border: 2px dashed var(--naruto-orange);
+            border-radius: 50%;
+            animation: rotate-seal 10s linear infinite;
+        }
+
+        @keyframes rotate-seal {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .avatar-box img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        /* BOX INFO - GAYA PAPAN PENGUMUMAN NINJA */
+        .pro-card {
+            background: var(--scroll-paper);
+            min-width: 450px; 
+            padding: 15px 40px; 
+            border-left: 15px solid var(--sage-red);
+            border-right: 15px solid var(--sage-red);
+            position: relative;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+            /* Bentuk hexagon tactical */
+            clip-path: polygon(5% 0, 95% 0, 100% 50%, 95% 100%, 5% 100%, 0% 50%);
+        }
+
+        .content-pro { 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center;
+        }
+
+        .name-pro { 
+            color: var(--konoha-blue); 
+            font-family: 'Permanent Marker', cursive;
+            font-size: 32px; 
+            line-height: 1;
+        }
+
+        .status-text { 
+            color: var(--sage-red); 
+            font-size: 42px; 
+            font-weight: 800; 
+            text-shadow: 1px 1px 0px rgba(0,0,0,0.1);
+            letter-spacing: 2px;
+            line-height: 0.9;
+            margin: 5px 0;
+        }
+
+        .gift-detail { 
+            background: var(--naruto-orange);
+            color: #fff;
+            padding: 2px 25px;
+            font-size: 24px; 
+            font-weight: 700; 
+            margin-top: 5px;
+            box-shadow: 4px 4px 0px var(--konoha-blue);
+        }
+
+        /* EFEK CAHAYA (CHAKRA BURST) */
+        .message-wrapper.show .avatar-box {
+            animation: chakra-glow 2s infinite ease-in-out;
+        }
+
+        @keyframes chakra-glow {
+            0% { box-shadow: 0 0 20px rgba(255, 107, 0, 0.5); }
+            50% { box-shadow: 0 0 60px rgba(255, 107, 0, 0.8); border-color: var(--naruto-orange); }
+            100% { box-shadow: 0 0 20px rgba(255, 107, 0, 0.5); }
+        }
+
+        .fade-out {
+            opacity: 0 !important;
+            transform: scale(1.2) !important;
+            filter: blur(20px);
+            transition: all 0.7s ease-in !important;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="main-display">
+        <div id="output"></div>
+    </div>
+    
+    <audio id="gift-sound" preload="auto"></audio>
+
+    <script>
+        const urlParams = new URLSearchParams(window.location.search);
+        const roomID = urlParams.get('session') || urlParams.get('room') || 'TESTROOM';
+        const password = urlParams.get('password') || "false";
+        const soundFile = "Narutogif.mp3"; // Bisa lo ganti ke sound jutsu kalau ada
+
+        let giftQueue = [];
+        let isShowing = false;
+
+        function connectToNinja() {
+            const iframe = document.createElement("iframe");
+            iframe.src = `https://vdo.socialstream.ninja/?ln&password=${password}&notmobile&salt=vdo.ninja&label=overlay&exclude=${roomID}&scene&novideo&noaudio&cleanoutput&includeavatars=1&chat=1&system=1&events=1&room=${roomID}`;
+            iframe.style.display = "none";
+            document.body.appendChild(iframe);
+
+            window.addEventListener("message", function (e) {
+                if (e.source != iframe.contentWindow) return;
+                const res = e.data.dataReceived?.overlayNinja;
+                if (!res) return;
+
+                // Deteksi gift/donasi
+                if (res.hasDonation || (res.chatmessage && res.chatmessage.toLowerCase().includes("sent"))) {
+                    giftQueue.push({
+                        name: res.chatname || 'SULTAN NINJA',
+                        gift: res.hasDonation || res.chatmessage.replace(/sent/i, "").trim(),
+                        img: res.avatar || res.user_img || res.chatimg 
+                    });
+                    if (!isShowing) processQueue();
+                }
+            });
+        }
+
+        function processQueue() {
+            if (isShowing || giftQueue.length === 0) return;
+            isShowing = true;
+            render(giftQueue.shift());
+        }
+
+        function render(data) {
+            const output = document.getElementById('output');
+            const audio = document.getElementById('gift-sound');
+            const userPic = data.img || `https://api.dicebear.com/7.x/initials/svg?seed=${data.name}`;
+            
+            output.innerHTML = `
+                <div class="message-wrapper">
+                    <div class="avatar-box">
+                        <img src="${userPic}" onerror="this.src='https://via.placeholder.com/400?text=SULTAN'">
+                    </div>
+                    <div class="pro-card">
+                        <div class="content-pro">
+                            <span class="name-pro">${data.name}</span>
+                            <span class="status-text">KIRIMAN PERBEKALAN!</span>
+                            <span class="gift-detail">📜 ${data.gift}</span>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            audio.src = soundFile;
+            audio.volume = 0.9;
+            audio.play().catch(() => {});
+
+            const wrap = output.querySelector('.message-wrapper');
+            setTimeout(() => wrap.classList.add('show'), 100);
+
+            // Tampil selama 8 detik
+            setTimeout(() => {
+                wrap.classList.add('fade-out');
+                setTimeout(() => { 
+                    output.innerHTML = ''; 
+                    isShowing = false; 
+                    processQueue(); 
+                }, 700);
+            }, 8000);
+        }
+
+        // TEST MODE (SPASI)
+        window.addEventListener('keydown', (e) => {
+            if (e.code === "Space") {
+                giftQueue.push({ 
+                    name: "SULTAN_KONOHA", 
+                    gift: "Bento Raksasa x1", 
+                    img: "https://i.pravatar.cc/400?u=" + Math.random() 
+                });
+                if (!isShowing) processQueue();
+            }
+        });
+
+        window.onload = connectToNinja;
+
+        window.addEventListener('click', () => {
+            const audio = document.getElementById('gift-sound');
+            audio.play().then(() => audio.pause());
+        }, { once: true });
+    </script>
+</body>
+</html>
