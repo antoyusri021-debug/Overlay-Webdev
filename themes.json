@@ -16,15 +16,18 @@
   "join_themes": {
     "Black Cat Joined": "https://antoyusri021-debug.github.io/Overlay-Webdev/overlayjoin/catblackshdows/catblack.html",
     "Minimalis Joined": "https://antoyusri021-debug.github.io/Overlay-Webdev/overlayjoin/minimalis/minimalis.html",
-    "PUBG Joined": "https://antoyusri021-debug.github.io/Overlay-Webdev/overlayjoin/PUBGjoined/PUBGjoined.html"
+    "PUBG Joined": "https://antoyusri021-debug.github.io/Overlay-Webdev/overlayjoin/PUBGjoined/PUBGjoined.html",
+    "Naruto Joined": "https://antoyusri021-debug.github.io/Overlay-Webdev/overlayjoin/Narutojoined/narutojoined.html"
   },
   "follow_themes": {
     "Kece Follow": "https://antoyusri021-debug.github.io/Overlay-Webdev/overlayfollow/KeceFollow/kecefollow.html",
-    "PUBG Follow": "https://antoyusri021-debug.github.io/Overlay-Webdev/overlayfollow/PUBGfollow/pubgfollow.html"
+    "PUBG Follow": "https://antoyusri021-debug.github.io/Overlay-Webdev/overlayfollow/PUBGfollow/pubgfollow.html",
+    "Naruto Follow": "https://antoyusri021-debug.github.io/Overlay-Webdev/overlayfollow/Narutofollow/narutofollow.html"
   },
   "gif_themes": {
     "Box White Gift": "https://antoyusri021-debug.github.io/Overlay-Webdev/overlaygif/MonoGlitch/MonoGlitch.html",
-    "PUBG Gif": "https://antoyusri021-debug.github.io/Overlay-Webdev/overlaygif/PUBGgif/PUBGgif.html"
+    "PUBG Gif": "https://antoyusri021-debug.github.io/Overlay-Webdev/overlaygif/PUBGgif/PUBGgif.html",
+    "Naruto Gif": "https://antoyusri021-debug.github.io/Overlay-Webdev/overlaygif/Narutogif/Narutogif.html"
   },
   "share_themes": {
     "Default Share": "https://antoyusri021-debug.github.io/Overlay-Webdev/share/default.html"
@@ -68,6 +71,7 @@
     "Overlay Fifine": "https://antoyusri021-debug.github.io/Overlay-Webdev/fifine/fifine_.html",
     "TheNinjaBone": "https://antoyusri021-debug.github.io/Overlay-Webdev/TheNinjaBone/Border-radius.html",
     "Golden Capsul Potret": "https://antoyusri021-debug.github.io/Overlay-Webdev/goldencapsulpotret/goldencapsulpotret.html",
-    "PUBG Tactical Overlay": "https://antoyusri021-debug.github.io/Overlay-Webdev/PUBGTacticalOverlay/pubg.html"
+    "PUBG Tactical Overlay": "https://antoyusri021-debug.github.io/Overlay-Webdev/PUBGTacticalOverlay/pubg.html",
+    "Naruto Shippuden": "https://antoyusri021-debug.github.io/Overlay-Webdev/NarutoSifudden/naruto.html"
   }
 }
