@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Naruto Joined - Shinobi ID Edition</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Teko:wght@400;700&family=Permanent+Marker&display=swap');
+
+        :root {
+            --naruto-orange: #ff6b00;
+            --dark-metal: #121212;
+            --accent-red: #d90429;
+            --glow: 0 0 15px rgba(255, 107, 0, 0.4);
+        }
+
+        body { 
+            background: transparent; 
+            margin: 0;
+            overflow: hidden;
+            height: 100vh;
+            display: flex;
+            justify-content: flex-start; 
+            align-items: center; /* BALIK KE TENGAH KIRI */
+            padding-left: 40px;
+            font-family: 'Teko', sans-serif;
+            text-transform: uppercase;
+        }
+
+        .joined-card {
+            display: flex;
+            align-items: center;
+            opacity: 0;
+            transform: translateX(-100px) skewX(-10deg);
+            transition: all 0.4s cubic-bezier(0.19, 1, 0.22, 1);
+            position: relative;
+        }
+
+        .joined-card.show {
+            opacity: 1;
+            transform: translateX(0) skewX(-10deg);
+        }
+
+        /* FRAME FOTO - HEXAGON STYLE */
+        .photo-frame {
+            width: 90px;
+            height: 90px;
+            background: var(--naruto-orange);
+            z-index: 5;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            clip-path: polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%);
+            border: 2px solid #000;
+            box-shadow: var(--glow);
+        }
+
+        .photo-frame img {
+            width: 80%;
+            height: 80%;
+            object-fit: contain;
+            filter: drop-shadow(2px 2px 2px rgba(0,0,0,0.5));
+            transform: skewX(10deg); /* Counter skew bodi */
+        }
+
+        /* INFO CONTAINER */
+        .info-bar {
+            background: var(--dark-metal);
+            margin-left: -20px;
+            padding: 10px 40px 10px 40px;
+            border-top: 3px solid var(--naruto-orange);
+            border-bottom: 3px solid var(--naruto-orange);
+            border-right: 8px solid var(--accent-red);
+            min-width: 280px;
+            position: relative;
+            box-shadow: 10px 10px 0px rgba(0,0,0,0.3);
+        }
+
+        /* ORNAMEN POJOK */
+        .info-bar::before {
+            content: "SHINOBI ID";
+            position: absolute;
+            top: -22px;
+            left: 30px;
+            background: var(--naruto-orange);
+            color: #000;
+            font-size: 14px;
+            font-weight: 700;
+            padding: 0 10px;
+            transform: skewX(10deg);
+        }
+
+        .user-name {
+            color: #fff;
+            font-family: 'Permanent Marker', cursive;
+            font-size: 32px;
+            line-height: 1;
+            margin: 0;
+            text-shadow: 2px 2px 0px var(--accent-red);
+            transform: skewX(10deg); /* Supaya teks lurus */
+        }
+
+        .status-text {
+            color: var(--naruto-orange);
+            font-size: 18px;
+            letter-spacing: 2px;
+            font-weight: 600;
+            margin-top: 2px;
+            transform: skewX(10deg);
+        }
+
+        /* CHAKRA SCANNER EFFECT */
+        .scanner {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            height: 3px;
+            background: #fff;
+            width: 0%;
+            box-shadow: 0 0 10px #fff;
+        }
+
+        .joined-card.show .scanner {
+            animation: scan 5.5s linear forwards;
+        }
+
+        @keyframes scan {
+            to { width: 100%; background: var(--naruto-orange); }
+        }
+
+        .hide-now {
+            opacity: 0 !important;
+            transform: translateX(100px) skewX(-10deg) !important;
+            transition: 0.5s ease-in !important;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="display-area"></div>
+    <audio id="sfx"></audio>
+
+    <script>
+        const urlParams = new URLSearchParams(window.location.search);
+        const sessionID = urlParams.get('session') || 'TESTROOM';
+        const password = urlParams.get('password') || "false";
+
+        // Asset (Ganti konoha.png dengan logo lo)
+        const iconFile = "konoha.png"; 
+        const soundFile = "narutojoined.mp3"; 
+
+        let queue = [];
+        let active = false;
+        const seen = new Set();
+
+        function play() {
+            const a = document.getElementById('sfx');
+            a.src = soundFile;
+            a.volume = 0.5;
+            a.play().catch(() => {});
+        }
+
+        function connect() {
+            const ifr = document.createElement("iframe");
+            ifr.src = `https://vdo.socialstream.ninja/?ln&password=${password}&salt=vdo.ninja&label=overlay&exclude=${sessionID}&scene&novideo&noaudio&cleanoutput&chat=1&room=${sessionID}`;
+            ifr.style.display = "none";
+            document.body.appendChild(ifr);
+
+            window.addEventListener("message", (e) => {
+                if (e.source != ifr.contentWindow) return;
+                const data = e.data?.dataReceived?.overlayNinja;
+                if (data) {
+                    let name = data.chatname || data.chatname_clean;
+                    if (name && !seen.has(name.toLowerCase()) && name.toLowerCase() !== "vdo.ninja") {
+                        seen.add(name.toLowerCase());
+                        queue.push(name);
+                        if (!active) next();
+                    }
+                }
+            });
+        }
+
+        function next() {
+            if (active || queue.length === 0) return;
+            active = true;
+            render(queue.shift());
+        }
+
+        function render(user) {
+            const area = document.getElementById('display-area');
+            area.innerHTML = `
+                <div class="joined-card">
+                    <div class="photo-frame">
+                        <img src="${iconFile}" onerror="this.src='https://cdn-icons-png.flaticon.com/512/824/824481.png'">
+                    </div>
+                    <div class="info-bar">
+                        <div class="user-name">${user}</div>
+                        <div class="status-text">MISSION READY: JOINED</div>
+                        <div class="scanner"></div>
+                    </div>
+                </div>
+            `;
+            
+            const card = document.querySelector('.joined-card');
+            play();
+            
+            setTimeout(() => card.classList.add('show'), 100);
+
+            setTimeout(() => {
+                card.classList.add('hide-now');
+                setTimeout(() => {
+                    area.innerHTML = '';
+                    active = false;
+                    next();
+                }, 600);
+            }, 6000); 
+        }
+
+        // Space to Test
+        window.addEventListener('keydown', (e) => {
+            if (e.code === "Space") {
+                queue.push("TEST_SHINOBI_" + Math.floor(Math.random()*99));
+                if (!active) next();
+            }
+        });
+
+        window.onload = connect;
+    </script>
+</body>
+</html>
