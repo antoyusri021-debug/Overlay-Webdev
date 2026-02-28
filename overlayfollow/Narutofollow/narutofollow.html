@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Naruto Shinobi Follower - Summoning Edition</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Teko:wght@400;600;700&family=Permanent+Marker&display=swap');
+
+        :root {
+            --naruto-orange: #ff6b00;
+            --konoha-blue: #1b263b;
+            --scroll-bg: #fcf4dd;
+            --border-red: #8d0801;
+        }
+
+        body { 
+            background: transparent !important; 
+            font-family: 'Teko', sans-serif; 
+            margin: 0;
+            overflow: hidden;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+        }
+
+        #container {
+            padding-left: 50px;
+        }
+
+        /* --- ANIMASI SUMMONING --- */
+        .follower-card {
+            display: flex;
+            align-items: center; 
+            position: relative;
+            opacity: 0;
+            transform: scale(0.5) rotate(-5deg);
+            filter: blur(10px);
+            transition: all 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .follower-card.show {
+            opacity: 1;
+            transform: scale(1) rotate(0deg);
+            filter: blur(0);
+        }
+
+        /* FRAME AVATAR - Gaya Segel Ninja */
+        .avatar-frame {
+            width: 200px;
+            height: 200px;
+            background: #fff;
+            border: 8px solid var(--konoha-blue);
+            position: relative;
+            z-index: 20;
+            box-shadow: 10px 10px 0px var(--naruto-orange);
+            overflow: hidden;
+        }
+
+        .avatar-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+
+        /* INFO BOX - Gaya Gulungan (Scroll) */
+        .info-box {
+            background: var(--scroll-bg);
+            height: 120px; 
+            padding: 0 60px 0 80px;
+            margin-left: -40px; 
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            border-top: 4px solid var(--border-red);
+            border-bottom: 4px solid var(--border-red);
+            border-right: 20px solid var(--border-red);
+            position: relative;
+            min-width: 400px;
+            /* Bentuk miring khas Naruto */
+            clip-path: polygon(0 0, 100% 0, 95% 100%, 0% 100%);
+            box-shadow: 15px 15px 30px rgba(0,0,0,0.4);
+        }
+
+        .status-tag {
+            background: var(--konoha-blue);
+            color: #fff;
+            font-size: 20px;
+            font-weight: 800;
+            padding: 0 15px;
+            width: fit-content;
+            margin-bottom: -5px;
+            letter-spacing: 2px;
+            border: 1px solid var(--naruto-orange);
+        }
+
+        .follower-name {
+            color: var(--border-red);
+            font-family: 'Permanent Marker', cursive;
+            font-size: 45px;
+            font-weight: 700;
+            line-height: 1;
+            margin: 5px 0;
+            text-transform: uppercase;
+        }
+
+        .sub-text {
+            color: #333;
+            font-size: 24px;
+            letter-spacing: 1px;
+            font-weight: 600;
+            font-style: italic;
+        }
+
+        /* EFEK ASAP (Summoning Smoke Effect) */
+        .smoke-effect {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle, rgba(255,255,255,0.8) 0%, transparent 70%);
+            opacity: 0;
+            z-index: 10;
+        }
+
+        .show .smoke-effect {
+            animation: smoke-puff 1s ease-out forwards;
+        }
+
+        @keyframes smoke-puff {
+            0% { opacity: 0; transform: scale(0.2); }
+            50% { opacity: 1; transform: scale(1.5); }
+            100% { opacity: 0; transform: scale(2); }
+        }
+
+        .fade-out {
+            opacity: 0 !important;
+            transform: translateY(50px) scale(0.8) !important;
+            filter: blur(15px);
+            transition: all 0.5s ease-in !important;
+        }
+    </style>
+</head>
+<body>
+    <div id="container"></div>
+    <audio id="follow-sound" preload="auto"></audio>
+
+    <script>
+        const urlParams = new URLSearchParams(window.location.search);
+        const roomID = urlParams.get('session') || urlParams.get('room') || 'TESTROOM';
+        const password = urlParams.get('password') || "false";
+        
+        // Ganti ke file sound naruto lo kalau ada (misal: "jutsu.mp3")
+        const soundFile = "follow.mp3"; 
+        const container = document.getElementById('container');
+        let isProcessing = false;
+        let queue = [];
+
+        const ninjaMessages = [
+            "TELAH GABUNG KE DESA KONOHA!",
+            "SHINOBI BARU TELAH TIBA!",
+            "TEKAD API MENYALA DI DIRINYA!",
+            "SIAP MENJADI HOKAGE BERIKUTNYA!",
+            "REKRUTAN BARU SQUAD ELITE!",
+            "PENGGUNA JUTSU TERLARANG!",
+            "WELCOME TO THE NINJA WAY!",
+            "SQUAD KITA MAKIN OP, BROW!"
+        ];
+
+        function playFollowSound() {
+            const audio = document.getElementById('follow-sound');
+            audio.src = soundFile;
+            audio.volume = 0.8;
+            audio.play().catch(e => {});
+        }
+
+        function renderFollower(name, img) {
+            const userImg = img && img !== "" ? img : `https://api.dicebear.com/7.x/initials/svg?seed=${name}`;
+            const randomMsg = ninjaMessages[Math.floor(Math.random() * ninjaMessages.length)];
+            
+            const card = document.createElement('div');
+            card.className = 'follower-card';
+            card.innerHTML = `
+                <div class="smoke-effect"></div>
+                <div class="avatar-frame">
+                    <img src="${userImg}" class="avatar-img" onerror="this.src='https://via.placeholder.com/200?text=NINJA'">
+                </div>
+                <div class="info-box">
+                    <div class="status-tag">NEW SHINOBI</div>
+                    <div class="follower-name">${name}</div>
+                    <div class="sub-text">${randomMsg}</div>
+                </div>
+            `;
+
+            container.innerHTML = ''; 
+            container.appendChild(card);
+            
+            setTimeout(() => card.classList.add('show'), 100);
+            playFollowSound();
+
+            setTimeout(() => {
+                card.classList.add('fade-out');
+                setTimeout(() => {
+                    card.remove();
+                    isProcessing = false;
+                    processQueue();
+                }, 600);
+            }, 8000); // Tampil 8 detik
+        }
+
+        function processQueue() {
+            if (isProcessing || queue.length === 0) return;
+            isProcessing = true;
+            const item = queue.shift();
+            renderFollower(item.name, item.img);
+        }
+
+        function createIframe() {
+            const iframe = document.createElement("iframe");
+            iframe.src = `https://vdo.socialstream.ninja/?ln&password=${password}&notmobile&salt=vdo.ninja&label=overlay&exclude=${roomID}&scene&novideo&noaudio&cleanoutput&includeavatars=1&chat=1&system=1&events=1&room=${roomID}`;
+            iframe.style.display = "none";
+            document.body.appendChild(iframe);
+
+            window.addEventListener("message", function (e) {
+                if (e.source != iframe.contentWindow) return;
+                const res = e.data.dataReceived?.overlayNinja;
+                if (!res) return;
+
+                let isFollow = false;
+                let name = res.chatname || res.chatname_clean;
+                let avatar = res.avatar || res.user_img || "";
+
+                // Cek event follow
+                if (res.event === 'follow' || res.type === 'follow') isFollow = true;
+                let msg = (res.text || "").toLowerCase();
+                if (msg.includes("followed") || msg.includes("mengikuti")) isFollow = true;
+
+                if (isFollow && name) {
+                    queue.push({ name: name, img: avatar });
+                    if (!isProcessing) processQueue();
+                }
+            });
+        }
+
+        // TEST PAKAI SPASI
+        window.addEventListener('keydown', (e) => {
+            if (e.code === "Space") {
+                queue.push({ 
+                    name: "UZUMAKI_BROW", 
+                    img: "https://i.pravatar.cc/200?u="+Math.random() 
+                });
+                if (!isProcessing) processQueue();
+            }
+        });
+
+        window.onload = createIframe;
+        window.addEventListener('click', () => {
+            const audio = document.getElementById('follow-sound');
+            audio.play().then(() => audio.pause());
+        }, { once: true });
+    </script>
+</body>
+</html>
